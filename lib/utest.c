@@ -124,7 +124,9 @@ int test_mujs(){
 	int r=0;
 	void *vm = wa_bsnew();
 	r = wa_bsload(vm, "a.js");
-	wa_bsrun(vm, "foo", "si", "dummy", 5);
+	int ret;
+	wa_bsrun(vm, "foo", "bii", 1, 5, &ret);
+	wa_utok(ret==6);
 	wa_bsfree(vm);
 	return r;
 }

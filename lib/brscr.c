@@ -24,22 +24,62 @@ int wa_bsload(void* J, char* fn){
 }
 
 void wa_bsrun(void*J, char* fn, char* fmt, ...){
-	int paramnum = strlen(fmt);
+	int i=0, paramnum = strlen(fmt)-1;//last is output
 	js_getglobal(J, fn);
 	//js_getproperty(J, -1, "bar");//if call fn.bar, use this
 	js_copy(J, -1);//fn.bar use -2, normal fn can use js_pushnull(J)
 	va_list arg;
 	va_start(arg, fmt);
-	char* s = va_arg(arg, char*);
-	js_pushstring(J, s);
-	int a = va_arg(arg, int);
-	js_pushnumber(J, a);
+	for (; i<paramnum; i++) {
+	  switch (fmt[i]) {
+	  case 's': {
+	    char* s = va_arg(arg, char*);
+	    js_pushstring(J, s);
+		break;}
+	  case 'b': {
+	    int b = va_arg(arg, int);
+		js_pushboolean(J, b);
+		break;}
+	  case 'i': {
+	    int a = va_arg(arg, int);
+	    js_pushnumber(J, a);
+		break;}
+	  case 'f': {
+	    double f = va_arg(arg, double);
+		js_pushnumber(J, f);
+		break;}
+	  default: {
+	    printf("Error, dont know type '%c', clear stack!\n", fmt[i]);
+	    //js_settop(J, 0);
+		}
+	  }
+	}
 	js_pcall(J, paramnum);
-	va_end(arg);
 
-  printf("%g\n", js_tonumber(J, -1) );
-  js_pop(J, 1);
-  printf("top:%d\n", js_gettop(J) );
+	switch (fmt[i]) {
+	case 's': {
+	  char** s = va_arg(arg, char**);
+	  strcpy(*s, js_tostring(J, -1) );
+	  break;}
+	case 'b': {
+	  int *b = va_arg(arg, int*);
+	  *b = js_toboolean(J, -1);
+	  break;}
+	case 'i': {
+	  int *a = va_arg(arg, int*);
+	  *a = js_tointeger(J, -1);
+	  break;}
+	case 'f': {
+	  double *f = va_arg(arg, double*);
+	  *f = js_tonumber(J, -1);
+	  break;}
+	default: {
+	  printf("Error, dont know type '%c', clear stack!\n", fmt[i]);
+	    //js_settop(J, 0);
+	  }
+	}
+	va_end(arg);
+    js_pop(J, 1);
 }
 
 void wa_bsfree(void* J) {
