@@ -1,10 +1,11 @@
 #include "walib.h"
 
-void test_md5(){
+int test_md5(){
 	unsigned char encrypt[] ="admin";//21232f297a57a5a743894a0e4a801fc3
     char output[33] = {0};
 	wa_md5(encrypt, output);
     printf("Original:%s\nHash:%s\n",encrypt, output);
+	return 0;
 }
 
 void test_http(char* ip, int port ){
@@ -39,12 +40,13 @@ int test_calendar(){
 	return i;
 }
 
-void test_rand(){
+int test_rand(){
 	int i = 0;
 	for (;i<30;i++){
 		printf("%d ", wa_rands(1, 64));
 	}
 	puts("");
+	return 0;
 }
 
 int test_match(){
@@ -110,23 +112,34 @@ int test_file(){
 	return i;
 }
 
-void test_log(){
+int test_log(){
 	FILE* fd;
 	fd = wa_setfd4l("log.txt");
 	wa_log("sqlite %d, %d\n", 1, 5);
 	fclose(fd);
+	return 0;
+}
+
+int test_mujs(){
+	int r=0;
+	void *vm = wa_bsnew();
+	r = wa_bsload(vm, "a.js");
+	wa_bsrun(vm, "foo", "si", "dummy", 5);
+	wa_bsfree(vm);
+	return r;
 }
 
 int main(int argc, char *argv[])
 {
 	//test_md5();
     //test_http(argv[1], atoi(argv[2]));
-	TEST(_calendar);
+	//TEST(_calendar);
 	//test_rand();
-    TEST(_match);
+    //TEST(_match);
 	//test_mempool( atoi(argv[1]) );
 	//test_ephemem();
-	TEST(_file);
+	//TEST(_file);
+	TEST(_mujs);
 	//test_log();
     return wa_utsum();
 }

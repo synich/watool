@@ -81,6 +81,12 @@ char* wa_dupbin(const char* b, int len);
 int wa_memdbgflg(int i);
 void wa_memreport();
 
+/* Bridge to script */
+void *wa_bsnew();
+int wa_bsload(void* J, char* fn);
+void wa_bsrun(void*J, char* fn, char* fmt, ...);
+void wa_bsfree(void* J);
+
 #ifdef __cplusplus
 }
 #endif
