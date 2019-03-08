@@ -123,10 +123,18 @@ int test_log(){
 int test_mujs(){
 	int r=0;
 	void *vm = wa_bsnew();
-	r = wa_bsload(vm, "a.js");
+	r += wa_utok(0== wa_bsload(vm, "a.js"));
 	int ret;
-	wa_bsrun(vm, "foo", "bii", 1, 5, &ret);
-	wa_utok(ret==6);
+	r += wa_utok(1== wa_bsfunc(vm, "fo", "sii", "abcd", 5, &ret ));
+	r += wa_utok(0== wa_bsfunc(vm, "foo", "sii", "abcd", 5, &ret ));
+	r += wa_utok(ret==9);
+	r += wa_utok(1==wa_bsmethod(vm, "st", "bar", "iii", 0, 5, &ret));
+	r += wa_utok(1==wa_bsmethod(vm, "sth", "ba", "iii", 0, 5, &ret));
+	r += wa_utok(0==wa_bsmethod(vm, "sth", "bar", "iii", 0, 5, &ret));
+	r += wa_utok(ret==6);
+	char buf[16];
+	r += wa_utok(0==wa_bsfunc(vm, "bar", "ss", "abcd", buf) );
+	r += wa_utok(0==strcmp("abcdabcd", buf));
 	wa_bsfree(vm);
 	return r;
 }

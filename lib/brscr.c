@@ -23,13 +23,13 @@ int wa_bsload(void* J, char* fn){
 	return ret;
 }
 
-void wa_bsrun(void*J, char* fn, char* fmt, ...){
+static void sf_clearvm(void* J){
+  int deep = js_gettop(J);
+  js_pop(J, deep);
+}
+
+static void sf_excute(void* J, char* fmt, va_list arg){
 	int i=0, paramnum = strlen(fmt)-1;//last is output
-	js_getglobal(J, fn);
-	//js_getproperty(J, -1, "bar");//if call fn.bar, use this
-	js_copy(J, -1);//fn.bar use -2, normal fn can use js_pushnull(J)
-	va_list arg;
-	va_start(arg, fmt);
 	for (; i<paramnum; i++) {
 	  switch (fmt[i]) {
 	  case 's': {
@@ -49,8 +49,8 @@ void wa_bsrun(void*J, char* fn, char* fmt, ...){
 		js_pushnumber(J, f);
 		break;}
 	  default: {
-	    printf("Error, dont know type '%c', clear stack!\n", fmt[i]);
-	    //js_settop(J, 0);
+	    printf("Error, dont know type '%c' at pos %d, clear stack!\n", fmt[i], i);
+		goto REACHEND;
 		}
 	  }
 	}
@@ -58,8 +58,8 @@ void wa_bsrun(void*J, char* fn, char* fmt, ...){
 
 	switch (fmt[i]) {
 	case 's': {
-	  char** s = va_arg(arg, char**);
-	  strcpy(*s, js_tostring(J, -1) );
+	  char* s = va_arg(arg, char*);
+	  strcpy(s, js_tostring(J, -1) );
 	  break;}
 	case 'b': {
 	  int *b = va_arg(arg, int*);
@@ -73,13 +73,47 @@ void wa_bsrun(void*J, char* fn, char* fmt, ...){
 	  double *f = va_arg(arg, double*);
 	  *f = js_tonumber(J, -1);
 	  break;}
+	case 'v' : break;
 	default: {
-	  printf("Error, dont know type '%c', clear stack!\n", fmt[i]);
-	    //js_settop(J, 0);
+	  printf("Error, dont know type '%c' at pos %d, clear stack!\n", fmt[i], i);
+	  goto REACHEND;
 	  }
 	}
+REACHEND:
+	sf_clearvm(J);
+}
+
+int wa_bsfunc(void*J, char* fn, char* fmt, ...){
+	js_getglobal(J, fn);
+	if (0 == js_iscallable(J, -1)) {
+		sf_clearvm(J);
+		return 1;
+	}
+	js_copy(J, -1);//push fn itself into stack as fu's this
+	va_list arg;
+	va_start(arg, fmt);
+	sf_excute(J, fmt, arg);
 	va_end(arg);
-    js_pop(J, 1);
+	return 0;
+}
+
+int wa_bsmethod(void*J, char* obj, char* fn, char* fmt, ...){
+	js_getglobal(J, obj);
+	if (0 == js_isobject(J, -1)) {
+		sf_clearvm(J);
+		return 1;
+	}
+	js_getproperty(J, -1, fn);//call obj.fn, use this
+	if (0 == js_iscallable(J, -1)) {
+		sf_clearvm(J);
+		return 1;
+	}
+	js_copy(J, -2);//push obj into stack as fn's this
+	va_list arg;
+	va_start(arg, fmt);
+	sf_excute(J, fmt, arg);
+	va_end(arg);
+	return 0;
 }
 
 void wa_bsfree(void* J) {

@@ -84,8 +84,10 @@ void wa_memreport();
 /* Bridge to script */
 void *wa_bsnew();
 int wa_bsload(void* J, char* fn); /*return 0-OK 1-fail*/
-/*fn: func name  fmt: last is output, others are input. s-str b-bool i-int f-double*/
-void wa_bsrun(void*J, char* fn, char* fmt, ...);
+/*fn: func name  fmt: last is output, others are input. s-str b-bool i-int f-double
+  return 0-call finish 1-other exception*/
+int wa_bsfunc(void*J, char* fn, char* fmt, ...);
+int wa_bsmethod(void*J, char* obj, char* fn, char* fmt, ...);
 void wa_bsfree(void* J);
 
 #ifdef __cplusplus
