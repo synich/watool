@@ -135,6 +135,10 @@ int test_mujs(){
 	char buf[16];
 	r += wa_utok(0==wa_bsfunc(vm, "bar", "ss", "abcd", buf) );
 	r += wa_utok(0==strcmp("abcdabcd", buf));
+	r += wa_utok(0==wa_bsfunc(vm, "impb", "ii", 3, &ret) );
+	r += wa_utok(9==ret);
+	r += wa_utok(0==wa_bsfunc(vm, "impc", "ii", 3, &ret) );
+	r += wa_utok(12==ret);
 	wa_bsfree(vm);
 	return r;
 }

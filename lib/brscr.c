@@ -1,9 +1,22 @@
 #include <stdarg.h>
 #include "walib.h"
+
 #ifdef MUJS
 #include "mujs.h"
+static void jsB_require(js_State *J)
+{
+	const char *filename = js_tostring(J, 1); //Index 0 always contains the this value, and function arguments are index 1 and up
+	char *s = wa_readfile(filename);
+	js_ploadstring(J, filename, s);
+	js_pushundefined(J);
+	js_pcall(J, 0);
+	js_pop(J, 3);//original this+filename+return, total 3
+}
+
 void *wa_bsnew(){
 	js_State *J = js_newstate(NULL, NULL, JS_STRICT);
+	js_newcfunction(J, jsB_require, "require", 0);
+	js_setglobal(J, "require");
 	return J;
 }
 
@@ -86,6 +99,7 @@ REACHEND:
 int wa_bsfunc(void*J, char* fn, char* fmt, ...){
 	js_getglobal(J, fn);
 	if (0 == js_iscallable(J, -1)) {
+		printf("func '%s' is not callable\n", fn);
 		sf_clearvm(J);
 		return 1;
 	}
@@ -100,11 +114,13 @@ int wa_bsfunc(void*J, char* fn, char* fmt, ...){
 int wa_bsmethod(void*J, char* obj, char* fn, char* fmt, ...){
 	js_getglobal(J, obj);
 	if (0 == js_isobject(J, -1)) {
+		printf("obj '%s' is not object\n", obj);
 		sf_clearvm(J);
 		return 1;
 	}
 	js_getproperty(J, -1, fn);//call obj.fn, use this
 	if (0 == js_iscallable(J, -1)) {
+		printf("method '%s' is not callable\n", fn);
 		sf_clearvm(J);
 		return 1;
 	}
