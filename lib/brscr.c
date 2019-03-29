@@ -3,7 +3,6 @@
 
 #ifdef MUJS
 #include "mujs.h"
-//static
 static void jsB_require(js_State *J)
 {
 #define FILELEN 128
