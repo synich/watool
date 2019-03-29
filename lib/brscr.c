@@ -3,10 +3,14 @@
 
 #ifdef MUJS
 #include "mujs.h"
+//static
 static void jsB_require(js_State *J)
 {
-	const char *filename = js_tostring(J, 1); //Index 0 always contains the this value, and function arguments are index 1 and up
-	char *s = wa_readfile(filename);
+#define FILELEN 128
+	char filename[FILELEN] = {0};
+    const char *modname = js_tostring(J, 1); //Index 0 always contains the this value, and function arguments are index 1 and up
+	snprintf(filename, sizeof(filename)-1, "%s.js", modname);
+    char *s = wa_readfile(filename);
 	js_ploadstring(J, filename, s);
 	js_pushundefined(J);
 	js_pcall(J, 0);
