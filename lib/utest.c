@@ -1,10 +1,22 @@
 #include "walib.h"
 
 int test_md5(){
-	unsigned char encrypt[] ="admin";//21232f297a57a5a743894a0e4a801fc3
+	unsigned char encrypt[] ="a";
     char output[33] = {0};
 	wa_md5(encrypt, output);
-    printf("Original:%s\nHash:%s\n",encrypt, output);
+    wa_utok(0==strcmp(output, "0cc175b9c0f1b6a831c399e269772661"));
+    wa_md5(NULL, output);
+    wa_utok(output==NULL);
+	return 0;
+}
+
+int test_sha1(){
+	unsigned char encrypt[] ="a";
+    char output[41] = {0};
+	wa_sha1(encrypt, output);
+    wa_utok(0==strcmp(output, "86f7e437faa5a7fce15d1ddcb9eaeaea377667b8"));
+    wa_sha1(NULL, output);
+    wa_utok(output==NULL);
 	return 0;
 }
 
@@ -145,7 +157,8 @@ int test_mujs(){
 
 int main(int argc, char *argv[])
 {
-	//test_md5();
+	TEST(_md5);
+    TEST(_sha1);
     //test_http(argv[1], atoi(argv[2]));
 	//TEST(_calendar);
 	//test_rand();
@@ -153,7 +166,7 @@ int main(int argc, char *argv[])
 	//test_mempool( atoi(argv[1]) );
 	//test_ephemem();
 	//TEST(_file);
-	TEST(_mujs);
+	//TEST(_mujs);
 	//test_log();
     return wa_utsum();
 }

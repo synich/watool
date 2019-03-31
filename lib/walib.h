@@ -8,8 +8,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/*dst must have at least 33 bytes*/
+/*MD5 dst must have at least 33 bytes*/
 void wa_md5(char* src, char* dst);
+/*SHA1 dst must have at least 41 bytes*/
+void wa_sha1(char* src, char* dst);
 
 /*return epoch, calendar in localtime*/
 int wa_calendar(int* year, int* mon, int* day, int* hour, int* min, int* sec, int tz);
