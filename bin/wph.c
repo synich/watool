@@ -112,7 +112,9 @@ int main(int argc, char** argv) {
 			  if (2==argc) {usage();}
 			  else {createProject(argv[2]);}
 			break;
-			default : break;
+			default :
+              usage();
+              break;
 		}
 	}
 	return 0;
