@@ -20,6 +20,14 @@ int test_sha1(){
 	return 0;
 }
 
+int test_base64(){
+    char src[] = "abc";
+    char output[8] = {0};
+    wa_base64enc(src, output);
+    wa_utok(0==strcmp(src, "YWJj" ) );
+    return 0;
+}
+
 void test_http(char* ip, int port ){
   char* pos;
 #define HTTPBUF 2194
@@ -157,8 +165,9 @@ int test_mujs(){
 
 int main(int argc, char *argv[])
 {
-	TEST(_md5);
-    TEST(_sha1);
+	//TEST(_md5);
+    //TEST(_sha1);
+    TEST(_base64);
     //test_http(argv[1], atoi(argv[2]));
 	//TEST(_calendar);
 	//test_rand();
