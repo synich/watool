@@ -747,3 +747,7 @@ int wa_base64dec(char * base64, char * dedata)
 
     return 0;
 }
+
+int wa_base16dec(char* src, char* dst){
+  
+}
