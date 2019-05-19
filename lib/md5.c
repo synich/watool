@@ -748,6 +748,28 @@ int wa_base64dec(char * base64, char * dedata)
     return 0;
 }
 
+static unsigned char chtonum(char c) {
+  unsigned char r=0;
+  if (('0'<=c) && (c<='9') ) {
+    r = c-'0';
+  } else if (('A'<=c) && (c<='F') ) {
+    r = c- 'A'+10;
+  } else if (('a'<=c) &&(c<='f') ) {
+    r = c- 'a'+10;
+  }
+  return r;
+}
+
 int wa_base16dec(char* src, char* dst){
-  
+  int l = strlen(src) / 2;
+  for (int i=0; i<l; i++ ){
+    unsigned char j;
+    j = (chtonum(str[2*i])<<4 ) + chtonum(str[2*i+1]);
+    dst[i] = (char*)j;
+  }
+  return 0;
+}
+
+int wa_base16enc() {
+  return 0;
 }
