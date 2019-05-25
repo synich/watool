@@ -14,7 +14,7 @@ void wa_md5(char* src, char* dst);
 void wa_sha1(char* src, char* dst);
 int wa_base64enc(char* src, char* dst);
 int wa_base64dec(char* src, char* dst);
-int wa_base16enc(char* src, char* dst);
+int wa_base16enc(char* src, int len, char* dst);
 int wa_base16dec(char* src, char* dst);
 
 /*return epoch, calendar in localtime*/

@@ -770,6 +770,6 @@ int wa_base16dec(char* src, char* dst){
   return 0;
 }
 
-int wa_base16enc() {
+int wa_base16enc(char* src, int len, char* dst) {
   return 0;
 }
