@@ -28,6 +28,17 @@ int test_base64(){
     return 0;
 }
 
+int test_base16() {
+    char hexres[16]={0};
+    char tobin[4];
+    unsigned char src[4] = {5, 188, 127, 200};
+    wa_base16enc(src, 4, hexres);
+    wa_utok(0==strcmp(hexres, "05bc7fc8") );
+    wa_base16dec(hexres, tobin);
+    wa_utok(tobin[2]==src[2] );
+    return 0;
+}
+
 void test_http(char* ip, int port ){
   char* pos;
 #define HTTPBUF 2194
@@ -167,7 +178,8 @@ int main(int argc, char *argv[])
 {
 	//TEST(_md5);
     //TEST(_sha1);
-    TEST(_base64);
+    //TEST(_base64);
+    TEST(_base16);
     //test_http(argv[1], atoi(argv[2]));
 	//TEST(_calendar);
 	//test_rand();

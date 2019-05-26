@@ -8,6 +8,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/* All functions declare here return 0-OK, other fail */
 /*MD5 dst must have at least 33 bytes*/
 void wa_md5(char* src, char* dst);
 /*SHA1 dst must have at least 41 bytes*/

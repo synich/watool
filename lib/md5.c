@@ -761,15 +761,27 @@ static unsigned char chtonum(char c) {
 }
 
 int wa_base16dec(char* src, char* dst){
-  int l = strlen(src) / 2;
-  for (int i=0; i<l; i++ ){
-    unsigned char j;
-    j = (chtonum(str[2*i])<<4 ) + chtonum(str[2*i+1]);
-    dst[i] = (char*)j;
+  int ret = 0;
+  int l = strlen(src);
+  if (l%2) { ret = -1; }
+  else {
+    l = l/ 2;
+    for (int i=0; i<l; i++ ){
+      unsigned char j;
+      j = (chtonum(src[2*i])<<4 ) + chtonum(src[2*i+1]);
+      dst[i] = (char)j;
+    }
   }
-  return 0;
+  return ret;
 }
 
 int wa_base16enc(char* src, int len, char* dst) {
+  int i = 0;
+  char* tohex = "0123456789abcdef";
+  for (; i<len; i++) {
+    unsigned char c = src[i];
+    dst[2*i] = tohex[c>>4];
+    dst[2*i+1] = tohex[c&0xf];
+  }
   return 0;
 }
