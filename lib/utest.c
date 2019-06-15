@@ -3,10 +3,14 @@
 int test_md5(){
 	unsigned char encrypt[] ="a";
     char output[33] = {0};
+    //char anosrc[4];
 	wa_md5(encrypt, output);
     wa_utok(0==strcmp(output, "0cc175b9c0f1b6a831c399e269772661"));
     wa_md5(NULL, output);
     wa_utok(output==NULL);
+    strcpy(output, "abc");
+    wa_md5(output, output);
+    wa_utok(0==strcmp(output, "900150983cd24fb0d6963f7d28e17f72"));
 	return 0;
 }
 
@@ -17,6 +21,9 @@ int test_sha1(){
     wa_utok(0==strcmp(output, "86f7e437faa5a7fce15d1ddcb9eaeaea377667b8"));
     wa_sha1(NULL, output);
     wa_utok(output==NULL);
+    strcpy(output, "abc");
+    wa_sha1(output, output);
+    wa_utok(0==strcmp(output, "a9993e364706816aba3e25717850c26c9cd0d89d") );
 	return 0;
 }
 
@@ -176,10 +183,10 @@ int test_mujs(){
 
 int main(int argc, char *argv[])
 {
-	//TEST(_md5);
-    //TEST(_sha1);
+	TEST(_md5);
+    TEST(_sha1);
     //TEST(_base64);
-    TEST(_base16);
+    //TEST(_base16);
     //test_http(argv[1], atoi(argv[2]));
 	//TEST(_calendar);
 	//test_rand();

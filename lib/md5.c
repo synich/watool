@@ -206,18 +206,19 @@ void wa_md5(char* src, char* dst){
 	int i;
 	unsigned char decrypt[16];
 	MD5_CTX md5;
-    dst[0] = 0;
     if (!src) return;
 
     MD5Init(&md5);
 	MD5Update(&md5,(unsigned char*)src,strlen((char *)src));
 	MD5Final(&md5,decrypt);
+    dst[0] = 0;
 	for(i=0;i<16;i++)
 	{
       char tmp[4]={0};
       sprintf(tmp, "%02x", decrypt[i]);
       strcat(dst, tmp);
 	}
+    dst[32] = 0;
 }
 
 
@@ -621,20 +622,22 @@ void wa_sha1(char* src, char* dst) {
 	SHA1Context sha;
 	int i, err=0;
 	uint8_t Message_Digest[20];
-    dst[0] = 0;
     if (!src) return;
+
 	err |= SHA1Reset(&sha);
 	err |= SHA1Input(&sha,
 			(const unsigned char *) src,
 			strlen(src));
     err |= SHA1Result(&sha, Message_Digest);
     if (0==err) {
+      dst[0] = 0;
       for(i = 0; i < 20 ; ++i)
       {
         char tmpbuf[4]={0};
 		snprintf(tmpbuf, sizeof(tmpbuf)-1, "%02x", Message_Digest[i]);
         strcat(dst, tmpbuf);
 	  }
+      dst[41] = 0;
     }
     return ;
 }
@@ -690,7 +693,7 @@ int wa_base64enc(char * sourcedata, char * base64)
         }
     }
 
-    base64[j] = '\0'; 
+    base64[j] = '\0';
 
     return 0;
 }
@@ -700,7 +703,7 @@ int wa_base64enc(char * sourcedata, char * base64)
 * const char *str ，字符串
 * char c，要查找的字符
 */
-static inline int num_strchr(const char *str, char c) // 
+static inline int num_strchr(const char *str, char c) //
 {
     const char *pindex = strchr(str, c);
     if (NULL == pindex){
