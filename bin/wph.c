@@ -4,7 +4,8 @@
 
 void usage(){
 	puts("wph(WaProjectHelper) command option\n"
-	"command: c|create option: c-clang a-android");
+	"wph c c  -- create c project scafold\n"
+    "wph l p  -- generate lua plugin write by c");
 }
 
 static const unsigned char s_Makefile_str[]={
@@ -93,21 +94,79 @@ static void createCPro(){
 	}
 }
 
-static void createProject(const char* opt) {
-	if (opt && *opt=='c') {
+static void helpC(const char* opt) {
+    if (!opt) return;
+	if (*opt=='c') {
 		createCPro();
+	} else {
+        printf("Command `c' Unknown option: `%s'\n", opt);
+    }
+}
+
+static const unsigned char s_nlsys_c_str[]={
+35,105,110,99,108,117,100,101,32,34,
+108,117,97,97,100,97,112,116,46,104,
+34,10,10,115,116,97,116,105,99,32,
+105,110,116,10,115,121,115,95,115,116,
+114,101,114,114,111,114,32,40,108,117,
+97,95,83,116,97,116,101,32,42,76,
+41,10,123,10,32,32,99,111,110,115,
+116,32,99,104,97,114,32,42,116,111,
+99,111,100,101,32,61,32,108,117,97,
+76,95,99,104,101,99,107,115,116,114,
+105,110,103,40,76,44,32,49,41,59,
+10,32,32,108,117,97,95,112,117,115,
+104,108,105,116,101,114,97,108,40,76,
+44,32,34,79,75,34,41,59,10,32,
+32,114,101,116,117,114,110,32,49,59,
+10,125,10,10,115,116,97,116,105,99,
+32,108,117,97,76,95,82,101,103,32,
+115,121,115,95,108,105,98,91,93,32,
+61,32,123,10,32,32,123,34,115,116,
+114,101,114,114,111,114,34,44,9,9,
+115,121,115,95,115,116,114,101,114,114,
+111,114,125,44,10,32,32,123,78,85,
+76,76,44,32,78,85,76,76,125,10,
+125,59,10,10,76,85,65,76,73,66,
+95,65,80,73,32,105,110,116,10,108,
+117,97,111,112,101,110,95,110,108,115,
+121,115,32,40,108,117,97,95,83,116,
+97,116,101,32,42,76,41,10,123,10,
+32,32,108,117,97,76,95,114,101,103,
+105,115,116,101,114,40,76,44,32,78,
+85,76,76,44,32,115,121,115,95,108,
+105,98,41,59,10,32,32,114,101,116,
+117,114,110,32,49,59,10,125,10,0};
+
+void generateLuaRel(){
+    FILE *mf=NULL;
+	mf = fopen("lua_nlsys.c", "w");
+	if (mf){
+	  fwrite(s_nlsys_c_str, strlen(s_nlsys_c_str), 1, mf);
+	  fclose(mf);
 	}
 }
 
+static void helpLua(const char* opt) {
+  if (!opt) return;
+  if (*opt=='p'){
+    generateLuaRel();
+  } else {
+    printf("Command `l' Unknown option: `%s'\n", opt);
+  }
+}
+
 int main(int argc, char** argv) {
-	if (1==argc) {
+	if ( 2>=argc ) {
 		usage();
 	} else {
 		switch (argv[1][0]) {
 			case 'c': /* create project */
-			  if (2==argc) {usage();}
-			  else {createProject(argv[2]);}
+			  helpC(argv[2]);
 			break;
+            case 'l': /* lua relate */
+              helpLua(argv[2]);
+            break;
 			default :
               usage();
               break;
