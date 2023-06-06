@@ -15,6 +15,7 @@ int frontcmp(const char* s, const char* target, int most){
   return strncmp(s,target, tlen);
 }
 
+/*show ascii char*/
 void ascii(){
   int i = 32;
   for (; i<32+24; i++){
@@ -23,28 +24,51 @@ void ascii(){
   }
 }
 
-void snip(int argc, char** argv){
-  if (argc==0){
-    puts("snip");
-  } else {
-    char line[MAXLINE];
-    FILE *f = fopen("_snip_txt", "r");
-    char fl_str[MAXLINE];
-    int out_flag = 0;
-    int fl_len = 0;
-    strcat(fl_str, "_snip_");
-    strcat(fl_str, argv[0]);
-    fl_len = strlen(fl_str);
-    while(fgets(line, MAXLINE, f)){
-      if (out_flag==1 && 0==strncmp(line, "EOF", 3)){
+/*wh: 0-title 1-para*/
+void get_paragraph(const char* fname, int wh, const char* kwd){
+  FILE *f = fopen(fname, "r");
+  char line[MAXLINE];
+  int fl_len = strlen(kwd);
+  int out_flag = 0;
+  while(fgets(line, MAXLINE, f)){
+    if (0==wh){
+      if (0==strncmp(line, kwd, fl_len)){
+        printf("%s", line+7);
+      }
+    }else{
+      if (out_flag==1 && 0==strncmp(line, "@@", 2)){
         break;
       } else if (out_flag==1){
         printf("%s", line);
-      } else if (0==strncmp(line, fl_str, fl_len)){
+      } else if (0==strncmp(line, kwd, fl_len)){
         out_flag = 1;
       }
     }
-    fclose(f);
+  }
+  fclose(f);
+
+}
+
+void get_exe_path(char* wd){
+  strcpy(wd, "./");
+}
+
+void snip(int argc, char** argv){
+  char fl_str[MAXLINE];
+  char fname[MAXLINE];
+  strcat(fl_str, "# snip_");
+  get_exe_path(fname);
+  strcat(fname, "_snip_txt");
+  if (argc==0){
+    get_paragraph(fname, 0, fl_str);
+  } else {
+    strcat(fl_str, argv[0]);
+    if (argc>=2){
+      char mor_str[MAXLINE];
+      sprintf(mor_str, "#%s %s", fl_str, argv[1]);
+      strcpy(fl_str, mor_str);
+    }
+    get_paragraph(fname, 1, fl_str);
   }
 }
 
