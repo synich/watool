@@ -37,7 +37,8 @@ void get_paragraph(const char* fname, int wh, const char* kwd){
   while(fgets(line, MAXLINE, f)){
     if (0==wh){
       if (0==strncmp(line, kwd, fl_len)){
-        printf("%s", line+7);
+        char *pos = strchr(line, '_');
+        printf("%s", pos+1);
       }
     }else{
       if (out_flag==1 && 0==strncmp(line, "@@", 2)){
@@ -50,14 +51,16 @@ void get_paragraph(const char* fname, int wh, const char* kwd){
     }
   }
   fclose(f);
-
 }
 
 void get_exe_path(char* wd){
 #ifdef _WIN32
   char exepath[MAXLINE];
+  char *pos;
   GetModuleFileName(NULL, exepath, MAXLINE);
   strcpy(wd, exepath);
+  pos = strrchr(wd, '\\');
+  *(pos+1)=0;
 #else
   strcpy(wd, "./");
 #endif
