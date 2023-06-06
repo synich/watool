@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <string.h>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 #define MAXLINE 256
 
@@ -27,6 +30,7 @@ void ascii(){
 /*wh: 0-title 1-para*/
 void get_paragraph(const char* fname, int wh, const char* kwd){
   FILE *f = fopen(fname, "r");
+  if (NULL==f){printf("cant find '%s'\n",fname);return;}
   char line[MAXLINE];
   int fl_len = strlen(kwd);
   int out_flag = 0;
@@ -50,13 +54,19 @@ void get_paragraph(const char* fname, int wh, const char* kwd){
 }
 
 void get_exe_path(char* wd){
+#ifdef _WIN32
+  char exepath[MAXLINE];
+  GetModuleFileName(NULL, exepath, MAXLINE);
+  strcpy(wd, exepath);
+#else
   strcpy(wd, "./");
+#endif
 }
 
 void snip(int argc, char** argv){
   char fl_str[MAXLINE];
   char fname[MAXLINE];
-  strcat(fl_str, "# snip_");
+  sprintf(fl_str, "# %s_", "snip");
   get_exe_path(fname);
   strcat(fname, "_snip_txt");
   if (argc==0){
