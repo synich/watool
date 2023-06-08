@@ -7,7 +7,7 @@
 #define MAXLINE 256
 
 void usage(){
-  puts("personal busybox: ascii snip");
+  puts("personal busybox: ascii snip comp tpl");
 }
 
 int frontcmp(const char* s, const char* target, int most){
@@ -41,10 +41,12 @@ void get_paragraph(const char* fname, int wh, const char* kwd){
         printf("%s", pos+1);
       }
     }else{
-      if (out_flag==1 && 0==strncmp(line, "@@", 2)){
-        break;
-      } else if (out_flag==1){
-        printf("%s", line);
+      if (out_flag==1){
+        if (0==strncmp(line, "@@", 2)) {
+          break;
+        } else {
+          printf("%s", line);
+        }
       } else if (0==strncmp(line, kwd, fl_len)){
         out_flag = 1;
       }
@@ -66,10 +68,11 @@ void get_exe_path(char* wd){
 #endif
 }
 
-void snip(int argc, char** argv){
+void snip(int argc, char** argv, int wh){
   char fl_str[MAXLINE];
   char fname[MAXLINE];
-  sprintf(fl_str, "# %s_", "snip");
+  char* snip_flag[3] = {"snip", "comp", "tpl"};
+  sprintf(fl_str, "# %s_", snip_flag[wh]);
   get_exe_path(fname);
   strcat(fname, "_snip_txt");
   if (argc==0){
@@ -92,7 +95,11 @@ int main(int argc, char** argv){
     if (0==frontcmp(argv[1], "ascii", 2)){
       ascii();
     } else if (0==frontcmp(argv[1], "snip", 2)){
-      snip(argc-2, argv+2);
+      snip(argc-2, argv+2, 0);
+    } else if (0==frontcmp(argv[1], "comp", 2)){
+      snip(argc-2, argv+2, 1);
+    } else if (0==frontcmp(argv[1], "tpl", 2)){
+      snip(argc-2, argv+2, 2);
     }
   }
   return 0;
