@@ -4,10 +4,22 @@
 #include <windows.h>
 #endif
 
+#define SUPPORT_LUA
+#ifdef SUPPORT_LUA
+#include "lua.h"
+#include "lauxlib.h"
+#include "lualib.h"
+#endif
+
+
 #define MAXLINE 256
 
 void usage(){
-  puts("personal busybox: ascii snip comp tpl");
+  puts("personal busybox ver230611\nascii snip comp tpl"
+#ifdef SUPPORT_LUA
+  " lua"
+#endif
+);
 }
 
 int frontcmp(const char* s, const char* target, int most){
@@ -88,10 +100,43 @@ void snip(int argc, char** argv, int wh){
   }
 }
 
+void* linit(){
+  void *L = NULL;
+#ifdef SUPPORT_LUA
+  L = (lua_State *)lua_open();  /* create state */
+  if (L == NULL) {
+    puts("cannot create lua_State: not enough memory");
+  } else {
+    L = (void*)lua_open();
+    lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
+    luaL_openlibs(L);  /* open libraries */
+    lua_gc(L, LUA_GCRESTART, 0);
+  }
+#endif
+  return L;
+}
+
+int lrun(void* L, char *fname){
+  int status = 0;
+#ifdef SUPPORT_LUA
+  status = luaL_dofile(L, fname);
+  if (0!=status) {puts(lua_tostring(L, 1));}
+  lua_pop(L, 1);
+#endif
+  return status; /*0-ok 1-fail*/
+}
+
+void lclose(void* L){
+#ifdef SUPPORT_LUA
+  lua_close((lua_State *)L);
+#endif
+}
+
 int main(int argc, char** argv){
   if (1==argc){
     usage();
   } else {
+    void *L = linit();
     if (0==frontcmp(argv[1], "ascii", 2)){
       ascii();
     } else if (0==frontcmp(argv[1], "snip", 2)){
@@ -100,7 +145,13 @@ int main(int argc, char** argv){
       snip(argc-2, argv+2, 1);
     } else if (0==frontcmp(argv[1], "tpl", 2)){
       snip(argc-2, argv+2, 2);
+    } else if (0==frontcmp(argv[1], "lua", 2)){
+      char fname[MAXLINE];
+      get_exe_path(fname);
+      strcat(fname, "init.lua");
+      lrun(L, fname);
     }
+    lclose(L);
   }
   return 0;
 }
