@@ -39,34 +39,6 @@ void ascii(){
   }
 }
 
-/*wh: 0-title 1-para*/
-void get_paragraph(const char* fname, int wh, const char* kwd){
-  FILE *f = fopen(fname, "r");
-  if (NULL==f){printf("cant find '%s'\n",fname);return;}
-  char line[MAXLINE];
-  int fl_len = strlen(kwd);
-  int out_flag = 0;
-  while(fgets(line, MAXLINE, f)){
-    if (0==wh){
-      if (0==strncmp(line, kwd, fl_len)){
-        char *pos = strchr(line, '_');
-        printf("%s", pos+1);
-      }
-    }else{
-      if (out_flag==1){
-        if (0==strncmp(line, "@@", 2)) {
-          break;
-        } else {
-          printf("%s", line);
-        }
-      } else if (0==strncmp(line, kwd, fl_len)){
-        out_flag = 1;
-      }
-    }
-  }
-  fclose(f);
-}
-
 void get_exe_path(char* wd){
 #ifdef _WIN32
   char exepath[MAXLINE];
@@ -75,12 +47,50 @@ void get_exe_path(char* wd){
   strcpy(wd, exepath);
   pos = strrchr(wd, '\\');
   *(pos+1)=0;
+  strcat(wd, "pb\\");
 #else
   strcpy(wd, "./");
 #endif
 }
 
-void snip(int argc, char** argv, int wh){
+/*wh: 0-title 1-para
+  to: 0-stdout 1-_pb_out */
+void get_paragraph(const char* fname, int wh, const char* kwd, int to){
+  FILE *f = fopen(fname, "r");
+  FILE *fout = stdout;
+  if (1==to) {
+    char fop[MAXLINE];
+    get_exe_path(fop);
+    strcat(fop, "_pb_out");
+    fout = fopen(fop, "w");
+  }
+  if (NULL==f){printf("cant find '%s'\n",fname);return;}
+  char line[MAXLINE];
+  int fl_len = strlen(kwd);
+  int out_flag = 0;
+  while(fgets(line, MAXLINE, f)){
+    if (0==wh){
+      if (0==strncmp(line, kwd, fl_len)){
+        char *pos = strchr(line, '_');
+        fprintf(fout, "%s", pos+1);
+      }
+    }else{
+      if (out_flag==1){
+        if (0==strncmp(line, "@@", 2)) {
+          break;
+        } else {
+          fprintf(fout, "%s", line);
+        }
+      } else if (0==strncmp(line, kwd, fl_len)){
+        out_flag = 1;
+      }
+    }
+  }
+  fclose(f);
+  if (1==to) {fclose(fout);}
+}
+
+void snip(int argc, char** argv, int wh, int to){
   char fl_str[MAXLINE];
   char fname[MAXLINE];
   char* snip_flag[3] = {"snip", "comp", "tpl"};
@@ -88,7 +98,7 @@ void snip(int argc, char** argv, int wh){
   get_exe_path(fname);
   strcat(fname, "_snip_txt");
   if (argc==0){
-    get_paragraph(fname, 0, fl_str);
+    get_paragraph(fname, 0, fl_str, to);
   } else {
     strcat(fl_str, argv[0]);
     if (argc>=2){
@@ -96,7 +106,7 @@ void snip(int argc, char** argv, int wh){
       sprintf(mor_str, "#%s %s", fl_str, argv[1]);
       strcpy(fl_str, mor_str);
     }
-    get_paragraph(fname, 1, fl_str);
+    get_paragraph(fname, 1, fl_str, to);
   }
 }
 
@@ -140,11 +150,11 @@ int main(int argc, char** argv){
     if (0==frontcmp(argv[1], "ascii", 2)){
       ascii();
     } else if (0==frontcmp(argv[1], "snip", 2)){
-      snip(argc-2, argv+2, 0);
+      snip(argc-2, argv+2, 0, 0);
     } else if (0==frontcmp(argv[1], "comp", 2)){
-      snip(argc-2, argv+2, 1);
+      snip(argc-2, argv+2, 1, 0);
     } else if (0==frontcmp(argv[1], "tpl", 2)){
-      snip(argc-2, argv+2, 2);
+      snip(argc-2, argv+2, 2, 0);
     } else if (0==frontcmp(argv[1], "lua", 2)){
       char fname[MAXLINE];
       get_exe_path(fname);
