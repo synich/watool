@@ -15,7 +15,7 @@
 #define MAXLINE 256
 
 void usage(){
-  puts("personal busybox ver230614\nascii snip comp tpl"
+  puts("personal busybox ver230617\nascii snip comp tpl"
 #ifdef SUPPORT_LUA
   " lua(ext)"
 #endif
@@ -185,10 +185,13 @@ void* linit(){
   return L;
 }
 
-int lrun(void* L, char *fname){
+int lrun(void* L, char *fname, int narg){
   int status = 0;
 #ifdef SUPPORT_LUA
-  status = luaL_dofile(L, fname);
+  status = luaL_loadfile(L, fname);
+  if (0!=status) {printf("load %s fail!\n", fname);return status;}
+  if (0<narg) {lua_insert(L, 1);}
+  status = lua_pcall(L, narg, LUA_MULTRET, 0);
   if (0!=status) {puts(lua_tostring(L, 1));}
   lua_pop(L, 1);
 #endif
@@ -205,7 +208,6 @@ int main(int argc, char** argv){
   if (1==argc){
     usage();
   } else {
-    void *L = linit();
     if (0==frontcmp(argv[1], "ascii", 2)){
       ascii();
     } else if (0==frontcmp(argv[1], "snip", 2)){
@@ -215,12 +217,24 @@ int main(int argc, char** argv){
     } else if (0==frontcmp(argv[1], "tpl", 2)){
       snip(argc-2, argv+2, 2, 0);
     } else if (0==frontcmp(argv[1], "lua", 2)){
-      char fname[MAXLINE];
-      get_exe_path(fname);
-      strcat(fname, "init.lua");
-      lrun(L, fname);
+      void *L = linit();
+      if (2==argc) {
+        char fname[MAXLINE];
+        get_exe_path(fname);
+        strcat(fname, "init.lua");
+        lrun(L, fname, 0);
+      } else {
+        int narr = argc - 3, i;
+        lua_createtable(L, narr, 0);
+        for (i=3; i < argc; i++) {
+          lua_pushstring(L, argv[i]);
+          lua_rawseti(L, -2, i-2);
+        }
+        lua_setglobal(L, "arg");
+        lrun(L, argv[2], 0);
+      }
+      lclose(L);
     }
-    lclose(L);
   }
   return 0;
 }
