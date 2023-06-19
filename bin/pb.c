@@ -15,8 +15,9 @@
 
 void usage(){
   puts("personal busybox ver230619\nascii\n"
+  "dyn2str file -- convert script into C string file\n"
 #ifdef SUPPORT_LUA
-  "lua|el [file] [argv]\n"
+  "lua|el file [argv]\n"
 #endif
   "snip|comp|tpl [keyword]\n"
   "hsc helper show cvs\n\tmf(list modified file)|ml(number modified line)|rv(repo version)\n");
@@ -132,6 +133,64 @@ void help_show_csv(int argc, char** argv){
       puts("Unknown command, see help without argument.");
     }
   }
+}
+
+
+static void convFile(unsigned char* str, int slen, FILE* fout){
+  int i=0;
+  char buf[8] = {0};
+  for (; i<slen; i++) {
+    if (0 == i%10){
+      fwrite("\n", 1, 1, fout);
+    }
+    snprintf(buf, sizeof(buf), "%u,", str[i]);
+    fwrite(buf, strlen(buf), 1, fout);
+  }
+}
+
+/* Convert script language source to C style string.
+   So you can embed source into binary file, not confuse just combine.*/
+void dyn2str(int argc, char *argv[])
+{
+  FILE *fin = NULL, *fout = NULL;
+  char buf[128] = {0};
+  char *pos = NULL;
+  unsigned char *chin = NULL;
+  int insize = 0;
+
+  if (argc <= 1) {
+    usage(argv[0]);
+  }
+
+  /* if input is script.ext, output file name is script_ext.c */
+  snprintf(buf, sizeof(buf), "%s.c", argv[1]);
+  pos = strchr(buf, '.');
+  *pos = '_'; /*At least has one .c, must available*/
+
+  fin = fopen(argv[1], "r");
+  fout = fopen(buf, "w");
+  fseek(fin, 0, SEEK_END);
+  insize = ftell(fin);
+  rewind(fin);
+
+  /* write C string declare */
+  snprintf(buf, sizeof(buf), "static const unsigned char s_%s_str[]={", argv[1]);
+  chin = strchr(buf, '.');
+  if (chin) {*chin = '_';} /*Origin file no extname, dont overwrite here*/
+  fwrite(buf, strlen(buf), 1, fout);
+
+  /* write script content */
+  chin = (unsigned char*)calloc(1, insize + 2);
+  insize = fread(chin, sizeof(char), insize, fin);
+  convFile(chin, insize, fout);
+
+  /* write C string end mark */
+  snprintf(buf, sizeof(buf), "0};\n");
+  fwrite(buf, strlen(buf), 1, fout);
+
+  free(chin);
+  fclose(fin);
+  fclose(fout);
 }
 
 
@@ -312,6 +371,9 @@ int main(int argc, char** argv){
         break;
       case 'c':
         snip(argc-2, argv+2, 1, 0);
+        break;
+      case 'd':
+        dyn2str(argc-1, argv+1);
         break;
       case 'e':
         enc_lua(argc-1, argv+1);
