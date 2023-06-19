@@ -90,6 +90,7 @@ void get_paragraph(const char* fname, int wh, const char* kwd, int to){
   if (1==to) {fclose(fout);}
 }
 
+/*wh: 0-snip 1-comp 2-tpl*/
 void snip(int argc, char** argv, int wh, int to){
   char fl_str[MAXLINE];
   char fname[MAXLINE];
@@ -185,7 +186,7 @@ void* linit(){
   return L;
 }
 
-int lrun(void* L, char *fname, int narg){
+int ldofile(void* L, char *fname, int narg){
   int status = 0;
 #ifdef SUPPORT_LUA
   status = luaL_loadfile(L, fname);
@@ -204,36 +205,48 @@ void lclose(void* L){
 #endif
 }
 
+void run_lua(int argc, char** argv){
+  void *L = linit();
+  if (2==argc) {
+    char fname[MAXLINE];
+    get_exe_path(fname);
+    strcat(fname, "init.lua");
+    ldofile(L, fname, 0);
+  } else {
+    int narr = argc - 3, i;
+    lua_createtable(L, narr, 0);
+    for (i=3; i < argc; i++) {
+      lua_pushstring(L, argv[i]);
+      lua_rawseti(L, -2, i-2);
+    }
+    lua_setglobal(L, "arg");
+    ldofile(L, argv[2], 0);
+  }
+  lclose(L);
+}
+
 int main(int argc, char** argv){
   if (1==argc){
     usage();
   } else {
-    if (0==frontcmp(argv[1], "ascii", 2)){
-      ascii();
-    } else if (0==frontcmp(argv[1], "snip", 2)){
-      snip(argc-2, argv+2, 0, 0);
-    } else if (0==frontcmp(argv[1], "comp", 2)){
-      snip(argc-2, argv+2, 1, 0);
-    } else if (0==frontcmp(argv[1], "tpl", 2)){
-      snip(argc-2, argv+2, 2, 0);
-    } else if (0==frontcmp(argv[1], "lua", 2)){
-      void *L = linit();
-      if (2==argc) {
-        char fname[MAXLINE];
-        get_exe_path(fname);
-        strcat(fname, "init.lua");
-        lrun(L, fname, 0);
-      } else {
-        int narr = argc - 3, i;
-        lua_createtable(L, narr, 0);
-        for (i=3; i < argc; i++) {
-          lua_pushstring(L, argv[i]);
-          lua_rawseti(L, -2, i-2);
-        }
-        lua_setglobal(L, "arg");
-        lrun(L, argv[2], 0);
-      }
-      lclose(L);
+    switch(argv[1][0]){
+      case 'a':
+        ascii();
+        break;
+      case 'c':
+        snip(argc-2, argv+2, 1, 0);
+        break;
+      case 'l':
+        run_lua(argc, argv);
+        break;
+      case 's':
+        snip(argc-2, argv+2, 0, 0);
+        break;
+      case 't':
+        snip(argc-2, argv+2, 2, 0);
+        break;
+      default:
+        break;
     }
   }
   return 0;
