@@ -14,12 +14,13 @@
 #define MAXLINE 256
 
 void usage(){
-  puts("personal busybox ver230617\nascii\n"
+  puts("personal busybox ver230619\nascii\n"
 #ifdef SUPPORT_LUA
-  "lua(ext) [file] [argv]\n"
+  "lua|el [file] [argv]\n"
 #endif
   "snip|comp|tpl [keyword]\n"
   "hsc helper show cvs\n\tmf(list modified file)|ml(number modified line)|rv(repo version)\n");
+  exit(0);
 }
 
 int frontcmp(const char* s, const char* target, int most){
@@ -248,6 +249,59 @@ void run_lua(int argc, char** argv){
   lclose(L);
 }
 
+
+void enc_lua(int argc, char *argv[])
+{
+  char buf[128] = {0};
+  char* pos; int i = 1, ret;
+  char fndecl[128] = {0};
+  FILE *fw, *fr;
+
+  if (argc <2){
+    usage();
+  }
+
+  sprintf(buf, "luac -s %s", argv[1]); /*drop debug*/
+  ret = system(buf);
+  if (0!=ret){puts("luac fail");return;}
+
+  sprintf(buf, "%s.c", argv[1]);
+  pos = strchr(buf, '.');
+  *pos = '_';
+  fr = fopen("luac.out", "rb");
+  fw = fopen(buf, "w");
+
+  *pos = 0; // let buf be the lua module name
+  sprintf(fndecl, "#include \"lua/lauxlib.h\"\n\n"
+    "static void luafn_%s(lua_State* L) {\n"
+    "  const unsigned char B1[]={\n    ", buf);
+  fwrite(fndecl, strlen(fndecl), 1, fw);
+
+  while(1){
+    unsigned char ch;
+    char* comma = ",";  int cnt;
+    char* nline = "\n    ";
+    char fch[4] = {0};
+    cnt = fread(&ch, 1, 1, fr);
+    if (cnt == 0) break;
+    sprintf(fch, "%u", ch); // convert to string
+    fwrite(&fch, strlen(fch), 1, fw);
+    fwrite(comma, 1, 1, fw);
+    if ( i++%16 == 0) fwrite(nline, 5, 1, fw);
+    //if (feof(fr)) break;
+  }
+
+  sprintf(fndecl, "\n  };\n\n  if (luaL_loadbuffer"
+    "(L,(const char*)B1,sizeof(B1),\"%s\")==0)\n"
+    "    lua_call(L, 0, 1);\n"
+    "  lua_setglobal(L, \"%s\");\n"
+    "}\n", buf, buf);
+  fwrite(fndecl, strlen(fndecl), 1, fw);
+  fclose(fr);
+  fclose(fw);
+}
+
+
 int main(int argc, char** argv){
   if (1==argc){
     usage();
@@ -258,6 +312,9 @@ int main(int argc, char** argv){
         break;
       case 'c':
         snip(argc-2, argv+2, 1, 0);
+        break;
+      case 'e':
+        enc_lua(argc-1, argv+1);
         break;
       case 'h':
         help_show_csv(argc-1, argv+1);
