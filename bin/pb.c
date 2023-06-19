@@ -11,15 +11,15 @@
 #include "lualib.h"
 #endif
 
-
 #define MAXLINE 256
 
 void usage(){
-  puts("personal busybox ver230617\nascii snip comp tpl"
+  puts("personal busybox ver230617\nascii\n"
 #ifdef SUPPORT_LUA
-  " lua(ext)"
+  "lua(ext) [file] [argv]\n"
 #endif
-);
+  "snip|comp|tpl [keyword]\n"
+  "hsc helper show cvs\n\tmf(list modified file)|ml(number modified line)|rv(repo version)\n");
 }
 
 int frontcmp(const char* s, const char* target, int most){
@@ -30,6 +30,7 @@ int frontcmp(const char* s, const char* target, int most){
   return strncmp(s,target, tlen);
 }
 
+
 /*show ascii char*/
 void ascii(){
   int i = 32;
@@ -38,6 +39,7 @@ void ascii(){
       i, i, i, i+24, i+24, i+24, i+48, i+48, i+48, i+72, i+72, i+72);
   }
 }
+
 
 void get_exe_path(char* wd){
 #ifdef _WIN32
@@ -110,6 +112,27 @@ void snip(int argc, char** argv, int wh, int to){
     get_paragraph(fname, 1, fl_str, to);
   }
 }
+
+
+void help_show_csv(int argc, char** argv){
+#define MODFILE "mf"
+#define MODLINE "ml"
+#define REPOVER "rv"
+  if (1==argc){
+    usage();
+  } else {
+    if (0==strcmp(argv[1], MODFILE)) {
+      system("cvs st | grep Modified");
+    } else if (0==strcmp(argv[1], MODLINE)) {
+      system("cvs diff | grep \"^>\" | wc -l");
+     } else if (0==strcmp(argv[1], REPOVER)) {
+      system("cvs st | grep Repository");
+   } else {
+      puts("Unknown command, see help without argument.");
+    }
+  }
+}
+
 
 #ifdef SUPPORT_LUA
 char *s_lua_precode = "";
@@ -235,6 +258,9 @@ int main(int argc, char** argv){
         break;
       case 'c':
         snip(argc-2, argv+2, 1, 0);
+        break;
+      case 'h':
+        help_show_csv(argc-1, argv+1);
         break;
       case 'l':
         run_lua(argc, argv);
