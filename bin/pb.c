@@ -14,12 +14,13 @@
 #define MAXLINE 256
 
 void usage(){
-  puts("personal busybox ver230619\nascii\n"
+  puts("personal busybox ver230621\nascii\n"
   "dyn2str file -- convert script into C string file\n"
 #ifdef SUPPORT_LUA
   "lua|el file [argv]\n"
 #endif
-  "snip|comp|tpl [keyword]\n"
+  "snip|comp|ptn [keyword]\n"
+  "todo sth|[d line]\n"
   "hsc helper show cvs\n\tmf(list modified file)|ml(number modified line)|rv(repo version)\n");
   exit(0);
 }
@@ -59,7 +60,7 @@ void get_exe_path(char* wd){
 
 /*wh: 0-title 1-para
   to: 0-stdout 1-_pb_out */
-void get_paragraph(const char* fname, int wh, const char* kwd, int to){
+static void get_paragraph(const char* fname, int wh, const char* kwd, int to){
   FILE *f = fopen(fname, "r");
   FILE *fout = stdout;
   if (1==to) {
@@ -101,7 +102,7 @@ void snip(int argc, char** argv, int wh, int to){
   char* snip_flag[3] = {"snip", "comp", "tpl"};
   sprintf(fl_str, "# %s_", snip_flag[wh]);
   get_exe_path(fname);
-  strcat(fname, "_snip_txt");
+  strcat(fname, "_pb_snip");
   if (argc==0){
     get_paragraph(fname, 0, fl_str, to);
   } else {
@@ -193,6 +194,40 @@ void dyn2str(int argc, char *argv[])
   fclose(fout);
 }
 
+static void _cal_ext_fb2bb(char* cmd){
+  int has_bb, ret;
+#ifdef _WIN32
+  has_bb = system("busybox >NUL 2>NUL");
+#else
+  has_bb = system("busybox 1>2 2>/dev/null");
+#endif
+  if (0==has_bb){
+    char bbcmd[MAXLINE];
+    sprintf(bbcmd, "busybox %s", cmd);
+    ret = system(bbcmd);
+  } else {ret = system(cmd);}
+  if (0!=ret){puts("no busybox or native util found, todo fail");}
+}
+
+void todo(int argc, char** argv){
+  char fname[MAXLINE], cmd[MAXLINE];
+  get_exe_path(fname);
+  strcat(fname, "_pb_todo");
+  if (0 == argc) {
+    sprintf(cmd, "cat -n %s", fname);
+  } else if (2 == argc && 'd' == argv[0][0]) {
+    sprintf(cmd, "sed -e \"%sd\" %s -i", argv[1], fname);
+  } else {
+    int i;
+    char dosth[MAXLINE] = {0};
+    for (i=0; i<argc; i++){
+      strcat(dosth, argv[i]);
+      strcat(dosth, " ");
+    }
+    sprintf(cmd, "echo %s >>%s", dosth, fname);
+  }
+  _cal_ext_fb2bb(cmd);
+}
 
 #ifdef SUPPORT_LUA
 char *s_lua_precode = "";
@@ -384,13 +419,15 @@ int main(int argc, char** argv){
       case 'l':
         run_lua(argc, argv);
         break;
+      case 'p':
+        snip(argc-2, argv+2, 2, 0);
+        break;
       case 's':
         snip(argc-2, argv+2, 0, 0);
         break;
       case 't':
-        snip(argc-2, argv+2, 2, 0);
-        break;
-      default:
+        todo(argc-2, argv+2);
+        break;      default:
         break;
     }
   }
