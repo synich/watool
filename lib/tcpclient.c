@@ -10,7 +10,7 @@
 #include <unistd.h>
 #include "walib.h"
 
-int initsock(){
+int initsock(void){
   int err = 0;
 #ifdef _WIN32
   WORD wVersionRequested;
@@ -21,7 +21,7 @@ int initsock(){
   return err;
 }
 
-void finisock(){
+void finisock(void){
 #ifdef _WIN32
   WSACleanup();
 #endif

@@ -19,14 +19,14 @@ int wa_base64dec(char* src, char* dst);
 int wa_base16enc(char* src, int len, char* dst);
 int wa_base16dec(char* src, char* dst);
 
-/*return epoch, calendar in localtime*/
+/*return epoch, tz=0 -> localtime, tz=3600 -> plus one zone*/
 int wa_calendar(int* year, int* mon, int* day, int* hour, int* min, int* sec, int tz);
 void wa_msleep(int m);
 int wa_rands(int from, int to);/* [from, to) */
 #define wa_rand(r) wa_rands(0, r)
 /*benifit for socket*/
-int initsock();
-void finisock();
+int initsock(void);
+void finisock(void);
 int opentcp(char* ip, unsigned short port);
 void wa_settcpopt(int rcvtimeo);
 /*return -1:network error, >0 http response length*/
@@ -38,7 +38,7 @@ int wa_log(char* fmt, ...);
 int wa_utok(int result);/*if result true return 0, else 1. Sum all is error count*/
 typedef int(*wa_utfn)(void);
 void wa_utrun(const char* name, wa_utfn f);
-int wa_utsum();
+int wa_utsum(void);
 
 #define REG_MAXSUB 10
 struct stResub {
@@ -83,14 +83,14 @@ char* wa_alloc_(int n, const char* f, int l);
 #define wa_revert(p) wa_revert_((char*)(p), __FILE__, __LINE__);(p)=NULL
 void wa_revert_(char* p, const char* f, int l);
 char* wa_ephemem(int n);
-void wa_finalize();
+void wa_finalize(void);
 char* wa_dupstr(const char* p);
 char* wa_dupbin(const char* b, int len);
 int wa_memdbgflg(int i);
-void wa_memreport();
+void wa_memreport(void);
 
 /* Bridge to script */
-void *wa_bsnew();
+void *wa_bsnew(void);
 int wa_bsload(void* J, char* fn); /*return 0-OK 1-fail*/
 /*fn: func name  fmt: last is output, others are input. s-str b-bool i-int f-double
   return 0-call finish 1-other exception*/

@@ -1,7 +1,7 @@
 #include <stdarg.h>
 #include "walib.h"
 
-#ifdef MUJS
+#ifdef SUPPORT_MUJS
 #include "mujs.h"
 static void jsB_require(js_State *J)
 {

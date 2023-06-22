@@ -2,8 +2,10 @@
 #include <string.h>
 #ifdef _WIN32
 #include <windows.h>
+#else
+#include <unistd.h>
 #endif
-
+#include "walib.h"
 #define SUPPORT_LUA
 #ifdef SUPPORT_LUA
 #include "lua.h"
@@ -14,7 +16,7 @@
 #define MAXLINE 256
 
 void usage(){
-  puts("personal busybox ver230621\nascii\n"
+  puts("personal busybox ver230622\nascii\n"
   "dyn2str file -- convert script into C string file\n"
 #ifdef SUPPORT_LUA
   "lua|el file [argv]\n"
@@ -46,15 +48,15 @@ void ascii(){
 
 void get_exe_path(char* wd){
 #ifdef _WIN32
-  char exepath[MAXLINE];
   char *pos;
-  GetModuleFileName(NULL, exepath, MAXLINE);
-  strcpy(wd, exepath);
-  pos = strrchr(wd, '\\');
-  *(pos+1)=0;
-  strcat(wd, "pb\\");
+  GetModuleFileName(NULL, wd, MAXLINE);
+  pos = strstr(wd, ".exe");
+  *pos=0;
+  strcat(wd, "\\");
 #else
-  strcpy(wd, "./");
+  int ret = readlink("/proc/self/exe", wd, MAXLINE);
+  wd[ret] = 0;
+  strcat(wd, "_d/");
 #endif
 }
 
@@ -160,7 +162,7 @@ void dyn2str(int argc, char *argv[])
   int insize = 0;
 
   if (argc <= 1) {
-    usage(argv[0]);
+    usage();
   }
 
   /* if input is script.ext, output file name is script_ext.c */
@@ -176,7 +178,7 @@ void dyn2str(int argc, char *argv[])
 
   /* write C string declare */
   snprintf(buf, sizeof(buf), "static const unsigned char s_%s_str[]={", argv[1]);
-  chin = strchr(buf, '.');
+  chin = (unsigned char*)strchr(buf, '.');
   if (chin) {*chin = '_';} /*Origin file no extname, dont overwrite here*/
   fwrite(buf, strlen(buf), 1, fout);
 
@@ -199,7 +201,7 @@ static void _cal_ext_fb2bb(char* cmd){
 #ifdef _WIN32
   has_bb = system("busybox >NUL 2>NUL");
 #else
-  has_bb = system("busybox 1>2 2>/dev/null");
+  has_bb = system("busybox 2>&1 1>/dev/null");
 #endif
   if (0==has_bb){
     char bbcmd[MAXLINE];
@@ -218,13 +220,16 @@ void todo(int argc, char** argv){
   } else if (2 == argc && 'd' == argv[0][0]) {
     sprintf(cmd, "sed -e \"%sd\" %s -i", argv[1], fname);
   } else {
-    int i;
+    int i, mon, day, hr, min;
     char dosth[MAXLINE] = {0};
+    char dt[MAXLINE] = {0};
+    wa_calendar(NULL, &mon, &day, &hr, &min, NULL, 0);
+    sprintf(dt, "%02d-%02d %02d:%02d", mon, day, hr, min);
     for (i=0; i<argc; i++){
       strcat(dosth, argv[i]);
       strcat(dosth, " ");
     }
-    sprintf(cmd, "echo %s >>%s", dosth, fname);
+    sprintf(cmd, "echo %s %s >>%s", dt, dosth, fname);
   }
   _cal_ext_fb2bb(cmd);
 }
@@ -325,6 +330,7 @@ void lclose(void* L){
 
 void run_lua(int argc, char** argv){
   void *L = linit();
+#ifdef SUPPORT_LUA
   if (2==argc) {
     char fname[MAXLINE];
     get_exe_path(fname);
@@ -341,6 +347,7 @@ void run_lua(int argc, char** argv){
     ldofile(L, argv[2], 0);
   }
   lclose(L);
+#endif
 }
 
 
