@@ -16,7 +16,7 @@
 #define MAXLINE 256
 
 void usage(){
-  puts("personal busybox ver230622\nascii\n"
+  puts("personal busybox ver230623\nascii\n"
   "dyn2str file -- convert script into C string file\n"
 #ifdef SUPPORT_LUA
   "lua|el file [argv]\n"
@@ -313,7 +313,7 @@ int ldofile(void* L, char *fname, int narg){
   int status = 0;
 #ifdef SUPPORT_LUA
   status = luaL_loadfile(L, fname);
-  if (0!=status) {printf("load %s fail!\n", fname);return status;}
+  if (0!=status) {printf("load %s fail: %s\n", fname, lua_tostring(L, 1));return status;}
   if (0<narg) {lua_insert(L, 1);}
   status = lua_pcall(L, narg, LUA_MULTRET, 0);
   if (0!=status) {puts(lua_tostring(L, 1));}
