@@ -11,6 +11,7 @@
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
+int luaopen_utf8(lua_State *L);
 #endif
 
 #define MAXLINE 256
@@ -21,7 +22,7 @@ void usage(){
 #ifdef SUPPORT_LUA
   "lua|el file [argv]\n"
 #endif
-  "snip|comp|ptn [keyword]\n"
+  "snip|comp [keyword]\n"
   "todo sth|[d line]\n"
   "hsc helper show cvs\n\tmf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "wph(WaProjectHelper)\n\twph c c -- create c project scafold\n\twph l p -- generate lua plugin by c\n"
@@ -102,11 +103,11 @@ static void get_paragraph(const char* fname, int wh, const char* kwd, int to){
   if (1==to) {fclose(fout);}
 }
 
-/*wh: 0-snip 1-comp 2-tpl*/
+/*wh: 0-snip 1-comp*/
 void snip(int argc, char** argv, int wh, int to){
   char fl_str[MAXLINE];
   char fname[MAXLINE];
-  char* snip_flag[3] = {"snip", "comp", "tpl"};
+  char* snip_flag[2] = {"snip", "comp"};
   sprintf(fl_str, "# %s_", snip_flag[wh]);
   get_exe_path(fname);
   strcat(fname, "_pb_snip");
@@ -559,6 +560,7 @@ void* linit(){
     L = (void*)lua_open();
     lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
     luaL_openlibs(L);  /* open libraries */
+    luaopen_utf8(L);
     lua_gc(L, LUA_GCRESTART, 0);
     luafn_s(L);
     /* luaL_dostring(L, s_lua_precode); */
@@ -567,6 +569,16 @@ void* linit(){
   return L;
 }
 
+void _debug_lua(void* L, char* hint){
+#define DEBUG_LUA1
+#ifdef DEBUG_LUA
+  int stk_size = lua_gettop(L), i = 1;
+  printf("%s elem num: %d\n", hint, stk_size);
+  for(;i<=stk_size;i++){
+    printf("%d: %s\n", i, lua_typename(L, lua_type(L, i)));
+  }
+#endif
+}
 int ldofile(void* L, char *fname, int narg){
   int status = 0;
 #ifdef SUPPORT_LUA
@@ -574,8 +586,12 @@ int ldofile(void* L, char *fname, int narg){
   if (0!=status) {printf("load %s fail: %s\n", fname, lua_tostring(L, 1));return status;}
   if (0<narg) {lua_insert(L, 1);}
   status = lua_pcall(L, narg, LUA_MULTRET, 0);
-  if (0!=status) {puts(lua_tostring(L, 1));}
-  lua_pop(L, 1);
+  if (0!=status) {
+    printf("run %s fail[%d]: %s %s\n",fname, status, lua_tostring(L, 1), lua_tostring(L, 2));
+    lua_pop(L, 2);
+  } else {
+    lua_pop(L, 1);
+  }
 #endif
   return status; /*0-ok 1-fail*/
 }
@@ -683,9 +699,6 @@ int main(int argc, char** argv){
         break;
       case 'l':
         run_lua(argc, argv);
-        break;
-      case 'p':
-        snip(argc-2, argv+2, 2, 0);
         break;
       case 's':
         snip(argc-2, argv+2, 0, 0);
