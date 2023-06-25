@@ -17,7 +17,7 @@ int luaopen_utf8(lua_State *L);
 #define MAXLINE 256
 
 void usage(){
-  puts("personal busybox ver230624\nascii\n"
+  puts("personal busybox ver230625\nascii\n"
   "dyn2str file -- convert script into C string file\n"
 #ifdef SUPPORT_LUA
   "lua|el file [argv]\n"
@@ -570,8 +570,7 @@ void* linit(){
 }
 
 void _debug_lua(void* L, char* hint){
-#define DEBUG_LUA1
-#ifdef DEBUG_LUA
+#ifdef SUPPORT_LUA
   int stk_size = lua_gettop(L), i = 1;
   printf("%s elem num: %d\n", hint, stk_size);
   for(;i<=stk_size;i++){
