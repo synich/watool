@@ -714,11 +714,16 @@ static inline int num_strchr(const char *str, char c) //
 /* 解码
 * const char * base64 码字
 * unsigned char * dedata， 解码恢复的数据
+* return -1: fail  0: OK
 */
 int wa_base64dec(char * base64, char * dedata)
 {
-    int i = 0, j=0;
+    int i = 0, j=0, srclen=strlen(base64);
     int trans[4] = {0,0,0,0};
+    if (0 != srclen%4) {
+        dedata[0] = 0;
+        return -1;
+    }
     for (;base64[i]!='\0';i+=4){
         // 每四个一组，译码成三个字符
         trans[0] = num_strchr(base64char, base64[i]);
