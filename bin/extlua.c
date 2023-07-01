@@ -1,5 +1,5 @@
 /*
-** $Id: lutf8lib.c $
+** $Id: extlua.c,v 1.1 2023/07/01 08:05:35 shuw Exp $
 ** Standard library for UTF-8 manipulation
 ** See Copyright Notice in lua.h
 */
@@ -17,16 +17,12 @@ typedef unsigned int  lua_Unsigned;
 #include <string.h>
 
 #include "lua.h"
-
 #include "lauxlib.h"
 #include "lualib.h"
 
 
 #define MAXUNICODE	0x10FFFFu
-
 #define MAXUTF		0x7FFFFFFFu
-
-
 #define MSGInvalid	"invalid UTF-8 code"
 
 /*
@@ -295,7 +291,7 @@ static int iter_codes (lua_State *L) {
 #define UTF8PATT	"[0-7F|C2-FD][80-BF]*"
 
 
-static const luaL_Reg funcs[] = {
+static const luaL_Reg utf8_funcs[] = {
   {"offset", byteoffset},
   {"codepoint", codepoint},
   {"char", utfchar},
@@ -308,9 +304,66 @@ static const luaL_Reg funcs[] = {
 
 
 LUALIB_API int luaopen_utf8 (lua_State *L) {
-  luaL_register(L, "utf8", funcs);
+  luaL_register(L, "utf8", utf8_funcs);
   lua_pushlstring(L, UTF8PATT, sizeof(UTF8PATT)/sizeof(char) - 1);
   lua_setfield(L, -2, "charpattern");
   return 1;
 }
 
+
+/********encode********/
+#include "walib.h"
+
+static int md5 (lua_State *L) {
+  const char *src = luaL_checkstring(L, 1);
+  char dst[33] = {0};
+  wa_md5((char*)src, dst);
+  lua_pushstring(L, dst);
+  return 1;
+}
+
+static int sha1 (lua_State *L) {
+  const char *src = luaL_checkstring(L, 1);
+  char dst[41] = {0};
+  wa_sha1((char*)src, dst);
+  lua_pushstring(L, dst);
+  return 1;
+}
+
+static int b64enc (lua_State *L) {
+  size_t len;
+  const char *src = lua_tolstring(L, 1, &len);
+  char* dst = malloc((len/3+1)*4+1);
+  wa_base64enc((char*)src, dst);
+  lua_pushstring(L, dst);
+  free(dst);
+  return 1;
+}
+
+static int b64dec (lua_State *L) {
+  size_t len;
+  const char *src = lua_tolstring(L, 1, &len);
+  char* dst = malloc((len/4+1)*3+1);
+  int ret = wa_base64dec((char*)src, dst);
+  if (0==ret) {
+    lua_pushstring(L, dst);
+  } else {
+    lua_pushnil(L);
+  }
+  free(dst);
+  return 1;
+}
+
+static const luaL_Reg enc_funcs[] = {
+  {"md5", md5},
+  {"sha1", sha1},
+  {"b64enc", b64enc},
+  {"b64dec", b64dec},
+  {NULL, NULL}
+};
+
+
+LUALIB_API int luaopen_enc (lua_State *L) {
+  luaL_register(L, "enc", enc_funcs);
+  return 1;
+}
