@@ -68,15 +68,16 @@ void get_exe_path(char* wd){
 }
 
 /*wh: 0-title 1-para
-  to: 0-stdout 1-_pb_out */
-static void get_paragraph(const char* fname, int wh, const char* kwd, int to){
+  to: 0-stdout 1-_pb_out
+  return: -1 fail 0 OK*/
+static int get_paragraph(const char* fname, int wh, const char* kwd, int to){
   FILE *fout = stdout;
   FILE *f = fopen(fname, "r");
   if (NULL==f){
     int pend = strlen(fname);
     char chend = fname[pend-1];
     if ('p'==chend){printf("cant find '%s'\n",fname);}
-    return;
+    return -1;
   }
   if (1==to) {
     char fop[MAXLINE];
@@ -107,6 +108,7 @@ static void get_paragraph(const char* fname, int wh, const char* kwd, int to){
   }
   fclose(f);
   if (1==to) {fclose(fout);}
+  return 0;
 }
 
 /*wh: 0-snip 1-comp*/
@@ -119,12 +121,12 @@ void snip(int argc, char** argv, int wh, int to){
   get_exe_path(fname);
   strcat(fname, "_pb_snip");
   pend = strlen(fname);
-#define SNIP_POST 2
+#define SNIP_POST 9
   if (argc==0){ /*see what section in this snip*/
     get_paragraph(fname, 0, fl_str, to);
     for (;i<=SNIP_POST;i++){
       fname[pend]='0'+i;fname[pend+1]=0;
-      get_paragraph(fname, 0, fl_str, to);
+      if (-1==get_paragraph(fname, 0, fl_str, to)){break;}
     }
   } else {
     strcat(fl_str, argv[0]);
@@ -136,7 +138,7 @@ void snip(int argc, char** argv, int wh, int to){
     get_paragraph(fname, 1, fl_str, to);
     for (;i<=SNIP_POST;i++){
       fname[pend]='0'+i;fname[pend+1]=0;
-      get_paragraph(fname, 1, fl_str, to);
+      if (-1==get_paragraph(fname, 1, fl_str, to)){break;}
     }
   }
 }
@@ -1038,7 +1040,7 @@ void run_lua(int argc, char** argv){
 void enc_lua(int argc, char *argv[])
 {
   char buf[128] = {0};
-  char* pos; int i = 1, ret;
+  char* pos; int i = 0, ret;
   char fndecl[128] = {0};
   FILE *fw, *fr;
 
@@ -1059,25 +1061,25 @@ void enc_lua(int argc, char *argv[])
   *pos = 0; // let buf be the lua module name
   sprintf(fndecl, "#include \"lua/lauxlib.h\"\n\n"
     "static void luafn_%s(lua_State* L) {\n"
-    "  const unsigned char B1[]={\n    ", buf);
+    "  const unsigned char B1[]={", buf);
   fwrite(fndecl, strlen(fndecl), 1, fw);
 
   while(1){
+#define comma    ","
+#define nline    "\n    "
     unsigned char ch;
-    char* comma = ",";  int cnt;
-    char* nline = "\n    ";
     char fch[4] = {0};
-    cnt = fread(&ch, 1, 1, fr);
-    if (cnt == 0) break;
+    int cnt = fread(&ch, 1, 1, fr);
+    if (cnt == 0) {break;}
+    else if ( (i++)%16 == 0) {fwrite(nline, 5, 1, fw);}
     sprintf(fch, "%u", ch); // convert to string
     fwrite(&fch, strlen(fch), 1, fw);
     fwrite(comma, 1, 1, fw);
-    if ( i++%16 == 0) fwrite(nline, 5, 1, fw);
     //if (feof(fr)) break;
   }
-
+  /*lua_call keep result and set global, or 1->0 then not set*/
   sprintf(fndecl, "\n  };\n\n  if (luaL_loadbuffer"
-    "(L,(const char*)B1,sizeof(B1),\"%s\")==0)\n"
+    "(L,(const char*)B1,sizeof(B1),\"buf_chunk_%s\")==0)\n"
     "    lua_call(L, 0, 1);\n"
     "  lua_setglobal(L, \"%s\");\n"
     "}\n", buf, buf);
