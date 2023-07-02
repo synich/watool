@@ -21,7 +21,7 @@ int wa_base16dec(char* src, char* dst);
 
 /*return epoch, tz=0 -> localtime, tz=3600 -> plus one zone*/
 int wa_calendar(int* year, int* mon, int* day, int* hour, int* min, int* sec, int tz);
-/*return day distance, input like 20230701*/
+/*return day distance, input like 20230701|230701*/
 int wa_datediff(const char* from, const char* to);
 void wa_msleep(int m);
 int wa_rands(int from, int to);/* [from, to) */

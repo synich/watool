@@ -20,11 +20,13 @@ int wa_datediff(const char* from, const char* to) {
     time_t fep, tep;
     struct tm ftm={0}, ttm={0};
     fall = atoi(from);
+    if (fall <1000000) {fall+=20000000;}
     ftm.tm_year = fall/10000 - 1900;
     ftm.tm_mon = (fall/100)%100 - 1;
     ftm.tm_mday = fall%100;
     fep = mktime(&ftm);
     tall = atoi(to);
+    if (tall <1000000) {tall+=20000000;}
     ttm.tm_year = tall/10000 - 1900;
     ttm.tm_mon = (tall/100)%100 - 1;
     ttm.tm_mday = tall%100;

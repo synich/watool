@@ -2,8 +2,10 @@
 #include <string.h>
 #ifdef _WIN32
 #include <windows.h>
+#define DIR_SEP "\\"
 #else
 #include <unistd.h>
+#define DIR_SEP "/"
 #endif
 #include "walib.h"
 #define SUPPORT_LUA
@@ -13,18 +15,19 @@
 #include "lualib.h"
 int luaopen_utf8(lua_State *L);
 int luaopen_enc(lua_State *L);
+int luaopen_os (lua_State *L);
 #endif
 
 #define MAXLINE 256
 
 void usage(){
-  puts("personal busybox ver230630\nascii\n"
+  puts("personal busybox ver230701\nascii\n"
   "dyn2str file -- convert script into C string file\n"
-#ifdef SUPPORT_LUA
-  "lua|el file [argv]\n"
-#endif
   "snip|comp [keyword]\n"
   "todo sth|[d line]\n"
+#ifdef SUPPORT_LUA
+  "lua|el file [argv] or -e expr\n\textend: utf8/enc/json,split/popen/datediff\n"
+#endif
   "hsc helper show cvs\n\tmf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "wph(WaProjectHelper)\n\twph c c -- create c project scafold\n\twph l p -- generate lua plugin by c\n"
   "xlispindent file|stdin"
@@ -59,12 +62,11 @@ void get_exe_path(char* wd){
   GetModuleFileName(NULL, wd, MAXLINE);
   pos = strstr(wd, ".exe");
   *pos=0;
-  strcat(wd, "_d\\");
 #else
   int ret = readlink("/proc/self/exe", wd, MAXLINE);
   wd[ret] = 0;
-  strcat(wd, "_d/");
 #endif
+  strcat(wd, "_d"DIR_SEP);
 }
 
 /*wh: 0-title 1-para
@@ -969,17 +971,17 @@ static void luafn_s(lua_State* L) {
 void* linit(){
   void *L = NULL;
 #ifdef SUPPORT_LUA
-  L = (lua_State *)lua_open();  /* create state */
+  L = (lua_State *)luaL_newstate();  /* create state */
   if (L == NULL) {
     puts("cannot create lua_State: not enough memory");
   } else {
-    L = (void*)lua_open();
     lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
     luaL_openlibs(L);  /* open libraries */
     luaopen_utf8(L);
     luaopen_enc(L);
+    luaopen_os (L);
     lua_gc(L, LUA_GCRESTART, 0);
-    lua_pop(L, 2);  // pop custom open_lib
+    lua_pop(L, 3);  // pop custom open_lib
     luafn_s(L);
     /* luaL_dostring(L, s_lua_precode); */
   }
@@ -1022,6 +1024,12 @@ void run_lua(int argc, char** argv){
     get_exe_path(fname);
     strcat(fname, "init.lua");
     ldofile(L, fname, 0);
+  } else if (0==strcmp(argv[2], "-e")) {
+    char exprbuff[MAXLINE] = {0};
+    if (3==argc){usage();}
+    sprintf(exprbuff, "return %s", argv[3]);
+    luaL_dostring(L, exprbuff);
+    puts(lua_tostring(L, 1));
   } else {
     int narr = argc - 3, i;
     lua_createtable(L, narr, 0);
@@ -1039,9 +1047,10 @@ void run_lua(int argc, char** argv){
 
 void enc_lua(int argc, char *argv[])
 {
-  char buf[128] = {0};
-  char* pos; int i = 0, ret;
-  char fndecl[128] = {0};
+  char buf[MAXLINE] = {0}, flname[128]={0};
+  char *pos, *fl_pos;
+  int i = 0, ret;
+  char fndecl[256] = {0};
   FILE *fw, *fr;
 
   if (argc <2){
@@ -1057,11 +1066,16 @@ void enc_lua(int argc, char *argv[])
   *pos = '_';
   fr = fopen("luac.out", "rb");
   fw = fopen(buf, "w");
+  fl_pos = strrchr(buf, '/')?strrchr(buf, '/'):strrchr(buf, '\\');
+  if (NULL==fl_pos){strcpy(flname, buf);}
+  else {strcpy(flname, fl_pos+1);}
+  fl_pos = strchr(flname, '_');
+  *fl_pos = 0;
 
   *pos = 0; // let buf be the lua module name
   sprintf(fndecl, "#include \"lua/lauxlib.h\"\n\n"
     "static void luafn_%s(lua_State* L) {\n"
-    "  const unsigned char B1[]={", buf);
+    "  const unsigned char B1[]={", flname);
   fwrite(fndecl, strlen(fndecl), 1, fw);
 
   while(1){
@@ -1082,7 +1096,7 @@ void enc_lua(int argc, char *argv[])
     "(L,(const char*)B1,sizeof(B1),\"buf_chunk_%s\")==0)\n"
     "    lua_call(L, 0, 1);\n"
     "  lua_setglobal(L, \"%s\");\n"
-    "}\n", buf, buf);
+    "}\n", flname, flname);
   fwrite(fndecl, strlen(fndecl), 1, fw);
   fclose(fr);
   fclose(fw);

@@ -367,3 +367,22 @@ LUALIB_API int luaopen_enc (lua_State *L) {
   luaL_register(L, "enc", enc_funcs);
   return 1;
 }
+
+/********os********/
+static int datediff (lua_State *L) {
+  const char *from_day = luaL_checkstring(L, 1);
+  const char *to_day = luaL_checkstring(L, 2);
+  lua_pushinteger(L, wa_datediff(from_day, to_day));
+  return 1;
+}
+
+static const luaL_Reg os_funcs[] = {
+  {"datediff", datediff},
+  {NULL, NULL}
+};
+
+
+LUALIB_API int luaopen_os (lua_State *L) {
+  luaL_register(L, "os", os_funcs);
+  return 1;
+}

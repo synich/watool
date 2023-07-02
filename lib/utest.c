@@ -79,7 +79,7 @@ int test_calendar(){
 }
 
 int test_datediff(){
-    printf("datediff %d\n", wa_datediff("20240301", "20240227"));
+    printf("datediff %d\n", wa_datediff("230301", "230227"));
     return 0;
 }
 
