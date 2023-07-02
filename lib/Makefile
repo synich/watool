@@ -21,8 +21,8 @@ obj/%.o : %.c
 	$(CC) $(CFLAGS) -o $@ $<
 
 ut: lib
-	@$(CC) $(DEPINC) -g utest.c -o ut -L. $(DEPLIB) $(UTLIB) -lmujs
-	@ut.exe $(P)
+	@$(CC) $(DEPINC) -g utest.c -o ut -L. $(DEPLIB) $(UTLIB)
+	@ut $(P)
 
 clean:
 	rm obj/*.o

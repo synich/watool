@@ -78,6 +78,11 @@ int test_calendar(){
 	return i;
 }
 
+int test_datediff(){
+    printf("datediff %d\n", wa_datediff("20240301", "20240227"));
+    return 0;
+}
+
 int test_rand(){
 	int i = 0;
 	for (;i<30;i++){
@@ -157,7 +162,7 @@ int test_log(){
 	fclose(fd);
 	return 0;
 }
-
+/*
 int test_mujs(){
 	int r=0;
 	void *vm = wa_bsnew();
@@ -180,15 +185,16 @@ int test_mujs(){
 	wa_bsfree(vm);
 	return r;
 }
-
+*/
 int main(int argc, char *argv[])
 {
-	TEST(_md5);
-    TEST(_sha1);
+	//TEST(_md5);
+    //TEST(_sha1);
     //TEST(_base64);
     //TEST(_base16);
     //test_http(argv[1], atoi(argv[2]));
 	//TEST(_calendar);
+    TEST(_datediff);
 	//test_rand();
     //TEST(_match);
 	//test_mempool( atoi(argv[1]) );

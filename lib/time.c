@@ -15,6 +15,23 @@ int wa_calendar(int* year, int* mon, int* day, int* hour, int* min, int* sec, in
 	return (int)t;
 }
 
+int wa_datediff(const char* from, const char* to) {
+    int fall, tall;
+    time_t fep, tep;
+    struct tm ftm={0}, ttm={0};
+    fall = atoi(from);
+    ftm.tm_year = fall/10000 - 1900;
+    ftm.tm_mon = (fall/100)%100 - 1;
+    ftm.tm_mday = fall%100;
+    fep = mktime(&ftm);
+    tall = atoi(to);
+    ttm.tm_year = tall/10000 - 1900;
+    ttm.tm_mon = (tall/100)%100 - 1;
+    ttm.tm_mday = tall%100;
+    tep = mktime(&ttm);
+    return (fep-tep)/86400;
+}
+
 void wa_msleep(int m) {
 	usleep(m*1000);
 }
@@ -29,3 +46,4 @@ int wa_rands(int from, int to){
 	ret = from +( rand() % range );
 	return ret;
 }
+
