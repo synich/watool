@@ -15,18 +15,25 @@
 #include "lualib.h"
 int luaopen_utf8(lua_State *L);
 int luaopen_enc(lua_State *L);
-int luaopen_os (lua_State *L);
+int luaopen_dt(lua_State *L);
+#else
+void get_exe_path(char* wd);
+#include "dep/bignum.c"
+#include "dep/miniscm.c"
 #endif
 
 #define MAXLINE 256
 
 void usage(){
-  puts("personal busybox ver230701\nascii\n"
+  puts("personal busybox ver231220\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "snip|comp [keyword]\n"
   "todo sth|[d line]\n"
 #ifdef SUPPORT_LUA
-  "lua|el file [argv] or -e expr\n\textend: utf8/enc/json,split/popen/datediff\n"
+  "lua [-y] file [argv] or -e expr or -h show extention\n"
+  "el file -- convert lua to c code\n"
+#else
+  "lisp file\n"
 #endif
   "hsc helper show cvs\n\tmf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "wph(WaProjectHelper)\n\twph c c -- create c project scafold\n\twph l p -- generate lua plugin by c\n"
@@ -979,7 +986,7 @@ void* linit(){
     luaL_openlibs(L);  /* open libraries */
     luaopen_utf8(L);
     luaopen_enc(L);
-    luaopen_os (L);
+    luaopen_dt (L);
     lua_gc(L, LUA_GCRESTART, 0);
     lua_pop(L, 3);  // pop custom open_lib
     luafn_s(L);
@@ -1016,9 +1023,10 @@ void lclose(void* L){
 #endif
 }
 
+#include "modidx_lua.c"
 void run_lua(int argc, char** argv){
-  void *L = linit();
 #ifdef SUPPORT_LUA
+  void *L = linit();
   if (2==argc) {
     char fname[MAXLINE];
     get_exe_path(fname);
@@ -1029,7 +1037,10 @@ void run_lua(int argc, char** argv){
     if (3==argc){usage();}
     sprintf(exprbuff, "return %s", argv[3]);
     luaL_dostring(L, exprbuff);
-    puts(lua_tostring(L, 1));
+    puts(lua_tostring(L, -1));
+  } else if (0==strcmp(argv[2], "-h")) {
+    puts("single: fmt/string.split/os.popen/dt.datediff\n"
+    "module: enc.md5/sha1/b64enc/b64dec; json.encode/decode; utf8.len/char/codes");
   } else {
     int narr = argc - 3, i;
     lua_createtable(L, narr, 0);
@@ -1038,9 +1049,15 @@ void run_lua(int argc, char** argv){
       lua_rawseti(L, -2, i-2);
     }
     lua_setglobal(L, "arg");
-    ldofile(L, argv[2], 0);
+    if (0==strcmp(argv[2], "-y")) {
+      luafn_modidx(L);
+    } else {
+      ldofile(L, argv[2], 0);
+    }
   }
   lclose(L);
+#else
+  miniscm(argc-1, argv+1);
 #endif
 }
 
@@ -1066,6 +1083,7 @@ void enc_lua(int argc, char *argv[])
   *pos = '_';
   fr = fopen("luac.out", "rb");
   fw = fopen(buf, "w");
+  printf("encode lua bytecode to %s\n", buf);
   fl_pos = strrchr(buf, '/')?strrchr(buf, '/'):strrchr(buf, '\\');
   if (NULL==fl_pos){strcpy(flname, buf);}
   else {strcpy(flname, fl_pos+1);}
