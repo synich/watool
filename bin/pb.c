@@ -27,7 +27,7 @@
 #endif
 
 void usage(){
-  puts("personal busybox ver231224\nascii\n"
+  puts("personal busybox ver231225\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "snip|comp [keyword]\n"
   "todo sth|[d line]\n"
@@ -523,22 +523,28 @@ void xlispindent(int argc, char** argv){
 
 
 /******** lua ********/
-void _debug_lua(void* L, char* hint_mess){
-#ifdef SUPPORT_LUA
-  int stk_size = lua_gettop(L), i;
-  printf("%s: elem num is %d. idx 1 is bottom, largest is top\n", hint_mess, stk_size);
-  for(i=stk_size;i>=1;i--){
-    char *idx_mean = "";
-    if (i==stk_size){idx_mean = "\ttop";} else if (1==i){idx_mean = "\tbottom";}
-    printf("  %d: %s%s\n", i, lua_typename(L, lua_type(L, i)), idx_mean);
-  }
-#endif
-}
-
 #ifdef SUPPORT_LUA
 /*var_dump|split|popen*/
 #include "pb_lua.c"
 #include "modidx_lua.c"
+
+static void _debug_lua(lua_State *L, char* hint_mess){
+  int stk_size = lua_gettop(L), ri=-1, i, val_t;
+  printf("%s: elem num is %d\n", hint_mess, stk_size);
+  for(i=stk_size;i>=1;i--){
+    val_t = lua_type(L, i);
+    char *idx_mean = "";
+    if (i==stk_size){idx_mean = "\t<- top";} else if (1==i){idx_mean = "\tbottom";}
+    printf("  %d or %d: %s", i, ri, lua_typename(L, val_t));
+    if (val_t==LUA_TSTRING) {printf(" %s", lua_tostring(L, i));}
+    else if (val_t==LUA_TNUMBER) {printf(" %.2f", lua_tonumber(L, i));}
+    else if (val_t==LUA_TTABLE) {printf(" arrlen %d", lua_objlen(L, i));}
+    else if (val_t==LUA_TBOOLEAN) {printf(" %s", 1==lua_toboolean(L, i)?"true":"false");}
+    printf("%s\n", idx_mean);
+    ri--;
+  }
+}
+
 static int _traceback (lua_State *L) {
   if (!lua_isstring(L, 1))  /* 'message' not a string? */
     return 1;  /* keep it intact */
@@ -575,7 +581,7 @@ void* linit(){
     luaopen_enc(L);
     luaopen_dt (L);
     lua_gc(L, LUA_GCRESTART, 0);
-    lua_pop(L, 3);  // pop custom open_lib
+    lua_pop(L, lua_gettop(L));  // pop custom open_lib
     luafn_pb(L);
     sprintf(s_lua_precode, "package.cpath=[[%s?.dll%c]]..package.cpath", pb_d_path, PATH_SEP);
     luaL_dostring(L, s_lua_precode);
