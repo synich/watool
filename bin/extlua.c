@@ -1,5 +1,5 @@
 /*
-** $Id: extlua.c,v 1.1 2023/07/01 08:05:35 shuw Exp $
+** $Id: extlua.c,v 1.3 2023/12/19 15:51:23 shuw Exp $
 ** Standard library for UTF-8 manipulation
 ** See Copyright Notice in lua.h
 */
@@ -376,13 +376,13 @@ static int datediff (lua_State *L) {
   return 1;
 }
 
-static const luaL_Reg os_funcs[] = {
+static const luaL_Reg dt_funcs[] = {
   {"datediff", datediff},
   {NULL, NULL}
 };
 
 
-LUALIB_API int luaopen_os (lua_State *L) {
-  luaL_register(L, "os", os_funcs);
+LUALIB_API int luaopen_dt (lua_State *L) {
+  luaL_register(L, "dt", dt_funcs);
   return 1;
 }
