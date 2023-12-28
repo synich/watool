@@ -27,7 +27,7 @@
 #endif
 
 void usage(){
-  puts("personal busybox ver231225\nascii\n"
+  puts("personal busybox ver231228\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "snip|comp [keyword]\n"
   "todo sth|[d line]\n"
@@ -527,6 +527,7 @@ void xlispindent(int argc, char** argv){
 /*var_dump|split|popen*/
 #include "pb_lua.c"
 #include "modidx_lua.c"
+#include "fennel.c"
 
 static void _debug_lua(lua_State *L, char* hint_mess){
   int stk_size = lua_gettop(L), ri=-1, i, val_t;
@@ -534,11 +535,21 @@ static void _debug_lua(lua_State *L, char* hint_mess){
   for(i=stk_size;i>=1;i--){
     val_t = lua_type(L, i);
     char *idx_mean = "";
-    if (i==stk_size){idx_mean = "\t<- top";} else if (1==i){idx_mean = "\tbottom";}
+    if (i==stk_size){idx_mean = "\t<- top";} else if (1==i){idx_mean = "\t<- bot";}
     printf("  %d or %d: %s", i, ri, lua_typename(L, val_t));
     if (val_t==LUA_TSTRING) {printf(" %s", lua_tostring(L, i));}
     else if (val_t==LUA_TNUMBER) {printf(" %.2f", lua_tonumber(L, i));}
-    else if (val_t==LUA_TTABLE) {printf(" arrlen %d", lua_objlen(L, i));}
+    else if (val_t==LUA_TTABLE) {int j=1;printf(" arrlen %d, key:", lua_objlen(L, i));
+      lua_pushnil(L);
+      for(;j<=5;j++){if (0==lua_next(L,i)){break;} else {
+        val_t = lua_type(L, -2);
+        if (val_t==LUA_TSTRING) {printf(" %s",lua_tostring(L,-2));}
+        else if (val_t==LUA_TNUMBER) {printf(" %.0f",lua_tonumber(L,-2));}
+        else {printf(" %s", lua_typename(L, lua_type(L, -2)));}
+        //printf("-%s,", lua_typename(L, lua_type(L, -1)));
+        lua_pop(L, 1);/* removes 'value'; keeps 'key' for next iteration */
+        } }
+      }
     else if (val_t==LUA_TBOOLEAN) {printf(" %s", 1==lua_toboolean(L, i)?"true":"false");}
     printf("%s\n", idx_mean);
     ri--;
@@ -596,7 +607,7 @@ int ldofile(void* L, char *fname, int narg){
   status = luaL_loadfile(L, fname);
   if (0!=status) {
     printf("pb load %s fail[%d]: %s\n", fname, status, lua_tostring(L, -1));
-    lua_pop(L, 2);
+    lua_pop(L, lua_gettop(L));
     return status;
   }
   if (0<narg) {lua_insert(L, 1);}
@@ -644,7 +655,10 @@ void run_lua(int argc, char** argv){
     }
     lua_setglobal(L, "arg");
     if (0==strcmp(argv[2], "-y")) {
-      luafn_modidx(L);
+      if (argc>3) {
+        if (NULL != strstr(argv[3], ".yue")) {luafn_modidx(L);}
+        else {luafn_fennel(L);}
+      } else {puts("need a file like *.yue/*.fnl");}
     } else {
       ldofile(L, argv[2], 0);
     }
