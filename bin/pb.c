@@ -27,7 +27,7 @@
 #endif
 
 void usage(){
-  puts("personal busybox ver231228\nascii\n"
+  puts("personal busybox ver231230\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "snip|comp [keyword]\n"
   "todo sth|[d line]\n"
@@ -576,7 +576,7 @@ static int _traceback (lua_State *L) {
 }
 #endif
 
-void* linit(){
+static void* linit(){
   void *L = NULL;
 #ifdef SUPPORT_LUA
   L = (lua_State *)luaL_newstate();  /* create state */
@@ -601,7 +601,7 @@ void* linit(){
   return L;
 }
 
-int ldofile(void* L, char *fname, int narg){
+static int ldofile(void* L, char *fname, int narg){
   int status = 0, base;
 #ifdef SUPPORT_LUA
   status = luaL_loadfile(L, fname);
@@ -623,7 +623,7 @@ int ldofile(void* L, char *fname, int narg){
   return status; /*0-ok 1-fail*/
 }
 
-void lclose(void* L){
+static void lclose(void* L){
 #ifdef SUPPORT_LUA
   lua_close((lua_State *)L);
 #endif
@@ -658,7 +658,7 @@ void run_lua(int argc, char** argv){
       if (argc>3) {
         if (NULL != strstr(argv[3], ".yue")) {luafn_modidx(L);}
         else {luafn_fennel(L);}
-      } else {puts("need a file like *.yue/*.fnl");}
+      } else {puts("need a file like *.yue");}
     } else {
       ldofile(L, argv[2], 0);
     }
@@ -699,7 +699,7 @@ void enc_lua(int argc, char *argv[])
   *fl_pos = 0;
 
   *pos = 0; // let buf be the lua module name
-  sprintf(fndecl, "#include \"lua/lauxlib.h\"\n\n"
+  sprintf(fndecl, "//#include \"lua/lauxlib.h\"\n\n"
     "static void luafn_%s(lua_State* L) {\n"
     "  const unsigned char B1[]={", flname);
   fwrite(fndecl, strlen(fndecl), 1, fw);
@@ -720,8 +720,8 @@ void enc_lua(int argc, char *argv[])
   /*lua_call keep result and set global, or 1->0 then not set*/
   sprintf(fndecl, "\n  };\n\n  if (luaL_loadbuffer"
     "(L,(const char*)B1,sizeof(B1),\"buf_chunk_%s\")==0)\n"
-    "    lua_call(L, 0, 1);\n"
-    "  lua_setglobal(L, \"%s\");\n"
+    "    lua_call(L, 0, 0);\n"
+    "  //lua_setglobal(L, \"%s\");\n"
     "}\n", flname, flname);
   fwrite(fndecl, strlen(fndecl), 1, fw);
   fclose(fr);
