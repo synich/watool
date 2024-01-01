@@ -644,8 +644,9 @@ void run_lua(int argc, char** argv){
     luaL_dostring(L, exprbuff);
     puts(lua_tostring(L, -1));
   } else if (0==strcmp(argv[2], "-h")) {
-    puts("single: fmt; var_dump; string.split; os.popen; dt.datediff/lsdir/lsfile\n"
-    "module: enc.md5/sha1/b64enc/b64dec; json.encode/decode; utf8.len/char/codes");
+    puts("enhance with:\nfmt; var_dump; map/reduce/filter/range\n"
+    "string.split; os.popen; dt.datediff/lsdir/lsfile\n"
+    "enc.md5/sha1/b64enc/b64dec; json.encode/decode; utf8.len/char/codes");
   } else {
     int narr = argc - 3, i;
     lua_createtable(L, narr, 0);

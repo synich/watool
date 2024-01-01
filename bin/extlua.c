@@ -383,11 +383,17 @@ static int _scan_dir_file (lua_State *L, int is_dir) { //dir 1, otherwise 0
   struct dirent *entry;
   struct stat v_st;
   DIR *dirp;
-  int i = 1;
+  int i = 1, need_full;
+  const char *src_d;
+  char full_name[1024];
+
+  if (0==lua_isstring(L, 1)){lua_pushnil(L);return 1;}
+  src_d = lua_tostring(L, 1);
+  need_full = lua_toboolean(L, 2);
+  dirp = opendir(src_d);
+  if (dirp==NULL){lua_pushnil(L);return 1;}
+
   lua_newtable(L);
-  if (0==lua_isstring(L, 1)){return 1;}
-  dirp = opendir(lua_tostring(L, 1));
-  if (dirp==NULL){return 1;}
   while(i){
     entry = readdir(dirp);
     // deal EOD . and ..
@@ -397,8 +403,13 @@ static int _scan_dir_file (lua_State *L, int is_dir) { //dir 1, otherwise 0
     }
     stat(entry->d_name, &v_st);
     if ((1==is_dir&&v_st.st_mode&0x4000) || (0==is_dir&&(0==(v_st.st_mode&0x4000)))) {
-      lua_pushstring(L, entry->d_name);
-      lua_rawseti(L, 2, i++);
+      if (1==need_full){
+        sprintf(full_name, "%s/%s", src_d, entry->d_name);
+        lua_pushstring(L, full_name);
+      } else {
+        lua_pushstring(L, entry->d_name);
+      }
+      lua_rawseti(L, -2, i++);
     } else {
       continue;
     }
