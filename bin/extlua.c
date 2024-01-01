@@ -1,5 +1,5 @@
 /*
-** $Id: extlua.c,v 1.3 2023/12/19 15:51:23 shuw Exp $
+** $Id: extlua.c,v 1.4 2024/01/01 06:47:23 shuw Exp $
 ** Standard library for UTF-8 manipulation
 ** See Copyright Notice in lua.h
 */
@@ -311,7 +311,7 @@ LUALIB_API int luaopen_utf8 (lua_State *L) {
 }
 
 
-/********encode********/
+/********enc********/
 #include "walib.h"
 
 static int md5 (lua_State *L) {
@@ -368,7 +368,7 @@ LUALIB_API int luaopen_enc (lua_State *L) {
   return 1;
 }
 
-/********os********/
+/********dt********/
 static int datediff (lua_State *L) {
   const char *from_day = luaL_checkstring(L, 1);
   const char *to_day = luaL_checkstring(L, 2);
@@ -376,8 +376,37 @@ static int datediff (lua_State *L) {
   return 1;
 }
 
+#include <dirent.h>
+#include <sys/stat.h>
+
+static int lsdir (lua_State *L) { //dir 1, otherwise 0
+  struct dirent *entry;
+  struct stat v_st;
+  DIR *dirp;
+  int i = 1;
+  lua_newtable(L);
+  if (0==lua_isstring(L, 1)){return 1;}
+  dirp = opendir(lua_tostring(L, 1));
+  if (dirp==NULL){return 1;}
+  while(i){
+    entry = readdir(dirp);
+    // deal EOD . and ..
+    if (entry == NULL) {break;}
+    if (!strncmp(entry->d_name, ".", 1) || !strncmp(entry->d_name, "..", 2)) {
+      continue;
+    }
+    stat(entry->d_name, &v_st);
+    lua_pushinteger(L, (v_st.st_mode&0x4000)!=0);// dir 0x4000
+    lua_rawseti(L, 2, i++);
+    lua_pushstring(L, entry->d_name);
+    lua_rawseti(L, 2, i++);
+  }
+  return 1;
+}
+
 static const luaL_Reg dt_funcs[] = {
   {"datediff", datediff},
+  {"lsdir", lsdir},
   {NULL, NULL}
 };
 

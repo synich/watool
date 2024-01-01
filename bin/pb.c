@@ -181,7 +181,7 @@ static void convFile(unsigned char* str, int slen, FILE* fout){
   int i=0;
   char buf[8] = {0};
   for (; i<slen; i++) {
-    if (0 == i%10){
+    if (0 == i%16){
       fwrite("\n", 1, 1, fout);
     }
     snprintf(buf, sizeof(buf), "%u,", str[i]);
