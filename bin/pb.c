@@ -27,7 +27,7 @@
 #endif
 
 void usage(){
-  puts("personal busybox ver231230\nascii\n"
+  puts("personal busybox ver240101\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "snip|comp [keyword]\n"
   "todo sth|[d line]\n"
@@ -644,7 +644,7 @@ void run_lua(int argc, char** argv){
     luaL_dostring(L, exprbuff);
     puts(lua_tostring(L, -1));
   } else if (0==strcmp(argv[2], "-h")) {
-    puts("single: fmt/var_dump/string.split/os.popen/dt.datediff\n"
+    puts("single: fmt; var_dump; string.split; os.popen; dt.datediff/lsdir/lsfile\n"
     "module: enc.md5/sha1/b64enc/b64dec; json.encode/decode; utf8.len/char/codes");
   } else {
     int narr = argc - 3, i;

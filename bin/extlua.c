@@ -1,5 +1,5 @@
 /*
-** $Id: extlua.c,v 1.4 2024/01/01 06:47:23 shuw Exp $
+** $Id: extlua.c,v 1.5 2024/01/01 07:28:42 shuw Exp $
 ** Standard library for UTF-8 manipulation
 ** See Copyright Notice in lua.h
 */
@@ -379,7 +379,7 @@ static int datediff (lua_State *L) {
 #include <dirent.h>
 #include <sys/stat.h>
 
-static int lsdir (lua_State *L) { //dir 1, otherwise 0
+static int _scan_dir_file (lua_State *L, int is_dir) { //dir 1, otherwise 0
   struct dirent *entry;
   struct stat v_st;
   DIR *dirp;
@@ -396,17 +396,28 @@ static int lsdir (lua_State *L) { //dir 1, otherwise 0
       continue;
     }
     stat(entry->d_name, &v_st);
-    lua_pushinteger(L, (v_st.st_mode&0x4000)!=0);// dir 0x4000
-    lua_rawseti(L, 2, i++);
-    lua_pushstring(L, entry->d_name);
-    lua_rawseti(L, 2, i++);
+    if ((1==is_dir&&v_st.st_mode&0x4000) || (0==is_dir&&(0==(v_st.st_mode&0x4000)))) {
+      lua_pushstring(L, entry->d_name);
+      lua_rawseti(L, 2, i++);
+    } else {
+      continue;
+    }
   }
   return 1;
+}
+
+static int lsdir (lua_State *L) {
+  return _scan_dir_file(L, 1);
+}
+
+static int lsfile (lua_State *L) {
+  return _scan_dir_file(L, 0);
 }
 
 static const luaL_Reg dt_funcs[] = {
   {"datediff", datediff},
   {"lsdir", lsdir},
+  {"lsfile", lsfile},
   {NULL, NULL}
 };
 
