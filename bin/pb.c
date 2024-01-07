@@ -21,13 +21,17 @@
   int luaopen_utf8(lua_State *L);
   int luaopen_enc(lua_State *L);
   int luaopen_dt(lua_State *L);
+#ifdef USE_VENDOR
+  int luaopen_lsqlite3(lua_State *L);
+  int luaopen_lpeg (lua_State *L);
+#endif
 #else
   #include "dep/bignum.c"
   #include "dep/miniscm.c"
 #endif
 
 void usage(){
-  puts("personal busybox ver240101\nascii\n"
+  puts("personal busybox ver240107\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "snip|comp [keyword]\n"
   "todo sth|[d line]\n"
@@ -527,7 +531,6 @@ void xlispindent(int argc, char** argv){
 /*var_dump|split|popen*/
 #include "pb_lua.c"
 #include "modidx_lua.c"
-#include "fennel.c"
 
 static void _debug_lua(lua_State *L, char* hint_mess){
   int stk_size = lua_gettop(L), ri=-1, i, val_t;
@@ -591,6 +594,10 @@ static void* linit(){
     luaopen_utf8(L);
     luaopen_enc(L);
     luaopen_dt (L);
+#ifdef USE_VENDOR
+    luaopen_lsqlite3(L);
+    luaopen_lpeg(L);
+#endif
     lua_gc(L, LUA_GCRESTART, 0);
     lua_pop(L, lua_gettop(L));  // pop custom open_lib
     luafn_pb(L);
@@ -645,7 +652,7 @@ void run_lua(int argc, char** argv){
     puts(lua_tostring(L, -1));
   } else if (0==strcmp(argv[2], "-h")) {
     puts("enhance with:\nfmt; var_dump; map/reduce/filter/range\n"
-    "string.split; os.popen; dt.datediff/lsdir/lsfile\n"
+    "string.split; os.popen; dt.datediff/lsdir/lsfile; sqlite3; lpeg\n"
     "enc.md5/sha1/b64enc/b64dec; json.encode/decode; utf8.len/char/codes");
   } else {
     int narr = argc - 3, i;
@@ -656,9 +663,8 @@ void run_lua(int argc, char** argv){
     }
     lua_setglobal(L, "arg");
     if (0==strcmp(argv[2], "-y")) {
-      if (argc>3) {
-        if (NULL != strstr(argv[3], ".yue")) {luafn_modidx(L);}
-        else {luafn_fennel(L);}
+      if ((argc>3) && (NULL != strstr(argv[3], ".yue"))) {
+        luafn_modidx(L);
       } else {puts("need a file like *.yue");}
     } else {
       ldofile(L, argv[2], 0);
