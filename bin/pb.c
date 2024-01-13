@@ -21,6 +21,8 @@
   int luaopen_utf8(lua_State *L);
   int luaopen_enc(lua_State *L);
   int luaopen_dt(lua_State *L);
+#include "lupt/pb_lua.c"
+#include "lupt/modidx_lua.c"
 #ifdef USE_VENDOR
   int luaopen_lsqlite3(lua_State *L);
   int luaopen_lpeg (lua_State *L);
@@ -529,9 +531,6 @@ void xlispindent(int argc, char** argv){
 /******** lua ********/
 #ifdef SUPPORT_LUA
 /*var_dump|split|popen*/
-#include "pb_lua.c"
-#include "modidx_lua.c"
-
 static void _debug_lua(lua_State *L, char* hint_mess){
   int stk_size = lua_gettop(L), ri=-1, i, val_t;
   printf("%s: elem num is %d\n", hint_mess, stk_size);
