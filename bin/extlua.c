@@ -1,5 +1,5 @@
 /*
-** $Id: extlua.c,v 1.5 2024/01/01 07:28:42 shuw Exp $
+** $Id: extlua.c,v 1.7 2024/01/20 07:06:07 shuw Exp $
 ** Standard library for UTF-8 manipulation
 ** See Copyright Notice in lua.h
 */
@@ -387,8 +387,7 @@ static int _scan_dir_file (lua_State *L, int is_dir) { //dir 1, otherwise 0
   const char *src_d;
   char full_name[1024];
 
-  if (0==lua_isstring(L, 1)){lua_pushnil(L);return 1;}
-  src_d = lua_tostring(L, 1);
+  src_d = luaL_optstring(L, 1, ".");
   need_full = lua_toboolean(L, 2);
   dirp = opendir(src_d);
   if (dirp==NULL){lua_pushnil(L);return 1;}

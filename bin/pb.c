@@ -33,19 +33,19 @@
 #endif
 
 void usage(){
-  puts("personal busybox ver240107\nascii\n"
+  puts("personal busybox ver240120\nascii\n"
   "dyn2str file -- convert script into C string file\n"
+  "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip|comp [keyword]\n"
   "todo sth|[d line]\n"
-#ifdef SUPPORT_LUA
-  "lua [-y] file [argv] or -e expr or -h show extention\n"
-  "el file -- convert lua to c code\n"
-#else
-  "lisp file\n"
-#endif
-  "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "wph(WaProjectHelper)\n  wph c c -- create c project scafold\n  wph l p -- generate lua plugin by c\n"
-  "xlispindent file|stdin"
+  "xlispindent file|stdin\n"
+#ifdef SUPPORT_LUA
+  "el file [luac path] -- convert lua to c code\n"
+  "lua [-y] file [argv] or -e expr or -h show extention"
+#else
+  "lisp file"
+#endif
   );
   exit(0);
 }
@@ -149,7 +149,7 @@ void snip(int argc, char** argv, int wh, int to){
     strcat(fl_str, argv[0]);
     if (argc>=2){
       char mor_str[MAXLINE];
-      sprintf(mor_str, "#%s %s", fl_str, argv[1]);
+      snprintf(mor_str, MAXLINE, "#%s %s", fl_str, argv[1]);
       strcpy(fl_str, mor_str);
     }
     get_paragraph(fname, 1, fl_str, to);
@@ -262,7 +262,7 @@ void todo(int argc, char** argv){
   get_exe_path(fname);
   strcat(fname, "_pb_todo");
   if (0 == argc) {
-    sprintf(cmd, "cat -n %s", fname);
+    snprintf(cmd, MAXLINE, "cat -n %s", fname);
   } else if ( (2==argc)&&('d'==argv[0][0])&&(0==argv[0][1]) ) {
     sprintf(cmd, "sed -e \"%sd\" %s -i", argv[1], fname);
   } else {
@@ -595,7 +595,7 @@ static void* linit(){
     luaopen_dt (L);
 #ifdef USE_VENDOR
     luaopen_lsqlite3(L);
-    luaopen_lpeg(L);
+    //luaopen_lpeg(L);
 #endif
     lua_gc(L, LUA_GCRESTART, 0);
     lua_pop(L, lua_gettop(L));  // pop custom open_lib
@@ -645,12 +645,18 @@ void run_lua(int argc, char** argv){
     ldofile(L, fname, 0);
   } else if (0==strcmp(argv[2], "-e")) {
     char exprbuff[MAXLINE] = {0};
+    int val_t, ret;
     if (3==argc){usage();}
     sprintf(exprbuff, "return %s", argv[3]);
-    luaL_dostring(L, exprbuff);
-    puts(lua_tostring(L, -1));
+    ret = luaL_dostring(L, exprbuff);
+    val_t = lua_type(L, -1);
+    if ((LUA_TSTRING==val_t) || (LUA_TNUMBER==val_t)) {
+      puts(lua_tostring(L, -1));
+    } else {
+      printf("run %s, type: %s\n", ret==0?"ok":"fail", lua_typename(L, val_t));
+    }
   } else if (0==strcmp(argv[2], "-h")) {
-    puts("enhance with:\nfmt; var_dump; map/reduce/filter/range\n"
+    puts("enhance with:\nfmt; var_dump; ts; map/reduce/filter/range\n"
     "string.split; os.popen; dt.datediff/lsdir/lsfile; sqlite3; lpeg\n"
     "enc.md5/sha1/b64enc/b64dec; json.encode/decode; utf8.len/char/codes");
   } else {
@@ -681,14 +687,14 @@ void enc_lua(int argc, char *argv[])
   char buf[MAXLINE] = {0}, flname[128]={0};
   char *pos, *fl_pos;
   int i = 0, ret;
-  char fndecl[256] = {0};
+  char fndecl[MAXLINE] = {0};
   FILE *fw, *fr;
 
   if (argc <2){
     usage();
   }
 
-  sprintf(buf, "luac -s %s", argv[1]); /*drop debug*/
+  sprintf(buf, "%s -s %s", 2==argc?"luac":argv[2], argv[1]);/*drop debug*/
   ret = system(buf);
   if (0!=ret){puts("luac fail");return;}
 
@@ -724,7 +730,7 @@ void enc_lua(int argc, char *argv[])
     //if (feof(fr)) break;
   }
   /*lua_call keep result and set global, or 1->0 then not set*/
-  sprintf(fndecl, "\n  };\n\n  if (luaL_loadbuffer"
+  snprintf(fndecl, MAXLINE, "\n  };\n\n  if (luaL_loadbuffer"
     "(L,(const char*)B1,sizeof(B1),\"buf_chunk_%s\")==0)\n"
     "    lua_call(L, 0, 0);\n"
     "  //lua_setglobal(L, \"%s\");\n"
