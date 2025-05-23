@@ -1,6 +1,6 @@
 function fmt(body, ...)
   local lst = {...}
-  hole = "{}"
+  local hole = "{}"
   for i=1,#lst do
     body = body:gsub(hole, lst[i], 1)
   end
@@ -12,6 +12,14 @@ function var_dump(t)
     local k,v;  for k,v in pairs(t) do print(k,v) end
   else print(t) end
 end
+
+table.join = table.concat
+string.replace = string.gsub
+
+function table.shift(t) if #t==0 then return nil end return table.remove(t, 1) end
+function table.unshift(t, ...) local v = {...} for i = #v, 1, -1 do table.insert(t, 1, v[i]) end return #t end
+function table.pop(t) if #t==0 then return nil end return table.remove(t) end
+function table.push(t, ...) local v={...} for _, n in ipairs(v) do table.insert(t, n) end return #t end
 
 function string.split(s, delim)
   local t = {}
@@ -30,12 +38,35 @@ function string.split(s, delim)
   return t
 end
 
+function string.indexOf(str, srch, pos)
+  pos = pos or 1
+  local startIdx = string.find(str, srch, pos, true)
+  return startIdx and startIdx or -1
+end
+
 function os.popen(cmd)
   cmd = cmd:gsub("`", "\\`") -- avoid ` work in shell
   local fd = io.popen(cmd)
   local txt = fd:read("*a")
   fd:close()
   return txt:sub(1, -2)  -- last is \n, drop it
+end
+
+function ts(v)
+  if type(v)=="number" then v=tostring(v) end
+  local ret = "accept 6/8/10/13 digit, but input len is "..#v
+  if #v ==8 then
+    local a={year=tonumber(v:sub(1,4)), month=tonumber(v:sub(5,6)), day=tonumber(v:sub(7,8))}
+    ret = os.time(a)
+  elseif #v ==6 then
+    local a={year=2000+tonumber(v:sub(1,2)), month=tonumber(v:sub(3,4)), day=tonumber(v:sub(5,6))}
+    ret = os.time(a)
+  elseif #v==10 then
+    ret = os.date("%Y%m%d %H%M%S", tonumber(v))
+  elseif #v==13 then
+    ret = os.date("%Y%m%d %H%M%S", tonumber(v)/1000)
+  end
+  return ret
 end
 
 function map(lst, f)

@@ -1,5 +1,5 @@
 /*
-** $Id: extlua.c,v 1.7 2024/01/20 07:06:07 shuw Exp $
+** $Id: extlua.c,v 1.3 2025/04/21 16:16:58 u0_a157 Exp $
 ** Standard library for UTF-8 manipulation
 ** See Copyright Notice in lua.h
 */
@@ -312,6 +312,7 @@ LUALIB_API int luaopen_utf8 (lua_State *L) {
 
 
 /********enc********/
+#ifdef USE_WALIB
 #include "walib.h"
 
 static int md5 (lua_State *L) {
@@ -362,19 +363,21 @@ static const luaL_Reg enc_funcs[] = {
   {NULL, NULL}
 };
 
-
 LUALIB_API int luaopen_enc (lua_State *L) {
   luaL_register(L, "enc", enc_funcs);
   return 1;
 }
+#endif
 
 /********dt********/
+#ifdef USE_WALIB
 static int datediff (lua_State *L) {
   const char *from_day = luaL_checkstring(L, 1);
   const char *to_day = luaL_checkstring(L, 2);
   lua_pushinteger(L, wa_datediff(from_day, to_day));
   return 1;
 }
+#endif
 
 #include <dirent.h>
 #include <sys/stat.h>
@@ -425,7 +428,9 @@ static int lsfile (lua_State *L) {
 }
 
 static const luaL_Reg dt_funcs[] = {
+#ifdef USE_WALIB
   {"datediff", datediff},
+#endif
   {"lsdir", lsdir},
   {"lsfile", lsfile},
   {NULL, NULL}
