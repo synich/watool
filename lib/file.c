@@ -76,7 +76,7 @@ void wa_utrun(const char* name, wa_utfn f){
 	strncat(s_utresult.report, buf, sizeof(s_utresult.report)-1);
 }
 
-int wa_utsum(){
+int wa_utsum(void){
 	printf("****UNIT TEST BEGIN****\n%s*****UNIT TEST END*****\n", s_utresult.report);
 	return s_utresult.sum;
 }

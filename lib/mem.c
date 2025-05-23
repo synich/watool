@@ -29,7 +29,7 @@ static struct stM##B##Bulk* sv_m##B##mem[M] = {NULL};\
 static uint8_t sv_m##B##canuse[M][P] = {0};\
 static uint8_t sv_m##B##used[M] = {0};\
 \
-static char* sf_borrow_m##B(){\
+static char* sf_borrow_m##B(void){\
   char* p = NULL;\
   int sidx = 0; /*segement index*/\
   /*iter all bulk, each bulk has 3 condition*/\
@@ -97,7 +97,7 @@ int wa_memdbgflg(int i){
     }\
     return p;\
   }
-  
+
 char* wa_alloc_(int n, const char* f, int l){
   char* p=NULL;
   if (0>=n) {
@@ -151,7 +151,7 @@ DECLARE_REVERT_BULK(184)
     }\
   }
 
-void wa_finalize(){
+void wa_finalize(void){
   int i;
 
   DECLARE_FINALIZE_BULK(24, M24_MAXPAGE)
@@ -171,7 +171,7 @@ void wa_finalize(){
   }\
   printf("Have alloc %d M%d pages, %d M%d object.\n", i, B, ause, B);
 
-void wa_memreport(){
+void wa_memreport(void){
   int i, ause;
   puts("------ MEMORY POOL REPORT -----");
   DECLARE_MEM_REPORT(24, M24_MAXPAGE)
@@ -205,7 +205,7 @@ static struct {
 	char* ptr[EPHEMEM_SIZE];
 } sv_ephememarr;
 
-static int sf_epheidx(){
+static int sf_epheidx(void){
 	static int idx = 0;
 	if (idx >= EPHEMEM_SIZE) {idx = 0;}
 	return idx++;
