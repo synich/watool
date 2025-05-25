@@ -22,10 +22,12 @@
 #include "lupt/pb_lua.c"
 #include "lupt/fennel.c"
 #include "lex.yy.c"
+#ifdef USE_WALIB
+  int luaopen_enc(lua_State *L);
+#endif
 #ifdef USE_VENDOR
   int luaopen_lsqlite3(lua_State *L);
-  int luaopen_enc(lua_State *L);
-  int luaopen_lpeg (lua_State *L);
+  //int luaopen_lpeg (lua_State *L);
 #endif
 #endif
 
@@ -565,8 +567,10 @@ static void* linit(){
     luaopen_utf8(L);
     luaopen_dt (L);
 #ifdef USE_VENDOR
-    luaopen_lsqlite3(L);
     luaopen_enc(L);
+#endif
+#ifdef USE_VENDOR
+    luaopen_lsqlite3(L);
     //luaopen_lpeg(L);
 #endif
     lua_gc(L, LUA_GCRESTART, 0);

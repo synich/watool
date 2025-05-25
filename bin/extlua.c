@@ -3,7 +3,7 @@
 ** Standard library for UTF-8 manipulation
 ** See Copyright Notice in lua.h
 */
-
+#if LUA_VERSION_NUM < 503
 #define lutf8lib_c
 #define LUA_LIB
 
@@ -309,6 +309,7 @@ LUALIB_API int luaopen_utf8 (lua_State *L) {
   lua_setfield(L, -2, "charpattern");
   return 1;
 }
+#endif
 
 
 /********enc********/
