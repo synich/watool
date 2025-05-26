@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #define MAXLINE 256
 
@@ -21,7 +22,6 @@
   int luaopen_dt(lua_State *L);
 #include "lupt/pb_lua.c"
 #include "lupt/fennel.c"
-#include "lex.yy.c"
 #ifdef USE_WALIB
   int luaopen_enc(lua_State *L);
 #endif
@@ -32,7 +32,7 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver250522\nascii\n"
+  printf("personal busybox %dbit ver250526\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip|comp [keyword]\n"
@@ -40,8 +40,8 @@ void usage(){
   "xlispindent file|stdin\n"
 #ifdef SUPPORT_LUA
   "el file [luac path] -- convert lua to c code\n"
-  "lua51 [-p] file [argv] or -e expr or -h show extention\n"
-  "lisp file\n"
+  "lua51 file [argv] or -e expr or -h show extention\n"
+  "lisp file [argv]\n"
 #endif
   , (int)(8*sizeof(void*)) );
   exit(0);
@@ -586,7 +586,7 @@ static void* linit(){
 static void _conv2lua(char *fname){
   char trans_name[96];
   char cmd[128];
-  transpiler_lua(fname, trans_name);
+  //transpiler_lua(fname, trans_name);
   sprintf(cmd, "mv %s %s", trans_name, fname);
   _cal_ext_fb2bb(cmd);
 }
@@ -595,7 +595,7 @@ static void _conv2lua(char *fname){
 static int ldofile(void* L, char *fname, int narg, int bconv){
   int status = 0, base;
 #ifdef SUPPORT_LUA
-  if (1==bconv){ _conv2lua(fname);}
+  //if (1==bconv){ _conv2lua(fname);}
   status = luaL_loadfile(L, fname);
   if (0!=status) {
     printf("pb load %s fail[%d]: %s\n", fname, status, lua_tostring(L, -1));
@@ -650,7 +650,7 @@ void run_lua(int argc, char** argv){
     int i=2, j=0, fpos=2, bconv=0;
     lua_newtable(L);
     if ('i'==argv[1][1]) {j=1;} // fennel self on arg[0]
-    if (0==strcmp(argv[2], "-p")) {i=3;fpos=3;bconv=1;}
+    //if (0==strcmp(argv[2], "-p")) {i=3;fpos=3;bconv=1;}
     for (; i < argc; i++) {
       lua_pushstring(L, argv[i]);
       lua_rawseti(L, -2, j++);

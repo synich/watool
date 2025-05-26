@@ -1,7 +1,17 @@
-CFLAGS = -I./inc/lua51 -I./inc/ -c
+# dependency and usage
+# * walib - USE_WALIB util or lua extension
+# * sqlite - USE_VENDOR lua sqlite3 extension
+# * lupt/pb - lua src extension
+# * lupt/fennel - fennel
+# * lex.l - [opt] parse python like to lua
+
+CFLAGS = -I./inc/lua51 -I./inc/ -c -DUSE_WALIB
+LUA_HEAD = -I./lua-5.1.5/src
+LUA_LIB = -L./lua-5.1.5/src -llua
+
 ifeq ($(VENDOR), 1)
   EXTCFL = -DUSE_VENDOR
-  EXTLIB = -llpeg -llsqlite3
+  EXTLIB = sqlite3.o lsqlite3.o
 else
   EXTCFL =
   EXTLIB =
@@ -12,15 +22,28 @@ else
   RES =
 endif
 
-# extlua.o
+
 pb: pb.c extlua.o
-	@echo build pb with VENDOR=$(VENDOR), export/set VENDOR=1/0 and make -e change
+	@echo build pb with VENDOR=$(VENDOR) and FLAGS=$(EXTCFL)
+	@echo export/set VENDOR=1/0  then make again
 	@gcc $(CFLAGS) $(EXTCFL) pb.c
-	@gcc -o pb.exe extlua.o pb.o $(RES) -L./lib/ -llua51 -lwa $(EXTLIB)
-	@strip pb.exe
+	@gcc -o pb extlua.o pb.o $(RES) $(EXTLIB) -L./lib/ -llua -lwa -lm
+	@strip pb
 
 extlua.o: extlua.c
 	@gcc $(CFLAGS) extlua.c
 
 ico.res: ico.rc
 	@windres -i ico.rc -o ico.res -O coff
+
+tr: lex.l tran.c
+	@D:\soft\gcc47\bin\flex.exe lex.l
+	@gcc tran.c
+	@a.exe a.lua
+
+sqlite3: lsqlite3.o sqlite3.o
+	@gcc -I./inc -c lsqlite3.c
+	@gcc -c -DSQLITE_ENABLE_FTS5 sqlite3.c
+
+iconv:
+	@gcc -shared -L./lib  -o iconv.dll luaiconv.o libiconv2.dll -llua51

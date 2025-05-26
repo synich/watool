@@ -1,0 +1,360 @@
+
+# snip_sh
+if for var
+@@
+
+
+## snip_sh if
+if [ -a -o ]; then
+if [[ && || ]]; then         # bash feature
+if [[ "$i" =~ a.* ]]; then   # bash regex, no quote right
+if [[ "$i" == a* ]]; then    # bash glob, no quote right
+if [[ "$i" == *" "* ]]; then # compare to space
+elif
+fi
+
+case "$1" in
+  x*)
+  ;;
+esac
+@@
+
+
+## snip_sh for
+while : ;  # endless loop
+for k in ${arr[@]};
+for ((i=0;i<10;i++));
+do
+done
+@@
+
+
+## snip_sh var
+res=${var:-abc}  # if $var not assign, $res is 'abc'. beside ${var-abc} means $var not declare
+sub=${str:start:len}   # substr from left,start from 0
+sub=${str:0-start:len} # substr from right, start from 1
+res=${var#*\"}   # glob left drop, no-greedy: 'abc"def"gh' -> 'def"gh'
+res=${var%%\"*}  # glob right drop, greedy:   'abc"def"gh' -> 'abc'
+res=${var/-*./.} # glob replace once, greedy: '-anychars.' -> '.' aka drop '-anychars' except '.'
+res=($spcstr)    # $spcstr spilt by space and asign array to $res
+declare -A dct;dct=([a]=b [1]=2) # local associate array
+res=$(ls)        # save ls result into res
+res=$((1+2))     # calc
+@@
+
+
+# snip_awk
+syn var lib
+@@
+
+
+## snip_awk syn
+$1 !~ /abc/ {print $1, $2}
+print "foo" > (a < 3 ? 2 : 1)  # a decide where to print
+{if($1 > 1.0 && $(NF-1) != 2){print $1, $2} else if($1 == 3){}}
+if (idx in arr){print arr[idx]}
+for (expr1; expr2; expr3)
+for (idx in arr){print arr[idx]}
+BEGIN{cmd="seq 1 5"}{while((cmd|getline)>0){print};close(cmd)}
+@@
+
+
+## snip_awk var
+FS  # Feild Separator
+NF  # Number Field
+RS  # Record Separator. ""-paragraph "\0"or"^$"-AllFile, LaterIsBetter "\n+"-ByLine,SkipWhiteLine
+RT  # When RS is regex, it is the result of regex match
+NR  # Number Record(Count for all file)
+FNR # File Number Record(each file reset 0)
+OFS # Output Field Separator
+ORS # Output Record Separator, default "\n"
+IGNORECASE=1     # use in cmd, because awk not support -i option
+OFMT="%.6g"      # affect num in print format
+CONVFMT="%.2f"   # affect num->str, specify str format
+re=@/abc/        # regex type variable
+function foo(){} # suggest define after END block
+@@
+
+
+## snip_awk lib
+srand/rand                               # () -> 0.234168
+sin/cos/atan2/log/exp/sqrt               # (0.6) accept 1 float
+and/or/xor/lshift/rshift                 # (3, 1) accept 2 integer
+length(str/num/arr)                      # (1234) -> 4
+int/tolower/toupper                      # int(12ab)->12 int(ab1)->0 toupper(ab1)->AB1
+index(str, sub)                          # (abc, b) -> 2
+substr(str, start/1st is 1 not 0, [len]) # (abcde,2,3) -> bcd
+split(str, arr, sep, [arsep])            # ("a-b", ar, "-") -> ar[1]=a, ar[2]=b
+match(str, reg, [cap]) RSTART/RLENGTH    # ("fooba", "(fo+).*(ba+)", ar) ar[0]:all, ar[1]:foo
+sub/gsub(reg, replace, [target])         # (/[[:digit:]]+/, "b&c", a9d) -> ab9cd
+gensub(reg, replace, how, [target])      # replace support \\1, how support g and 1,2,3
+system(str)                              # shell cmd
+mktime(y M d h m s)                      # ("2019 2 23 12 -1 59") -> 1512345678(s)
+systime/strftime                         # 1512345678/Sat Jan  2 17:46:07 2021
+=============== Not POSIX ===============
+asort/asorti(ar, [to])                   # rerange array by value or index
+strtonum(str)                            # (0xa) -> 10, oct/dec/hex
+@@
+
+
+# snip_lua
+syn lib
+@@
+
+
+## snip_lua syn
+-- scaffold, type `lib`
+function foo(a, b, ...)
+  local t = {k=1, v=2}
+  local lst = {...} -- v1, v2, v3 = ... ok but no robust
+  for v = first, last, [step] #lst do end
+  while true do
+    if t ~= nil then
+      return t.k
+    elseif t%2 == 1 then
+      t = t~1   -- bitwise XOR
+    end
+  end
+end
+@@
+
+
+## snip_lua lib
+str.find("abc","bc",1,true)   -- return (2,3)/nil true means plain off regex
+str.match("abc","(a)b(c)",1)  -- return ("a","c")/nil, not capture then all
+str.sub("abcd",2,3)           -- return "bc", 3(end pos) omit means -1 "bcd"
+str.gmatch
+str.gsub
+table.concat({"a","b"},"-")   -- return "a-b"
+table.insert({"a","b"},1,"c") -- no return, change inplace and get {"c","a","b"}
+table.remove({"a","b","c"},2) -- return b, change inplace and get {"a","c"}
+table.sort
+@@
+
+
+# snip_vim
+" scaffold, type more hint
+function! s:foo(p, ...) abort
+  for v in a:000
+    let t =
+    \ {'b':'', 'f':0}
+  endfor
+  while true do
+    for [k, v] in items(l:t)
+      if a:p =~# 's'. ref && a:0 == 1
+        return l:t.k  "default return 0
+      endif
+    endfor
+  endwhile
+endfunction
+@@
+
+
+# snip_py
+# filter value not 2 from dict
+  { k:v for k,v in diction.items() if v!=2 }
+  dict(filter(lambda v: v[1]!=2, d.items()))    # v[0] is k, v[1] is v
+@@
+
+
+# snip_js
+if (e1 || e2) {} else if {e1 && e2}
+for (let k in arr/str) {} // iter key
+for (let v of arr/str) {} // iter value(ES6 only)
+str = `plain ${var}`
+@@
+
+
+# snip_go
+import | const | var (
+type T struct | interface { // if use inner then `t`
+    nums []int
+    prop map[string]int     // use sync.Map in parallel
+    mod.Def                 // Def is struct and implicit same Def name
+    cb func()
+func foo(p *Person) int {   // pass pointer
+p := &Person{}              // call new() and assign pointer
+else if len(a)==1 && err!=nil {
+@@
+
+
+# snip_bat
+%var:~0,3%      rem get first 3 char
+%var:~0,-3%     rem drop last 3 char. positive mean len, neg mean position
+%var:a=b%       rem replace a -> b
+set "a=%b% %c%" rem concat b+" "+c -> a
+if /i "%1" == "ABC" (  rem ignore case
+  cmd1
+) else if %errorlevel% equ/leq/geq/neq %random% (
+  cmd2
+)
+for /f %%i in ('cmd') do (set var=%%i)
+@@
+
+
+# snip_re
+(..)\d*?\1    #non-greedy and group \1 capture, for same cap like 'ab0ab'
+(?<=xx)..     #lookbefore, assert `xx' before capture 2 char
+..(?!xx)      #lookafter, capture 2 char assert after not `xx'
+@@
+
+
+# snip_t
+date -d "1 day [ago] 2020-07-01" "+%Y-%m-%d %H:%M:%S"
+date -d @1612345678
+curl -k -H "Content-type: application/json" -X POST -d '{"a":1}' https://ip:port/path
+ssh -fN -L 0.0.0.0:l_port:r_ip:r_port -p r_port r_ip
+sed "addr1[,addr2!]{cmd1;!cmd2}"
+@@
+
+
+# snip_git
+-- remove large file from repo
+git rev-list --objects --all | grep "$(git verify-pack -v .git/objects/pack/*.idx | sort -k 3 -n | tail -5 | awk '{print$1}')"
+git filter-branch --force --index-filter 'git rm -rf --cached --ignore-unmatch big-file.jar' --prune-empty --tag-name-filter cat -- --all
+rm -rf .git/refs/original/
+git reflog expire --expire=now --all
+git gc --prune=now
+git gc --aggressive --prune=now
+git push origin master --force
+@@
+
+
+# comp_vim
+fn
+@@
+
+## comp_vim fn
+function! ()
+endfunction
+@@
+
+# comp_lua
+fn
+@@
+
+## comp_lua fn
+function ()
+  return
+end
+@@
+
+
+# comp_go
+fn
+@@
+
+## comp_go fn
+func () {
+  return
+}
+@@
+
+
+# comp_sh
+main(){
+  if [ $# -eq 0 ]; then
+    usage
+    return
+  fi
+  if [ "$1" = "x" ]; then
+  fi
+}
+
+main $@
+@@
+
+# comp_wingui
+#include <windows.h>
+
+LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
+    LPSTR lpCmdLine, int nCmdShow)
+{
+    WNDCLASS wc = { 0 };
+    wc.lpszClassName = TEXT("MyWindowClass");
+    wc.hInstance = hInstance;
+    wc.lpfnWndProc = WndProc;
+    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    RegisterClass(&wc);
+
+    HWND hwnd = CreateWindow(
+        TEXT("MyWindowClass"),
+        TEXT("CmdWrap"),
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT,
+        CW_USEDEFAULT,
+        500,
+        300,
+        NULL,
+        NULL,
+        hInstance,
+        NULL
+    );
+
+    ShowWindow(hwnd, nCmdShow);
+
+    MSG msg = { 0 };
+    while (GetMessage(&msg, NULL, 0, 0))
+    {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+    return (int)msg.wParam;
+}
+
+LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    static HWND hInput;
+    static HWND hButton;
+    static HWND hOutput;
+
+    switch (msg)
+    {
+    case WM_CREATE:
+        CreateWindow(TEXT("STATIC"), TEXT("Welcome"),
+            WS_CHILD | WS_VISIBLE | SS_LEFT,
+            10, 10, 70, 20,
+            hwnd, NULL, NULL, NULL);
+        hInput = CreateWindow(TEXT("EDIT"), NULL,
+            WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT,
+            80, 10, 120, 20,
+            hwnd, (HMENU)1, NULL, NULL);
+        hButton = CreateWindow(TEXT("BUTTON"), TEXT("Click Me"),
+            WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+            220, 10, 100, 20,
+            hwnd, (HMENU)2, NULL, NULL);
+        hOutput = CreateWindow(TEXT("EDIT"), NULL,
+            WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY,
+            10, 40, 310, 200,
+            hwnd, (HMENU)3, NULL, NULL);
+        break;
+
+    case WM_COMMAND:
+        if (HIWORD(wParam) == BN_CLICKED)
+        {
+            if ((HWND)lParam == hButton)
+            {
+                int len = GetWindowTextLength(hInput) + 1;
+                char text[256] = {0};
+                int len2 = GetWindowTextLength(hOutput);
+                GetWindowText(hInput, text, len);
+                SendMessage(hOutput , EM_SETSEL , (WPARAM)0 , (LPARAM)len2);
+                SendMessage(hOutput, EM_REPLACESEL, FALSE, (LPARAM)text);
+                SendMessage(hOutput, EM_REPLACESEL, FALSE, (LPARAM)"\r\n");
+            }
+        }
+        break;
+
+    case WM_DESTROY:
+        PostQuitMessage(0);
+        break;
+
+    default:
+        return DefWindowProc(hwnd, msg, wParam, lParam);
+    }
+    return 0;
+}
+@@
+
