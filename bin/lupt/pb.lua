@@ -56,10 +56,10 @@ function ts(v)
   if type(v)=="number" then v=tostring(v) end
   local ret = "accept 6/8/10/13 digit, but input len is "..#v
   if #v ==8 then
-    local a={year=tonumber(v:sub(1,4)), month=tonumber(v:sub(5,6)), day=tonumber(v:sub(7,8))}
+    local a={year=tonumber(v:sub(1,4)), month=tonumber(v:sub(5,6)), day=tonumber(v:sub(7,8)), hour=0}
     ret = os.time(a)
   elseif #v ==6 then
-    local a={year=2000+tonumber(v:sub(1,2)), month=tonumber(v:sub(3,4)), day=tonumber(v:sub(5,6))}
+    local a={year=2000+tonumber(v:sub(1,2)), month=tonumber(v:sub(3,4)), day=tonumber(v:sub(5,6)), hour=0}
     ret = os.time(a)
   elseif #v==10 then
     ret = os.date("%Y%m%d %H%M%S", tonumber(v))
