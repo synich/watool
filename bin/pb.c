@@ -32,7 +32,7 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver250529\nascii\n"
+  printf("personal busybox %dbit ver250601\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip|comp [keyword]\n"
@@ -645,7 +645,7 @@ void run_lua(int argc, char** argv){
     puts("enhance with:\nfmt; var_dump; ts; map/reduce/filter/range\n"
     "string.split/indexOf/replace; table.join/pop...;\n"
     "os.popen; dt.datediff/lsdir/lsfile; sqlite3\n"
-    "enc.md5/sha1/b64enc/b64dec; json.encode/decode; utf8.len/char/codes");
+    "enc.md5/sha1/btoa/atob; JSON.stringify/parse; utf8.len/char/codes");
   } else {
     int i=2, j=0, fpos=2, bconv=0;
     lua_newtable(L);

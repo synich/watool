@@ -359,8 +359,8 @@ static int b64dec (lua_State *L) {
 static const luaL_Reg enc_funcs[] = {
   {"md5", md5},
   {"sha1", sha1},
-  {"b64enc", b64enc},
-  {"b64dec", b64dec},
+  {"btoa", b64enc},
+  {"atob", b64dec},
   {NULL, NULL}
 };
 
