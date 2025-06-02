@@ -667,6 +667,25 @@ void run_lua(int argc, char** argv){
 }
 
 
+static int lwriter (lua_State *L, const void* p, size_t sz, void* ud) {
+  FILE* fp= (FILE*)ud;
+  return fwrite(p, sz, 1, fp)==1?0:1;
+}
+
+static int _luac(char *fname){
+#ifdef SUPPORT_LUA
+  void *L = linit();
+  FILE* fp = fopen("luac.out", "wb");
+  luaL_loadfile(L, fname);
+  if (0 != lua_dump(L, lwriter, fp)){
+    printf("lua dump %s fail", fname);
+  }
+  fclose(fp);
+  lclose(L);
+#endif
+  return 0;
+}
+
 void enc_lua(int argc, char *argv[])
 {
   char buf[MAXLINE] = {0}, flname[128]={0};
@@ -679,8 +698,8 @@ void enc_lua(int argc, char *argv[])
     usage();
   }
 
-  sprintf(buf, "%s -s %s", 2==argc?"luac":argv[2], argv[1]);/*drop debug*/
-  ret = system(buf);
+  //sprintf(buf, "%s -s %s", 2==argc?"luac":argv[2], argv[1]);/*drop debug*/
+  ret = _luac(argv[1]);//system(buf);
   if (0!=ret){puts("luac fail");return;}
 
   sprintf(buf, "%s.c", argv[1]);
