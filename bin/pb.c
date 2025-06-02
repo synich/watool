@@ -32,7 +32,7 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver250601\nascii\n"
+  printf("personal busybox %dbit ver250602\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip|comp [keyword]\n"
@@ -677,7 +677,11 @@ static int _luac(char *fname){
   void *L = linit();
   FILE* fp = fopen("luac.out", "wb");
   luaL_loadfile(L, fname);
+#if LUA_VERSION_NUM < 503
   if (0 != lua_dump(L, lwriter, fp)){
+#else
+  if (0 != lua_dump(L, lwriter, fp, 1)){
+#endif
     printf("lua dump %s fail", fname);
   }
   fclose(fp);
@@ -698,8 +702,12 @@ void enc_lua(int argc, char *argv[])
     usage();
   }
 
-  //sprintf(buf, "%s -s %s", 2==argc?"luac":argv[2], argv[1]);/*drop debug*/
-  ret = _luac(argv[1]);//system(buf);
+#if LUA_VERSION_NUM < 503
+  sprintf(buf, "%s -s %s", 2==argc?"luac":argv[2], argv[1]);/*drop debug*/
+  ret = system(buf);
+#else
+  ret = _luac(argv[1]);
+#endif
   if (0!=ret){puts("luac fail");return;}
 
   sprintf(buf, "%s.c", argv[1]);
