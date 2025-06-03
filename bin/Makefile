@@ -6,8 +6,6 @@
 # * lex.l - [opt] parse python like to lua
 
 CFLAGS = -I./inc/lua51 -I./inc/ -c -DUSE_WALIB
-LUA_HEAD = -I./lua-5.1.5/src
-LUA_LIB = -L./lua-5.1.5/src -llua
 
 ifeq ($(VENDOR), 1)
   EXTCFL = -DUSE_VENDOR

@@ -32,7 +32,7 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver250602\nascii\n"
+  printf("personal busybox %dbit ver250603\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip|comp [keyword]\n"
@@ -503,8 +503,10 @@ void xlispindent(int argc, char** argv){
 
 
 /******** lua ********/
+#if LUA_VERSION_NUM == 501
+#define lua_rawlen  lua_objlen
+#endif
 #ifdef SUPPORT_LUA
-/*var_dump|split|popen*/
 static void _debug_lua(lua_State *L, char* hint_mess){
   int stk_size = lua_gettop(L), ri=-1, i, val_t;
   printf("%s: elem num is %d\n", hint_mess, stk_size);
@@ -515,7 +517,7 @@ static void _debug_lua(lua_State *L, char* hint_mess){
     printf("  %d or %d: %s", i, ri, lua_typename(L, val_t));
     if (val_t==LUA_TSTRING) {printf(" %s", lua_tostring(L, i));}
     else if (val_t==LUA_TNUMBER) {printf(" %.2f", lua_tonumber(L, i));}
-    else if (val_t==LUA_TTABLE) {int j=1;printf(" arrlen %d, key:", (int)lua_objlen(L, i));
+    else if (val_t==LUA_TTABLE) {int j=1;printf(" arrlen %d, key:", (int)lua_rawlen(L, i));
       lua_pushnil(L);
       for(;j<=5;j++){if (0==lua_next(L,i)){break;} else {
         val_t = lua_type(L, -2);
@@ -535,7 +537,7 @@ static void _debug_lua(lua_State *L, char* hint_mess){
 static int _traceback (lua_State *L) {
   if (!lua_isstring(L, 1))  /* 'message' not a string? */
     return 1;  /* keep it intact */
-  lua_getfield(L, LUA_GLOBALSINDEX, "debug");
+  lua_getglobal(L, "debug");
   if (!lua_istable(L, -1)) {
     lua_pop(L, 1);
     return 1;
@@ -564,9 +566,11 @@ static void* linit(){
     get_exe_path(pb_d_path);
     lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
     luaL_openlibs(L);  /* open libraries */
+#if LUA_VERSION_NUM < 503
     luaopen_utf8(L);
+#endif
     luaopen_dt (L);
-#ifdef USE_VENDOR
+#ifdef USE_WALIB
     luaopen_enc(L);
 #endif
 #ifdef USE_VENDOR

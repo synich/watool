@@ -3,6 +3,10 @@
 ** Standard library for UTF-8 manipulation
 ** See Copyright Notice in lua.h
 */
+#include "lua.h"
+#include "lauxlib.h"
+#include "lualib.h"
+
 #if LUA_VERSION_NUM < 503
 #define lutf8lib_c
 #define LUA_LIB
@@ -15,10 +19,6 @@ typedef unsigned int  lua_Unsigned;
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "lua.h"
-#include "lauxlib.h"
-#include "lualib.h"
 
 
 #define MAXUNICODE	0x10FFFFu
