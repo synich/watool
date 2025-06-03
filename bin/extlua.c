@@ -442,3 +442,38 @@ LUALIB_API int luaopen_dt (lua_State *L) {
   luaL_register(L, "dt", dt_funcs);
   return 1;
 }
+
+static int band (lua_State *L) {
+  int i, n=lua_gettop(L), r=0xFFFFFFFF;
+  for (i=1; i<=n; i++){r &= lua_tointeger(L, i);}
+  lua_pushinteger(L, r);
+  return 1;
+}
+
+static int bor (lua_State *L) {
+  int i, n=lua_gettop(L), r=0;
+  for (i=1; i<=n; i++){r |= lua_tointeger(L, i);}
+  lua_pushinteger(L, r);
+  return 1;
+}
+
+static int bxor (lua_State *L) {
+  int i, n=lua_gettop(L), r=0;
+  for (i=1; i<=n; i++){r ^= lua_tointeger(L, i);}
+  lua_pushinteger(L, r);
+  return 1;
+}
+
+static const luaL_Reg bit32_funcs[] = {
+  {"band", band},
+  {"bor",  bor},
+  {"bxor", bxor},
+  {NULL, NULL}
+};
+
+
+LUALIB_API int luaopen_bit32 (lua_State *L) {
+  luaL_register(L, "bit32", bit32_funcs);
+  return 1;
+}
+

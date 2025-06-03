@@ -20,6 +20,7 @@
   #include "lualib.h"
   int luaopen_utf8(lua_State *L);
   int luaopen_dt(lua_State *L);
+  int luaopen_bit32(lua_State *L);
 #include "lupt/pb_lua.c"
 #include "lupt/fennel.c"
 #ifdef USE_WALIB
@@ -570,6 +571,7 @@ static void* linit(){
     luaopen_utf8(L);
 #endif
     luaopen_dt (L);
+    luaopen_bit32(L);
 #ifdef USE_WALIB
     luaopen_enc(L);
 #endif
@@ -649,7 +651,8 @@ void run_lua(int argc, char** argv){
     puts("enhance with:\nfmt; var_dump; ts; map/reduce/filter/range\n"
     "string.split/indexOf/replace; table.join/pop...;\n"
     "os.popen; dt.datediff/lsdir/lsfile; sqlite3\n"
-    "enc.md5/sha1/btoa/atob; JSON.stringify/parse; utf8.len/char/codes");
+    "enc.md5/sha1/btoa/atob; JSON.stringify/parse\n"
+    "bit32.band...; utf8.len/char/codes");
   } else {
     int i=2, j=0, fpos=2, bconv=0;
     lua_newtable(L);
