@@ -22,7 +22,7 @@
   int luaopen_dt(lua_State *L);
   int luaopen_bit32(lua_State *L);
 #include "lupt/pb_lua.c"
-#include "lupt/fennel.c"
+#include "lupt/fennel_lua.c"
 #ifdef USE_WALIB
   int luaopen_enc(lua_State *L);
 #endif
@@ -33,14 +33,14 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver250603\nascii\n"
+  printf("personal busybox %dbit ver250604\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip|comp [keyword]\n"
   "wph(WaProjectHelper)\n  wph c c -- create c project scafold\n  wph l p -- generate lua plugin by c\n"
   "xlispindent file|stdin\n"
 #ifdef SUPPORT_LUA
-  "el file [luac path] -- convert lua to c code\n"
+  "el file [luac] -- convert lua to c code\n"
   "lua51 file [argv] or -e expr or -h show extention\n"
   "lisp file [argv]\n"
 #endif
@@ -709,17 +709,17 @@ void enc_lua(int argc, char *argv[])
     usage();
   }
 
-#if LUA_VERSION_NUM < 503
-  sprintf(buf, "%s -s %s", 2==argc?"luac":argv[2], argv[1]);/*drop debug*/
-  ret = system(buf);
-#else
-  ret = _luac(argv[1]);
-#endif
+  if (2==argc) {
+    ret = _luac(argv[1]);
+  } else {
+    sprintf(buf, "%s -s %s", argv[2], argv[1]);/*drop debug*/
+    ret = system(buf);
+  }
   if (0!=ret){puts("luac fail");return;}
 
   sprintf(buf, "%s.c", argv[1]);
   pos = strchr(buf, '.');
-  *pos = '_';
+  if (pos) {*pos = '_';}
   fr = fopen("luac.out", "rb");
   fw = fopen(buf, "w");
   printf("encode lua bytecode to %s\n", buf);
@@ -727,7 +727,7 @@ void enc_lua(int argc, char *argv[])
   if (NULL==fl_pos){strcpy(flname, buf);}
   else {strcpy(flname, fl_pos+1);}
   fl_pos = strchr(flname, '_');
-  *fl_pos = 0;
+  if (fl_pos){*fl_pos = 0;}
 
   *pos = 0; // let buf be the lua module name
   sprintf(fndecl, "//#include \"lua/lauxlib.h\"\n\n"

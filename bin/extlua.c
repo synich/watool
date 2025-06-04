@@ -7,6 +7,10 @@
 #include "lauxlib.h"
 #include "lualib.h"
 
+#if LUA_VERSION_NUM > 501
+#define luaL_register(L,name,reg)  luaL_newlib(L,reg);lua_setglobal(L,name)
+#endif
+
 #if LUA_VERSION_NUM < 503
 #define lutf8lib_c
 #define LUA_LIB
@@ -443,6 +447,7 @@ LUALIB_API int luaopen_dt (lua_State *L) {
   return 1;
 }
 
+/********bit32********/
 static int band (lua_State *L) {
   int i, n=lua_gettop(L), r=0xFFFFFFFF;
   for (i=1; i<=n; i++){r &= lua_tointeger(L, i);}
