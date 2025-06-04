@@ -5,7 +5,7 @@
 # * lupt/fennel - fennel
 # * lex.l - [opt] parse python like to lua
 
-CFLAGS = -I./inc/lua51 -I./inc/ -c -DUSE_WALIB
+CFLAGS = -I./inc/lua51 -I../lib/ -c -DUSE_WALIB
 
 ifeq ($(VENDOR), 1)
   EXTCFL = -DUSE_VENDOR
@@ -25,7 +25,7 @@ pb: pb.c extlua.o
 	@echo build pb with VENDOR=$(VENDOR) and FLAGS=$(EXTCFL)
 	@echo export/set VENDOR=1/0  then make again
 	@gcc $(CFLAGS) $(EXTCFL) pb.c
-	@gcc -o pb extlua.o pb.o $(RES) $(EXTLIB) -L./lib/ -llua -lwa -lm
+	@gcc -o pb extlua.o pb.o $(RES) $(EXTLIB) -L./lib/ -L../lib/ -llua -lwa -lm
 	@strip pb
 
 extlua.o: extlua.c
@@ -40,7 +40,7 @@ tr: lex.l tran.c
 	@a.exe a.lua
 
 sqlite3: lsqlite3.o sqlite3.o
-	@gcc -I./inc -c lsqlite3.c
+	@gcc $(CFLAGS) -c lsqlite3.c
 	@gcc -c -DSQLITE_ENABLE_FTS5 sqlite3.c
 
 iconv:
