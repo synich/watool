@@ -21,8 +21,6 @@
   int luaopen_utf8(lua_State *L);
   int luaopen_dt(lua_State *L);
   int luaopen_bit32(lua_State *L);
-#include "lupt/pb_lua.c"
-#include "lupt/fennel_lua.c"
 #ifdef USE_WALIB
   int luaopen_enc(lua_State *L);
 #endif
@@ -41,7 +39,7 @@ void usage(){
   "xlispindent file|stdin\n"
 #ifdef SUPPORT_LUA
   "el file [luac] -- convert lua to c code\n"
-  "lua51 file [argv] or -e expr or -h show extention\n"
+  "lua51 file [argv] or -e expr or -h; set PB_LUA_DEBUG see hook\n"
   "lisp file [argv]\n"
 #endif
   , (int)(8*sizeof(void*)) );
@@ -534,6 +532,12 @@ static void _debug_lua(lua_State *L, char* hint_mess){
     ri--;
   }
 }
+static void debug_lua(lua_State *L, char* hint_mess){
+  char* e = getenv("PB_LUA_DEBUG");
+  if (e != NULL) {
+    _debug_lua(L, hint_mess);
+  }
+}
 
 static int _traceback (lua_State *L) {
   if (!lua_isstring(L, 1))  /* 'message' not a string? */
@@ -553,6 +557,9 @@ static int _traceback (lua_State *L) {
   lua_call(L, 2, 1);  /* call debug.traceback */
   return 1;
 }
+
+#include "lupt/pb_lua.c"
+#include "lupt/fennel_lua.c"
 #endif
 
 static void* linit(){
@@ -750,10 +757,11 @@ void enc_lua(int argc, char *argv[])
   }
   /*lua_call keep result and set global, or 1->0 then not set*/
   snprintf(fndecl, MAXLINE, "\n  };\n\n  if (luaL_loadbuffer"
-    "(L,(const char*)B1,sizeof(B1),\"buf_chunk_%s\")==0)\n"
+    "(L,(const char*)B1,sizeof(B1),\"buf_%s\")==0)\n"
     "    lua_call(L, 0, 0);\n"
+    "  else _debug_lua(L, \"err: buf_%s\");\n"
     "  //lua_setglobal(L, \"%s\");\n"
-    "}\n", flname, flname);
+    "}\n", flname, flname, flname);
   fwrite(fndecl, strlen(fndecl), 1, fw);
   fclose(fr);
   fclose(fw);
