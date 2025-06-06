@@ -31,7 +31,7 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver250604\nascii\n"
+  printf("personal busybox %dbit ver250606\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip|comp [keyword]\n"
@@ -128,11 +128,13 @@ static int get_paragraph(const char* fname, int wh, const char* kwd, int to){
 void snip(int argc, char** argv, int wh, int to){
   char fl_str[MAXLINE];
   char fname[MAXLINE];
+  char scname[16];
   char* snip_flag[2] = {"snip", "comp"};
   int i=1, pend;
   sprintf(fl_str, "# %s_", snip_flag[wh]);
   get_exe_path(fname);
-  strcat(fname, "_pb_snip");
+  sprintf(scname, "_pb_%s", snip_flag[wh]);
+  strcat(fname, scname);
   pend = strlen(fname);
 #define SNIP_POST 9
   if (argc==0){ /*see what section in this snip*/

@@ -1,0 +1,138 @@
+# comp_vim
+fn
+@@
+
+## comp_vim fn
+function! ()
+endfunction
+@@
+
+# comp_lua
+fn
+@@
+
+## comp_lua fn
+function ()
+  return
+end
+@@
+
+
+# comp_go
+fn
+@@
+
+## comp_go fn
+func () {
+  return
+}
+@@
+
+
+# comp_sh
+main(){
+  if [ $# -eq 0 ]; then
+    usage
+    return
+  fi
+  if [ "$1" = "x" ]; then
+  fi
+}
+
+main $@
+@@
+
+# comp_wingui
+#include <windows.h>
+
+LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
+    LPSTR lpCmdLine, int nCmdShow)
+{
+    WNDCLASS wc = { 0 };
+    wc.lpszClassName = TEXT("MyWindowClass");
+    wc.hInstance = hInstance;
+    wc.lpfnWndProc = WndProc;
+    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    RegisterClass(&wc);
+
+    HWND hwnd = CreateWindow(
+        TEXT("MyWindowClass"),
+        TEXT("CmdWrap"),
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT,
+        CW_USEDEFAULT,
+        500,
+        300,
+        NULL,
+        NULL,
+        hInstance,
+        NULL
+    );
+
+    ShowWindow(hwnd, nCmdShow);
+
+    MSG msg = { 0 };
+    while (GetMessage(&msg, NULL, 0, 0))
+    {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+    return (int)msg.wParam;
+}
+
+LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    static HWND hInput;
+    static HWND hButton;
+    static HWND hOutput;
+
+    switch (msg)
+    {
+    case WM_CREATE:
+        CreateWindow(TEXT("STATIC"), TEXT("Welcome"),
+            WS_CHILD | WS_VISIBLE | SS_LEFT,
+            10, 10, 70, 20,
+            hwnd, NULL, NULL, NULL);
+        hInput = CreateWindow(TEXT("EDIT"), NULL,
+            WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT,
+            80, 10, 120, 20,
+            hwnd, (HMENU)1, NULL, NULL);
+        hButton = CreateWindow(TEXT("BUTTON"), TEXT("Click Me"),
+            WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+            220, 10, 100, 20,
+            hwnd, (HMENU)2, NULL, NULL);
+        hOutput = CreateWindow(TEXT("EDIT"), NULL,
+            WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY,
+            10, 40, 310, 200,
+            hwnd, (HMENU)3, NULL, NULL);
+        break;
+
+    case WM_COMMAND:
+        if (HIWORD(wParam) == BN_CLICKED)
+        {
+            if ((HWND)lParam == hButton)
+            {
+                int len = GetWindowTextLength(hInput) + 1;
+                char text[256] = {0};
+                int len2 = GetWindowTextLength(hOutput);
+                GetWindowText(hInput, text, len);
+                SendMessage(hOutput , EM_SETSEL , (WPARAM)0 , (LPARAM)len2);
+                SendMessage(hOutput, EM_REPLACESEL, FALSE, (LPARAM)text);
+                SendMessage(hOutput, EM_REPLACESEL, FALSE, (LPARAM)"\r\n");
+            }
+        }
+        break;
+
+    case WM_DESTROY:
+        PostQuitMessage(0);
+        break;
+
+    default:
+        return DefWindowProc(hwnd, msg, wParam, lParam);
+    }
+    return 0;
+}
+@@
+
