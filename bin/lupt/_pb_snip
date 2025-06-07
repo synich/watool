@@ -220,4 +220,11 @@ git gc --aggressive --prune=now
 git push origin master --force
 @@
 
+# snip_hive
+int->timestamp  FROM_UNIXTIME
+timestamp->int  UNIX_TIMESTAMP
+timestamp->str  DATE_FORMAT(ts, "yyyy-MM-dd HH:mm:ss")
+str->timestamp  cast(str as timestamp)
+MySQL use same function
+@@
 
