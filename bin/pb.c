@@ -31,7 +31,7 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver250606\nascii\n"
+  printf("personal busybox %dbit ver250612\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip|comp [keyword]\n"
@@ -481,10 +481,7 @@ static void _debug_lua(lua_State *L, char* hint_mess){
   }
 }
 static void debug_lua(lua_State *L, char* hint_mess){
-  char* e = getenv("PB_LUA_DEBUG");
-  if (e != NULL) {
-    _debug_lua(L, hint_mess);
-  }
+  if (getenv("PB_LUA_DEBUG") != NULL) { _debug_lua(L, hint_mess); }
 }
 
 static int _traceback (lua_State *L) {
@@ -624,6 +621,7 @@ void run_lua(int argc, char** argv){
       ldofile(L, argv[fpos], 0, bconv);
     }
   }
+  debug_lua(L, "exit lua");
   lclose(L);
 #endif
 }
@@ -706,7 +704,7 @@ void enc_lua(int argc, char *argv[])
   /*lua_call keep result and set global, or 1->0 then not set*/
   snprintf(fndecl, MAXLINE, "\n  };\n\n  if (luaL_loadbuffer"
     "(L,(const char*)B1,sizeof(B1),\"buf_%s\")==0)\n"
-    "    lua_call(L, 0, 0);\n"
+    "    lua_call(L, 0, LUA_MULTRET);\n"
     "  else _debug_lua(L, \"err: buf_%s\");\n"
     "  //lua_setglobal(L, \"%s\");\n"
     "}\n", flname, flname, flname);
