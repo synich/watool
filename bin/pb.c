@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #define MAXLINE 256
 
 #ifdef _WIN32
@@ -456,7 +457,7 @@ void xlispindent(int argc, char** argv){
 #ifdef SUPPORT_LUA
 static void _debug_lua(lua_State *L, char* hint_mess){
   int stk_size = lua_gettop(L), ri=-1, i, val_t;
-  printf("%s: elem num is %d\n", hint_mess, stk_size);
+  printf("[DEBUG %s]: elem num is %d\n", hint_mess, stk_size);
   for(i=stk_size;i>=1;i--){
     val_t = lua_type(L, i);
     char *idx_mean = "";
@@ -464,7 +465,7 @@ static void _debug_lua(lua_State *L, char* hint_mess){
     printf("  %d or %d: %s", i, ri, lua_typename(L, val_t));
     if (val_t==LUA_TSTRING) {printf(" %s", lua_tostring(L, i));}
     else if (val_t==LUA_TNUMBER) {printf(" %.2f", lua_tonumber(L, i));}
-    else if (val_t==LUA_TTABLE) {int j=1;printf(" arrlen %d, key:", (int)lua_rawlen(L, i));
+    else if (val_t==LUA_TTABLE) {int j=1;printf(" arrlen %d, key_5:", (int)lua_rawlen(L, i));
       lua_pushnil(L);
       for(;j<=5;j++){if (0==lua_next(L,i)){break;} else {
         val_t = lua_type(L, -2);
@@ -642,7 +643,7 @@ static int _luac(char *fname){
 #else
   if (0 != lua_dump(L, lwriter, fp, 1)){
 #endif
-    printf("lua dump %s fail", fname);
+    printf("lua dump %s fail\n", fname);
   }
   fclose(fp);
   lclose(L);
@@ -655,7 +656,7 @@ void enc_lua(int argc, char *argv[])
   char buf[MAXLINE] = {0}, flname[128]={0};
   char *pos, *fl_pos;
   int i = 0, ret;
-  char fndecl[MAXLINE] = {0};
+  char fndecl[MAXLINE] = {0}, ma_upp[16]={0};
   FILE *fw, *fr;
 
   if (argc <2){
@@ -683,9 +684,12 @@ void enc_lua(int argc, char *argv[])
   if (fl_pos){*fl_pos = 0;}
 
   *pos = 0; // let buf be the lua module name
-  sprintf(fndecl, "//#include \"lua/lauxlib.h\"\n\n"
+  for (i=0;i<strlen(flname);i++) {
+    ma_upp[i] = toupper(flname[i]);}
+  i = 0;
+  sprintf(fndecl, "#define _PB_LUAFN_%s\n\n"
     "static void luafn_%s(lua_State* L) {\n"
-    "  const unsigned char B1[]={", flname);
+    "  const unsigned char B1[]={", ma_upp, flname);
   fwrite(fndecl, strlen(fndecl), 1, fw);
 
   while(1){
