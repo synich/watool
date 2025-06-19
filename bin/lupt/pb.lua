@@ -15,6 +15,7 @@ end
 
 table.join = table.concat
 string.replace = string.gsub
+string.slice = string.sub
 
 function table.shift(t) if #t==0 then return nil end return table.remove(t, 1) end
 function table.unshift(t, ...) local v = {...} for i = #v, 1, -1 do table.insert(t, 1, v[i]) end return #t end
@@ -42,6 +43,12 @@ function string.indexOf(str, srch, pos)
   pos = pos or 1
   local startIdx = string.find(str, srch, pos, true)
   return startIdx and startIdx or -1
+end
+
+function string.trim(str)
+  local s = str:gsub("^%s+", "")
+  s = s:gsub("%s+$", "")  -- drop 2nd number
+  return s
 end
 
 function os.popen(cmd)
