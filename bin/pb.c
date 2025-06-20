@@ -506,6 +506,13 @@ static int _traceback (lua_State *L) {
 
 #include "lupt/pb_lua.c"
 #include "lupt/fennel_lua.c"
+
+#ifndef _PB_LUAFN_PB
+void luafn_pb(void* L){}
+#endif
+#ifndef _PB_LUAFN_FENNEL
+void luafn_fennel(void* L){}
+#endif
 #endif
 
 static void* linit(){

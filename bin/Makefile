@@ -43,5 +43,9 @@ sqlite3: lsqlite3.o sqlite3.o
 	@gcc $(CFLAGS) -c lsqlite3.c
 	@gcc -c -DSQLITE_ENABLE_FTS5 sqlite3.c
 
+init:
+	@mkdir -p inc/lua51 lib
+	@echo dir inc lib has ready, cp lua.h lauxlib.h  lualib.h luaconf.h to inc/lua51/
+
 iconv:
 	@gcc -shared -L./lib  -o iconv.dll luaiconv.o libiconv2.dll -llua51
