@@ -45,6 +45,7 @@ sqlite3: lsqlite3.o sqlite3.o
 
 init:
 	@mkdir -p inc/lua51 lib
+	@touch lupt/pb_lua.c lupt/fennel_lua.c
 	@echo dir inc lib has ready, cp lua.h lauxlib.h  lualib.h luaconf.h to inc/lua51/
 
 iconv:

@@ -508,10 +508,10 @@ static int _traceback (lua_State *L) {
 #include "lupt/fennel_lua.c"
 
 #ifndef _PB_LUAFN_PB
-void luafn_pb(void* L){}
+static void luafn_pb(lua_State* L){puts("PB N/A");}
 #endif
 #ifndef _PB_LUAFN_FENNEL
-void luafn_fennel(void* L){}
+static void luafn_fennel(lua_State* L){puts("FNL N/A");}
 #endif
 #endif
 
@@ -537,6 +537,9 @@ static void* linit(){
 #endif
 #ifdef USE_VENDOR
     luaopen_lsqlite3(L);
+#if LUA_VERSION_NUM > 501
+    lua_setglobal(L, "sqlite3");
+#endif
     //luaopen_lpeg(L);
 #endif
     lua_gc(L, LUA_GCRESTART, 0);
