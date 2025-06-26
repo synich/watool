@@ -32,7 +32,7 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver250619\nascii\n"
+  printf("personal busybox %dbit ver250626\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip|comp [keyword]\n"
@@ -40,13 +40,43 @@ void usage(){
   "xlispindent file|stdin\n"
 #ifdef SUPPORT_LUA
   "el file [luac] -- convert lua to c code\n"
-  "lua51 file [argv] or -e expr or -h; set PB_LUA_DEBUG see hook\n"
+  "lua5 file [argv] or -e expr or -h; set PB_LUA_DEBUG see hook\n"
   "lisp file [argv]\n"
 #endif
   , (int)(8*sizeof(void*)) );
   exit(0);
 }
 
+
+/******** util ********/
+static void _cal_ext_fb2bb(char* cmd){
+  int has_bb, ret;
+#ifdef _WIN32
+  has_bb = system("busybox >NUL 2>NUL");
+#else
+  has_bb = system("sh busybox 1>/dev/null 2>/dev/null");
+#endif
+  if (0==has_bb){
+    char bbcmd[MAXLINE];
+    sprintf(bbcmd, "busybox %s", cmd);
+    ret = system(bbcmd);
+  } else {ret = system(cmd);}
+  if (0!=ret){puts("no busybox or native util found, cmd fail");}
+}
+
+
+void get_exe_path(char* wd){
+#ifdef _WIN32
+  char *pos;
+  GetModuleFileName(NULL, wd, MAXLINE);
+  pos = strstr(wd, ".exe");
+  *pos=0;
+#else
+  int ret = readlink("/proc/self/exe", wd, MAXLINE);
+  wd[ret] = 0;
+#endif
+  strcat(wd, "_d"DIR_SEP);
+}
 
 int frontcmp(const char* s, const char* target, int most){
   int tlen = strlen(target);
@@ -68,19 +98,6 @@ void ascii(){
 
 
 /******** snip ********/
-void get_exe_path(char* wd){
-#ifdef _WIN32
-  char *pos;
-  GetModuleFileName(NULL, wd, MAXLINE);
-  pos = strstr(wd, ".exe");
-  *pos=0;
-#else
-  int ret = readlink("/proc/self/exe", wd, MAXLINE);
-  wd[ret] = 0;
-#endif
-  strcat(wd, "_d"DIR_SEP);
-}
-
 /*wh: 0-title 1-para
   to: 0-stdout 1-_pb_out
   return: -1 fail 0 OK*/
@@ -237,23 +254,6 @@ void dyn2str(int argc, char *argv[])
   free(chin);
   fclose(fin);
   fclose(fout);
-}
-
-
-/******** util_bb ********/
-static void _cal_ext_fb2bb(char* cmd){
-  int has_bb, ret;
-#ifdef _WIN32
-  has_bb = system("busybox >NUL 2>NUL");
-#else
-  has_bb = system("sh busybox 1>/dev/null 2>/dev/null");
-#endif
-  if (0==has_bb){
-    char bbcmd[MAXLINE];
-    sprintf(bbcmd, "busybox %s", cmd);
-    ret = system(bbcmd);
-  } else {ret = system(cmd);}
-  if (0!=ret){puts("no busybox or native util found, cmd fail");}
 }
 
 
@@ -727,17 +727,43 @@ void enc_lua(int argc, char *argv[])
   fclose(fw);
 }
 
+/******** snip ********/
+#include "lupt/snip_lua.c"
+#ifndef _PB_LUAFN_SNIP
+static void luafn_snip(lua_State* L){puts("SNIP N/A");}
+#endif
+/*wh: 0-snip 1-comp*/
+void lsnip(int argc, char** argv, int wh){
+  char kwd[MAXLINE]={0};
+  char fname[MAXLINE];
+  char scname[16];
+  char* snip_flag[2] = {"snip", "comp"};
+  void *L = linit();
+  int i=0;
+  get_exe_path(fname);
+  sprintf(scname, "_pb_%s", snip_flag[wh]);
+  strcat(fname, scname);
+  for (; i<argc; i++){
+    strcat(kwd, argv[i]);strcat(kwd, " ");
+  }
+  luafn_snip(L);
+  lua_pushstring(L, snip_flag[wh]);
+  lua_pushstring(L, fname);
+  lua_pushstring(L, kwd);
+  lua_pcall(L, 3, LUA_MULTRET, 0);
+}
 
 int main(int argc, char** argv){
   if (1==argc){
     usage();
   } else {
+    // need the case -1, other -2
     switch(argv[1][0]){
       case 'a':
         ascii();
         break;
       case 'c':
-        snip(argc-2, argv+2, 1, 0);
+        lsnip(argc-2, argv+2, 1);
         break;
       case 'd':
         dyn2str(argc-1, argv+1);
@@ -752,7 +778,7 @@ int main(int argc, char** argv){
         run_lua(argc, argv);
         break;
       case 's':
-        snip(argc-2, argv+2, 0, 0);
+        lsnip(argc-2, argv+2, 0);
         break;
       case 'w':
         wph(argc-1, argv+1);

@@ -1,18 +1,29 @@
 (var flag false)
-
-(fn check-show [li kwd cat]
+(fn show-range [li mat]
   (if (= li "@@") (set flag false))
   (if flag (print li))
-  (if (: li :match (.. "^#+ " cat "_" kwd "[^ ]$")) (set flag true)) )
+  (if (: li :match mat) (set flag true)))
+
+(fn show-title [li mat]
+  (if (: li :match mat) (print (: li :slice 8))))
+
+(fn onef [cat fname kwd]
+ (let [fd (io.open fname) pkwd (: kwd :gsub " " ".- ") r_mat (.. "^#+ " cat "_" pkwd "[^ ]*$") t_mat (.. "^# " cat "_")]
+  (case fd
+    nil nil
+    _ (with-open [afd fd]
+       (each [li (: afd :lines)]
+        (if (= "" kwd)
+         (show-title li t_mat)
+         (show-range li r_mat)))
+      1))))
 
 (fn fsc [cat fname kwd]
- (let [fd (io.open fname)]
-   (case fd
-     nil (do (print fname "open fail") nil)
-     _ (with-open [afd fd]
-        (each [li (: afd :lines)]
-         (check-show li (: kwd :gsub " " ".- ") cat))))))
+  (let [tkwd (: kwd :trim)]
+    (onef cat fname tkwd)
+    (for [i 1 9 &until (onef cat (.. fname i) tkwd)]
+    1)))
 
-(fsc "comp" "_pb_comp" "lu f")
+;(fsc "snip" "_pb_snip" "sh va ")
 fsc
 
