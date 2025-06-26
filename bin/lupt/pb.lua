@@ -14,6 +14,7 @@ function var_dump(t)
 end
 
 table.join = table.concat
+if table.unpack then _G.unpack = table.unpack end
 string.replace = string.gsub
 string.slice = string.sub
 
