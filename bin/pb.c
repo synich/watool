@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdarg.h>
 #define MAXLINE 256
 
 #ifdef _WIN32
@@ -32,7 +33,7 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver250626\nascii\n"
+  printf("personal busybox %dbit ver250627\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip|comp [keyword]\n"
@@ -64,7 +65,6 @@ static void _cal_ext_fb2bb(char* cmd){
   if (0!=ret){puts("no busybox or native util found, cmd fail");}
 }
 
-
 void get_exe_path(char* wd){
 #ifdef _WIN32
   char *pos;
@@ -86,6 +86,12 @@ int frontcmp(const char* s, const char* target, int most){
   return strncmp(s,target, tlen);
 }
 
+void err_pf(const char* format, ...){
+  va_list args;
+  va_start(args, format);
+  vfprintf(stderr, format, args);
+  va_end(args);
+}
 
 /******** show ascii char ********/
 void ascii(){
@@ -457,27 +463,26 @@ void xlispindent(int argc, char** argv){
 #ifdef SUPPORT_LUA
 static void _debug_lua(lua_State *L, char* hint_mess){
   int stk_size = lua_gettop(L), ri=-1, i, val_t;
-  printf("[DEBUG %s]: elem num is %d\n", hint_mess, stk_size);
+  err_pf("[DEBUG %s]: elem num is %d\n", hint_mess, stk_size);
   for(i=stk_size;i>=1;i--){
     val_t = lua_type(L, i);
     char *idx_mean = "";
     if (i==stk_size){idx_mean = "\t<- top";} else if (1==i){idx_mean = "\t<- bot";}
-    printf("  %d or %d: %s", i, ri, lua_typename(L, val_t));
-    if (val_t==LUA_TSTRING) {printf(" %s", lua_tostring(L, i));}
-    else if (val_t==LUA_TNUMBER) {printf(" %.2f", lua_tonumber(L, i));}
-    else if (val_t==LUA_TTABLE) {int j=1;printf(" arrlen %d, key_5:", (int)lua_rawlen(L, i));
+    err_pf("  %d or %d: %s", i, ri, lua_typename(L, val_t));
+    if (val_t==LUA_TSTRING) {err_pf(" %s", lua_tostring(L, i));}
+    else if (val_t==LUA_TNUMBER) {err_pf(" %.2f", lua_tonumber(L, i));}
+    else if (val_t==LUA_TTABLE) {int j=1;err_pf(" arrlen %d, key_5:", (int)lua_rawlen(L, i));
       lua_pushnil(L);
       for(;j<=5;j++){if (0==lua_next(L,i)){break;} else {
         val_t = lua_type(L, -2);
-        if (val_t==LUA_TSTRING) {printf(" %s",lua_tostring(L,-2));}
-        else if (val_t==LUA_TNUMBER) {printf(" %.0f",lua_tonumber(L,-2));}
-        else {printf(" %s", lua_typename(L, lua_type(L, -2)));}
-        //printf("-%s,", lua_typename(L, lua_type(L, -1)));
+        if (val_t==LUA_TSTRING) {err_pf(" %s",lua_tostring(L,-2));}
+        else if (val_t==LUA_TNUMBER) {err_pf(" %.0f",lua_tonumber(L,-2));}
+        else {err_pf(" %s", lua_typename(L, lua_type(L, -2)));}
         lua_pop(L, 1);/* removes 'value'; keeps 'key' for next iteration */
         } }
       }
-    else if (val_t==LUA_TBOOLEAN) {printf(" %s", 1==lua_toboolean(L, i)?"true":"false");}
-    printf("%s\n", idx_mean);
+    else if (val_t==LUA_TBOOLEAN) {err_pf(" %s", 1==lua_toboolean(L, i)?"true":"false");}
+    err_pf("%s\n", idx_mean);
     ri--;
   }
 }
@@ -567,7 +572,7 @@ static int ldofile(void* L, char *fname, int narg, int bconv){
   //if (1==bconv){ _conv2lua(fname);}
   status = luaL_loadfile(L, fname);
   if (0!=status) {
-    printf("pb load %s fail[%d]: %s\n", fname, status, lua_tostring(L, -1));
+    err_pf("pb load %s fail[%d]: %s\n", fname, status, lua_tostring(L, -1));
     lua_pop(L, lua_gettop(L));
     return status;
   }
@@ -577,7 +582,7 @@ static int ldofile(void* L, char *fname, int narg, int bconv){
   lua_insert(L, base);  /* put it under chunk and args */
   status = lua_pcall(L, narg, LUA_MULTRET, base); /*LUA_MULTRET*/
   if (0!=status) {
-    printf("pb run %s fail[%d]: %s\n",fname, status, lua_tostring(L, -1));
+    err_pf("pb run %s fail[%d]: %s\n",fname, status, lua_tostring(L, -1));
   }
   lua_pop(L, lua_gettop(L));
 #endif
@@ -653,7 +658,7 @@ static int _luac(char *fname){
 #else
   if (0 != lua_dump(L, lwriter, fp, 1)){
 #endif
-    printf("lua dump %s fail\n", fname);
+    err_pf("lua dump %s fail\n", fname);
   }
   fclose(fp);
   lclose(L);
