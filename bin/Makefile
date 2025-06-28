@@ -45,16 +45,15 @@ sqlite3: lsqlite3.o sqlite3.o
 
 init:
 	@mkdir -p inc/lua51 lib
-	@cd lupt
-	@touch pb_lua.c fennel_lua.c snip_lua.c
-	@echo dir inc lib has ready, cp lua.h lauxlib.h  lualib.h luaconf.h to inc/lua51/
+	@cd lupt && touch pb_lua.c fennel_lua.c snip_lua.c
+	@echo dir inc lib has ready, cp lua.h lauxlib.h  lualib.h luaconf.h inc/lua51/
 
 genc:
 	@cd lupt
-	@pb el pb.lua
-	@pb el fennel.lua
 	@pb li --compile snip.fnl >snip.lua
 	@pb el snip.lua
+	@pb el pb.lua
+	@pb el fennel.lua
 
 iconv:
 	@gcc -shared -L./lib  -o iconv.dll luaiconv.o libiconv2.dll -llua51
