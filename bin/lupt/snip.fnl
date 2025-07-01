@@ -8,6 +8,7 @@
   (if (: li :match mat) (print (: li :slice 8))))
 
 (fn onef [cat fname kwd]
+"find snip/comp(category) with kwd in fname"
  (let [fd (io.open fname) pkwd (: kwd :gsub " " ".- ") r_mat (.. "^#+ " cat "_" pkwd "[^ ]*$") t_mat (.. "^# " cat "_")]
   (case fd
     nil nil
@@ -19,6 +20,7 @@
       1))))
 
 (fn fsc [cat fname kwd]
+"main entry for snip or comp"
   (let [tkwd (: kwd :trim)]
     (onef cat fname tkwd)
     (for [i 1 9 &until (onef cat (.. fname i) tkwd)]

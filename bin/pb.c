@@ -101,87 +101,6 @@ void ascii(){
   }
 }
 
-
-/******** snip ********/
-/*wh: 0-title 1-para
-  to: 0-stdout 1-_pb_out
-  return: -1 fail 0 OK*/
-static int get_paragraph(const char* fname, int wh, const char* kwd, int to){
-  FILE *fout = stdout;
-  FILE *f = fopen(fname, "r");
-  if (NULL==f){
-    int pend = strlen(fname);
-    char chend = fname[pend-1];
-    if ('p'==chend){printf("cant find '%s'\n",fname);}
-    return -1;
-  }
-  if (1==to) {
-    char fop[MAXLINE];
-    get_exe_path(fop);
-    strcat(fop, "_pb_out");
-    fout = fopen(fop, "w");
-  }
-  char line[MAXLINE];
-  int fl_len = strlen(kwd);
-  int out_flag = 0;
-  while(fgets(line, MAXLINE, f)){
-    if (0==wh){
-      if (0==strncmp(line, kwd, fl_len)){
-        char *pos = strchr(line, '_');
-        fprintf(fout, "%s", pos+1);
-      }
-    }else{
-      if (out_flag==1){
-        if (0==strncmp(line, "@@", 2)) {
-          break;
-        } else {
-          fprintf(fout, "%s", line);
-        }
-      } else if (0==strncmp(line, kwd, fl_len)){
-        out_flag = 1;
-      }
-    }
-  }
-  fclose(f);
-  if (1==to) {fclose(fout);}
-  return 0;
-}
-
-/*wh: 0-snip 1-comp*/
-void snip(int argc, char** argv, int wh, int to){
-  char fl_str[MAXLINE];
-  char fname[MAXLINE];
-  char scname[16];
-  char* snip_flag[2] = {"snip", "comp"};
-  int i=1, pend;
-  sprintf(fl_str, "# %s_", snip_flag[wh]);
-  get_exe_path(fname);
-  sprintf(scname, "_pb_%s", snip_flag[wh]);
-  strcat(fname, scname);
-  pend = strlen(fname);
-#define SNIP_POST 9
-  if (argc==0){ /*see what section in this snip*/
-    get_paragraph(fname, 0, fl_str, to);
-    for (;i<=SNIP_POST;i++){
-      fname[pend]='0'+i;fname[pend+1]=0;
-      if (-1==get_paragraph(fname, 0, fl_str, to)){break;}
-    }
-  } else {
-    strcat(fl_str, argv[0]);
-    if (argc>=2){
-      char mor_str[MAXLINE];
-      snprintf(mor_str, MAXLINE, "#%s %s", fl_str, argv[1]);
-      strcpy(fl_str, mor_str);
-    }
-    get_paragraph(fname, 1, fl_str, to);
-    for (;i<=SNIP_POST;i++){
-      fname[pend]='0'+i;fname[pend+1]=0;
-      if (-1==get_paragraph(fname, 1, fl_str, to)){break;}
-    }
-  }
-}
-
-
 /******** help_show_csv ********/
 void help_show_csv(int argc, char** argv){
 #define MODFILE "mf"
@@ -397,7 +316,6 @@ static int _traceback (lua_State *L) {
 
 #include "lupt/pb_lua.c"
 #include "lupt/fennel_lua.c"
-
 #ifndef _PB_LUAFN_PB
 static void luafn_pb(lua_State* L){puts("PB N/A");}
 #endif
