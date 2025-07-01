@@ -40,6 +40,8 @@ int wa_log(char* fmt, ...);
 int wa_utok(int result);/*if result true return 0, else 1. Sum all is error count*/
 typedef int(*wa_utfn)(void);
 void wa_utrun(const char* name, wa_utfn f);
+/* int testA(){}
+  TEST(A); wa_utsum(); */
 int wa_utsum(void);
 
 #define REG_MAXSUB 10

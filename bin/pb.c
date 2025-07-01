@@ -37,7 +37,6 @@ void usage(){
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip|comp [keyword]\n"
-  "wph(WaProjectHelper)\n  wph c c -- create c project scafold\n"
   "xlispindent file|stdin\n"
 #ifdef SUPPORT_LUA
   "el file [luac] -- convert lua to c code\n"
@@ -260,119 +259,6 @@ void dyn2str(int argc, char *argv[])
   free(chin);
   fclose(fin);
   fclose(fout);
-}
-
-
-/******** wph ********/
-static const unsigned char s_Makefile_str[]={
-67,67,61,103,99,99,10,68,69,80,
-65,84,72,61,47,100,47,111,112,51,
-114,100,47,10,67,70,76,65,71,83,
-32,61,32,45,99,32,45,45,115,116,
-100,61,99,57,57,32,45,87,97,108,
-108,32,45,112,101,100,97,110,116,105,
-99,32,45,73,36,40,68,69,80,65,
-84,72,41,105,110,99,108,117,100,101,
-10,79,66,74,83,32,61,10,72,79,
-83,84,32,61,32,36,40,115,104,101,
-108,108,32,117,110,97,109,101,41,10,
-105,102,101,113,32,40,36,40,72,79,
-83,84,41,44,32,77,105,110,71,87,
-41,10,9,85,84,76,73,66,32,61,
-32,45,76,36,40,68,69,80,65,84,
-72,41,108,105,98,32,45,108,119,97,
-32,45,108,119,115,50,95,51,50,10,
-101,108,115,101,10,9,85,84,76,73,
-66,32,61,32,45,76,36,40,68,69,
-80,65,84,72,41,108,105,98,32,45,
-108,119,97,10,101,110,100,105,102,10,
-10,108,105,98,58,32,36,40,79,66,
-74,83,41,10,9,64,97,114,32,114,
-99,117,32,108,105,98,119,97,46,97,
-32,36,94,32,36,40,85,84,76,73,
-66,41,10,10,111,98,106,47,37,46,
-111,32,58,32,37,46,99,10,9,36,
-40,67,67,41,32,36,40,67,70,76,
-65,71,83,41,32,45,111,32,36,64,
-32,36,60,10,0};
-
-static const unsigned char s_main_c_str[]={
-35,105,110,99,108,117,100,101,32,60,
-115,116,100,105,111,46,104,62,10,35,
-105,110,99,108,117,100,101,32,60,115,
-116,100,108,105,98,46,104,62,10,10,
-105,110,116,32,109,97,105,110,40,105,
-110,116,32,97,114,103,99,44,32,99,
-104,97,114,42,42,32,97,114,103,118,
-41,123,10,32,32,114,101,116,117,114,
-110,32,48,59,10,125,10,0};
-static const unsigned char s_utest_c_str[]={
-35,105,110,99,108,117,100,101,32,34,
-119,97,108,105,98,46,104,34,10,10,
-105,110,116,32,116,101,115,116,65,40,
-41,123,10,9,10,125,10,10,105,110,
-116,32,109,97,105,110,40,105,110,116,
-32,97,114,103,99,44,32,99,104,97,
-114,42,42,32,97,114,103,118,41,123,
-10,9,84,69,83,84,40,65,41,59,
-10,9,114,101,116,117,114,110,32,119,
-97,95,117,116,115,117,109,40,41,59,
-10,125,10,0};
-static const unsigned char s_ico_rc_str[]={
-65,32,73,67,79,78,32,34,120,46,
-105,99,111,34,10,0};
-
-/*create C project template file*/
-static void createCPro(){
-  FILE *mf=NULL;
-  _cal_ext_fb2bb("mkdir src");
-  _cal_ext_fb2bb("mkdir test");
-  _cal_ext_fb2bb("mkdir res");
-  mf = fopen("Makefile", "w");
-  if (mf){
-    fwrite(s_Makefile_str, sizeof(s_Makefile_str)-1, 1, mf);
-    fclose(mf);
-  }
-  mf = fopen("src/main.c", "w");
-  if (mf){
-    fwrite(s_main_c_str, sizeof(s_main_c_str)-1, 1, mf);
-    fclose(mf);
-  }
-  mf = fopen("test/utest.c", "w");
-  if (mf){
-    fwrite(s_utest_c_str, sizeof(s_utest_c_str)-1, 1, mf);
-    fclose(mf);
-  }
-  mf = fopen("res/ico.rc", "w");
-  if (mf) {
-    fwrite(s_ico_rc_str, sizeof(s_ico_rc_str)-1, 1, mf);
-    fclose(mf);
-  }
-}
-
-static void helpC(const char* opt) {
-  if (!opt) return;
-  if (*opt=='c') {
-    createCPro();
-  } else {
-    printf("Command `c' Unknown option: `%s'\n", opt);
-  }
-}
-
-
-void wph(int argc, char** argv) {
-  if ( 2>=argc ) {
-    usage();
-  } else {
-    switch (argv[1][0]) {
-      case 'c': /* create project */
-        helpC(argv[2]);
-        break;
-      default :
-        usage();
-        break;
-    }
-  }
 }
 
 
@@ -784,9 +670,6 @@ int main(int argc, char** argv){
         break;
       case 's':
         lsnip(argc-2, argv+2, 0);
-        break;
-      case 'w':
-        wph(argc-1, argv+1);
         break;
       case 'x':
         xlispindent(argc-1, argv+1);

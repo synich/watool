@@ -82,6 +82,25 @@ main $@
 </html>
 @@
 
+# _comp_mk
+HOST = $(shell uname)
+ifeq ($(HOST), MinGW)
+	UTLIB = -L$(DEPATH)lib -lwa -lws2_32
+else
+	UTLIB = -L$(DEPATH)lib -lwa
+endif
+
+lib: $(OBJS)
+	@ar rcu libwa.a $^ $(UTLIB)
+
+obj/%.o : %.c
+	$(CC) $(CFLAGS) -o $@ $<
+@@
+
+# _comp_rc
+A ICON "x.ico"
+@@
+
 # comp_wingui
 #include <windows.h>
 
