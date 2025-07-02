@@ -17,6 +17,7 @@ table.join = table.concat
 if table.unpack then _G.unpack = table.unpack end
 string.replace = string.gsub
 string.slice = string.sub
+os.system = os.execute
 
 function table.shift(t) if #t==0 then return nil end return table.remove(t, 1) end
 function table.unshift(t, ...) local v = {...} for i = #v, 1, -1 do table.insert(t, 1, v[i]) end return #t end
