@@ -33,7 +33,7 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver250627\nascii\n"
+  printf("personal busybox %dbit ver250705\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip|comp [keyword]\n"
@@ -563,39 +563,46 @@ void lsnip(int argc, char** argv, int wh){
 }
 
 int main(int argc, char** argv){
-  if (1==argc){
-    usage();
+  int cmd = 0;
+  char pp_txt[256] = {0};
+  if (1<argc){cmd = argv[1][0];
+  } else if (!isatty(fileno(stdin))) {
+    if (fgets(pp_txt, sizeof(pp_txt), stdin)!=NULL) {
+      cmd = pp_txt[0];
+      printf("not fully support pipe, %s", pp_txt);
+    } else {return 0;}
   } else {
-    // need the case -1, other -2
-    switch(argv[1][0]){
-      case 'a':
-        ascii();
-        break;
-      case 'c':
-        lsnip(argc-2, argv+2, 1);
-        break;
-      case 'd':
-        dyn2str(argc-1, argv+1);
-        break;
-      case 'e':
-        enc_lua(argc-1, argv+1);
-        break;
-      case 'h':
-        help_show_csv(argc-1, argv+1);
-        break;
-      case 'l':
-        run_lua(argc, argv);
-        break;
-      case 's':
-        lsnip(argc-2, argv+2, 0);
-        break;
-      case 'x':
-        xlispindent(argc-1, argv+1);
-        break;
-    default:
-        usage();
-        break;
-    }
+    usage(); return 0;
+  }
+  // need the case -1, other -2
+  switch(cmd){
+    case 'a':
+      ascii();
+      break;
+    case 'c':
+      lsnip(argc-2, argv+2, 1);
+      break;
+    case 'd':
+      dyn2str(argc-1, argv+1);
+      break;
+    case 'e':
+      enc_lua(argc-1, argv+1);
+      break;
+    case 'h':
+      help_show_csv(argc-1, argv+1);
+      break;
+    case 'l':
+      run_lua(argc, argv);
+      break;
+    case 's':
+      lsnip(argc-2, argv+2, 0);
+      break;
+    case 'x':
+      xlispindent(argc-1, argv+1);
+      break;
+  default:
+      usage();
+      break;
   }
   return 0;
 }
