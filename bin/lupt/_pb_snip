@@ -152,8 +152,11 @@ endfunction
 
 # snip_py
 # filter value not 2 from dict
-  { k:v for k,v in diction.items() if v!=2 }
-  dict(filter(lambda v: v[1]!=2, d.items()))    # v[0] is k, v[1] is v
+{ k:v for k,v in diction.items() if v!=2 }
+dict(filter(lambda v: v[1]!=2, d.items()))    # v[0] is k, v[1] is v
+from .     import xx # from same dir
+from .cmd  import xx # from same dir
+from ..log import xx # from upper dir
 @@
 
 

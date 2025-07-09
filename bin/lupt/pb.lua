@@ -1,11 +1,13 @@
-function fmt(body, ...)
-  local lst = {...}
-  local hole = "{}"
-  for i=1,#lst do
-    body = body:gsub(hole, lst[i], 1)
-  end
-  return body
+function fmt(str, ...)
+  local hole, lst = "{}", {...}
+  local res = str:gsub(hole, function()
+    if #lst == 0 then return hole end
+    return table.remove(lst, 1)
+  end)
+  return res
 end
+
+function fmtf(s,...) return string.format(s,...) end
 
 function var_dump(t)
   if "table"==type(t) then

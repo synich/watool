@@ -48,9 +48,10 @@ fn
 @@
 
 ## comp_go fn
-func () {
+func foo(l *State) int{
   return
 }
+func (self *State) bar() string
 @@
 
 
