@@ -56,11 +56,25 @@ function string.trim(str)
 end
 
 function os.popen(cmd)
+  local function fkopen(cmd)
+    os.execute(cmd.." >fk.txt")
+    local fd = io.open("fk.txt")
+    local t = fd:read("*a")
+    fd:close()
+    return t
+  end
+  local function popen(cmd)
+    local fd = io.popen(cmd)
+    local t = fd:read("*a")
+    fd:close()
+    return t
+  end
   cmd = cmd:gsub("`", "\\`") -- avoid ` work in shell
-  local fd = io.popen(cmd)
-  local txt = fd:read("*a")
-  fd:close()
-  return txt:sub(1, -2)  -- last is \n, drop it
+  local ok, r = pcall(popen, cmd)
+  if not ok then
+    r = fkopen(cmd)
+  end
+  return string.trim(r)
 end
 
 function ts(v)
