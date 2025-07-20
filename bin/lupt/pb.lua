@@ -89,7 +89,7 @@ function ts(v)
   elseif #v==10 then
     ret = os.date("%Y%m%d %H%M%S", tonumber(v))
   elseif #v==13 then
-    ret = os.date("%Y%m%d %H%M%S", tonumber(v)/1000)
+    ret = os.date("%Y%m%d %H%M%S", math.floor(tonumber(v)/1000))
   end
   return ret
 end
