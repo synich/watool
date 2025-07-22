@@ -33,7 +33,7 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver250709\nascii\n"
+  printf("personal busybox %dbit ver250721\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip|comp [keyword]\n"
@@ -154,6 +154,7 @@ void dyn2str(int argc, char *argv[])
   pos = strchr(buf, '.');
   *pos = '_'; /*At least has one .c, must available*/
 
+  err_pf("dyn2str to %s\n", buf);
   fin = fopen(argv[1], "r");
   fout = fopen(buf, "w");
   fseek(fin, 0, SEEK_END);
