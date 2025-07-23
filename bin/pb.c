@@ -33,17 +33,21 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver250721\nascii\n"
+  printf("personal busybox %dbit ver250723\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip|comp [keyword]\n"
   "xlispindent file|stdin\n"
 #ifdef SUPPORT_LUA
   "el file [luac] -- convert lua to c code\n"
-  "lua5 file [argv] or -e expr or -h; set PB_LUA_DEBUG see hook\n"
+  "lua%d file [argv] or -e expr or -h; set PB_LUA_DEBUG see hook\n"
   "lisp file [argv]\n"
 #endif
-  , (int)(8*sizeof(void*)) );
+  , (int)(8*sizeof(void*))
+#ifdef SUPPORT_LUA
+  , LUA_VERSION_NUM
+#endif
+  );
   exit(0);
 }
 
@@ -421,7 +425,8 @@ void run_lua(int argc, char** argv){
       printf("run %s, type: %s\n", ret==0?"ok":"fail", lua_typename(L, val_t));
     }
   } else if (0==strcmp(argv[2], "-h")) {
-    puts("enhance with:\nfmt; var_dump; ts; map/reduce/filter/range\n"
+    puts("enhance with:\nfmt/fmtf; var_dump; ts; tie\n"
+    "map/reduce/filter/range\n"
     "string.split/indexOf/replace/slice/trim; utf8.len/char/codes\n"
     "table.join/pop...; bit32.band...\n"
     "os.popen; dt.datediff/lsdir/lsfile; sqlite3\n"

@@ -94,6 +94,11 @@ function ts(v)
   return ret
 end
 
+function tie(t)
+  return setmetatable(t, {__index=table,
+  __tostring=function(t)local k=next(t) return "tbl-arr:"..#t..",1st_k:"..(k and k or "nil")end})
+end
+
 function map(lst, f)
 	local _accum_0 = { }
 	local _len_0 = 1
