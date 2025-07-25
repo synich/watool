@@ -1,3 +1,4 @@
+--ver250725
 function fmt(str, ...)
   local hole, lst = "{}", {...}
   local res = str:gsub(hole, function()
@@ -19,6 +20,7 @@ table.join = table.concat
 if table.unpack then _G.unpack = table.unpack end
 string.replace = string.gsub
 string.slice = string.sub
+string.search = string.find
 os.system = os.execute
 
 function table.shift(t) if #t==0 then return nil end return table.remove(t, 1) end
