@@ -20,7 +20,6 @@ table.join = table.concat
 if table.unpack then _G.unpack = table.unpack end
 string.replace = string.gsub
 string.slice = string.sub
-string.search = string.find
 os.system = os.execute
 
 function table.shift(t) if #t==0 then return nil end return table.remove(t, 1) end
@@ -55,6 +54,11 @@ function string.trim(str)
   local s = str:gsub("^%s+", "")
   s = s:gsub("%s+$", "")  -- drop 2nd number
   return s
+end
+
+function string.search(str, pat)
+  local s, e = string.find(str, pat, 1, false)
+  if s then return s, e else return -1 end
 end
 
 function os.popen(cmd)
