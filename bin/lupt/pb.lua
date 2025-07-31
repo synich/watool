@@ -16,8 +16,6 @@ function var_dump(t)
   else print(t) end
 end
 
-table.join = table.concat
-if table.unpack then _G.unpack = table.unpack end
 string.replace = string.gsub
 string.slice = string.sub
 os.system = os.execute
@@ -105,7 +103,7 @@ function tie(t)
   __tostring=function(t)local k=next(t) return "tbl-arr:"..#t..",1st_k:"..(k and k or "nil")end})
 end
 
-function map(lst, f)
+function map(f, lst)
 	local _accum_0 = { }
 	local _len_0 = 1
 	for _index_0 = 1, #lst do
@@ -116,7 +114,7 @@ function map(lst, f)
 	return _accum_0
 end
 
-function filter(lst, f)
+function filter(f, lst)
 	local _accum_0 = { }
 	local _len_0 = 1
 	for _index_0 = 1, #lst do
@@ -129,14 +127,24 @@ function filter(lst, f)
 	return _accum_0
 end
 
-function reduce(lst, init, f)
-	local value = init
-	for _index_0 = 1, #lst do
-		local x = lst[_index_0]
-		value = f(value, x)
+function reduce(f, lst, init)
+	local acc = init
+	for idx = 1, #lst do
+	  local x = lst[idx]
+      if idx==1 and not init then
+        acc = lst[idx]
+      else
+		acc = f(acc, x)
+      end
 	end
-	return value
+	return acc
 end
+
+table.join = table.concat
+if table.unpack then _G.unpack = table.unpack end
+table.map=function(t, f) return map(f, t) end
+table.filter=function(t,f) return filter(f, t) end
+table.reduce=function(t,f,i) return reduce(f,t,i) end
 
 function range(a, b)
 	if not b then
