@@ -40,7 +40,7 @@ void usage(){
   "xlispindent file|stdin\n"
 #ifdef SUPPORT_LUA
   "el file [luac] -- convert lua to c code\n"
-  "lua%d file [argv] or -e expr or -h; set PB_LUA_DEBUG see hook\n"
+  "lua%d file [argv] or -e expr or -h; set PB_DEBUG see hook\n"
   "lisp file [argv]\n"
 #endif
   , (int)(8*sizeof(void*))
@@ -297,7 +297,7 @@ static void _debug_lua(lua_State *L, char* hint_mess){
   }
 }
 static void debug_lua(lua_State *L, char* hint_mess){
-  if (getenv("PB_LUA_DEBUG") != NULL) { _debug_lua(L, hint_mess); }
+  if (getenv("PB_DEBUG") != NULL) { _debug_lua(L, hint_mess); }
 }
 
 static int _traceback (lua_State *L) {

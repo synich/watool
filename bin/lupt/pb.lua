@@ -16,6 +16,10 @@ function var_dump(t)
   else print(t) end
 end
 
+function dprint(...)
+  if os.getenv("PB_DEBUG") then print(...)end
+end
+
 string.replace = string.gsub
 string.slice = string.sub
 os.system = os.execute
