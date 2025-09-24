@@ -33,7 +33,7 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver250731\nascii\n"
+  printf("personal busybox %dbit ver250924\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip|comp [keyword]\n"
@@ -426,7 +426,7 @@ void run_lua(int argc, char** argv){
     }
   } else if (0==strcmp(argv[2], "-h")) {
     puts("enhance with:\nfmt/fmtf; var_dump; ts; tie\n"
-    "map/reduce/filter/range(py-like)\n"
+    "map/reduce/filter/range(fn 1st,py-like)\n"
     "string.split/indexOf/replace/slice/search/trim; utf8.len/char/codes\n"
     "table.join/pop...; bit32.band...\n"
     "os.popen; dt.datediff/lsdir/lsfile; sqlite3\n"
