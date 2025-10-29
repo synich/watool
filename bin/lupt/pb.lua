@@ -95,9 +95,9 @@ function ts(v)
     local a={year=2000+tonumber(v:sub(1,2)), month=tonumber(v:sub(3,4)), day=tonumber(v:sub(5,6)), hour=0}
     ret = os.time(a)
   elseif #v==10 then
-    ret = os.date("%Y%m%d %H%M%S", tonumber(v))
+    ret = os.date("%Y-%m-%d %H:%M:%S", tonumber(v))
   elseif #v==13 then
-    ret = os.date("%Y%m%d %H%M%S", math.floor(tonumber(v)/1000))
+    ret = os.date("%Y-%m-%d %H:%M:%S", math.floor(tonumber(v)/1000))
   end
   return ret
 end
