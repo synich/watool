@@ -1,4 +1,4 @@
---ver250725
+--ver251207
 function fmt(str, ...)
   local hole, lst = "{}", {...}
   local res = str:gsub(hole, function()
@@ -161,6 +161,33 @@ function range(a, b)
 		_len_0 = _len_0 + 1
 	end
 	return _accum_0
+end
+
+-- Set.lua like JS
+Set = {}
+Set.__index = Set
+function Set.new(items)
+    local self = setmetatable({}, Set)
+    self._items = {}
+    if items then
+        for _, v in ipairs(items) do self:add(v) end
+    end
+    return self
+end
+function Set:add(value) self._items[value] = true; return self end
+function Set:delete(value) self._items[value] = nil; return self end
+function Set:has(value) return self._items[value] ~= nil end
+function Set:clear() self._items = {}; return self end
+function Set:pairs() return pairs(self._items) end
+function Set:values()
+  local keys = {}
+  for k in pairs(self._items) do table.insert(keys, k) end
+  return keys
+end
+function Set:__tostring()
+  local vals = {}
+  for k in pairs(self._items) do table.insert(vals, tostring(k)) end
+  return "Set{" .. table.concat(vals, ", ") .. "}"
 end
 
 --
