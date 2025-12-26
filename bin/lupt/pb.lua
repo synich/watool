@@ -163,31 +163,31 @@ function range(a, b)
 	return _accum_0
 end
 
--- Set.lua like JS
-Set = {}
-Set.__index = Set
-function Set.new(items)
-    local self = setmetatable({}, Set)
+-- set.lua like JS
+set = {}
+set.__index = set
+function set.new(items)
+    local self = setmetatable({}, set)
     self._items = {}
     if items then
         for _, v in ipairs(items) do self:add(v) end
     end
     return self
 end
-function Set:add(value) self._items[value] = true; return self end
-function Set:delete(value) self._items[value] = nil; return self end
-function Set:has(value) return self._items[value] ~= nil end
-function Set:clear() self._items = {}; return self end
-function Set:pairs() return pairs(self._items) end
-function Set:values()
+function set:add(value) self._items[value] = true; return self end
+function set:delete(value) self._items[value] = nil; return self end
+function set:has(value) return self._items[value] ~= nil end
+function set:clear() self._items = {}; return self end
+function set:pairs() return pairs(self._items) end
+function set:values()
   local keys = {}
   for k in pairs(self._items) do table.insert(keys, k) end
   return keys
 end
-function Set:__tostring()
+function set:__tostring()
   local vals = {}
   for k in pairs(self._items) do table.insert(vals, tostring(k)) end
-  return "Set{" .. table.concat(vals, ", ") .. "}"
+  return "set{" .. table.concat(vals, ", ") .. "}"
 end
 
 --

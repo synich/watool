@@ -33,7 +33,7 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver251207\nascii\n"
+  printf("personal busybox %dbit ver251226\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip|comp [keyword]\n"
@@ -430,7 +430,7 @@ void run_lua(int argc, char** argv){
     "string.split/indexOf/replace/slice/search/trim; utf8.len/char/codes\n"
     "table.join/pop...; bit32.band...\n"
     "os.popen; dt.datediff/lsdir/lsfile; sqlite3\n"
-    "Set.new/add/delete/has/clear/values\n"
+    "set.new/add/delete/has/clear/values\n"
     "enc.md5/sha1/btoa/atob; JSON.stringify/parse");
   } else {
     int i=2, j=0, fpos=2, bconv=0;
