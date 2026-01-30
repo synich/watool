@@ -99,10 +99,20 @@ void err_pf(const char* format, ...){
 /******** show ascii char ********/
 void ascii(){
   int i = 32;
+  puts("Printable:");
   for (; i<32+24; i++){
     printf("0x%x,%d: %c\t\t0x%x,%d: %c\t\t0x%x,%d: %c\t\t0x%x,%d: %c\n",
       i, i, i, i+24, i+24, i+24, i+48, i+48, i+48, i+72, i+72, i+72);
   }
+  puts("\nControl:");
+  puts("0x00,0: NUL\t0x08,8: Backspace\t0x10,16: DataLnkEscape\t0x18,24: Cancel");
+  puts("0x01,1: SOH\t0x09,9: Tab\t\t0x11,17: DC1-XON\t\t0x19,25: EndMedium");
+  puts("0x02,2: STX\t0x0A,10: LF\t\t0x12,18: DC2\t\t0x1A,26: Substitute");
+  puts("0x03,3: ETX\t0x0B,11: VTab\t\t0x13,19: DC3-XOFF\t\t0x1B,27: Escape");
+  puts("0x04,4: EOT\t0x0C,12: ClearScreen\t0x14,20: DC4\t\t0x1C,28: FileSplit");
+  puts("0x05,5: Enquiry\t0x0D,13: CR\t\t0x15,21: NAK\t\t0x1D,29: GrpSplit");
+  puts("0x06,6: ACK\t0x0E,14: ShiftOut\t0x16,22: SYN\t\t0x1E,30: RecSplit");
+  puts("0x07,7: Bell\t0x0F,15: ShiftIn\t0x17,23: EndTransBlk\t0x1F,31: UnitSplit");
 }
 
 /******** help_show_csv ********/
