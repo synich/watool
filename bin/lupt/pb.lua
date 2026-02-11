@@ -1,4 +1,4 @@
---ver251207
+--ver260211
 function fmt(str, ...)
   local hole, lst = "{}", {...}
   local res = str:gsub(hole, function()
@@ -18,6 +18,13 @@ end
 
 function dprint(...)
   if os.getenv("PB_DEBUG") then print(...)end
+end
+
+function _wc(fname, txt) -- write text to file
+  local fout = io.open(fname, "w"); fout:write(txt); fout:close()
+end
+function _rc(fname)
+  local fout = io.open(fname, "r");local txt=fout:read("*a"); fout:close(); return txt
 end
 
 string.replace = string.gsub
