@@ -1,4 +1,4 @@
---ver260211
+--ver260217
 function fmt(str, ...)
   local hole, lst = "{}", {...}
   local res = str:gsub(hole, function()
@@ -72,10 +72,12 @@ end
 
 function os.popen(cmd)
   local function fkopen(cmd)
-    os.execute(cmd.." >fk.txt")
-    local fd = io.open("fk.txt")
-    local t = fd:read("*a")
-    fd:close()
+    local ok, t = os.execute(cmd.." >fk.txt")
+    if ok then
+      local fd = io.open("fk.txt")
+      t = fd:read("*a")
+      fd:close()
+    end
     return t
   end
   local function popen(cmd)
