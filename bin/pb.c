@@ -33,7 +33,7 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver260130\nascii\n"
+  printf("personal busybox %dbit ver260228\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip|comp [keyword]\n"
@@ -99,20 +99,20 @@ void err_pf(const char* format, ...){
 /******** show ascii char ********/
 void ascii(){
   int i = 32;
-  puts("Printable:");
-  for (; i<32+24; i++){
-    printf("0x%x,%d: %c\t\t0x%x,%d: %c\t\t0x%x,%d: %c\t\t0x%x,%d: %c\n",
-      i, i, i, i+24, i+24, i+24, i+48, i+48, i+48, i+72, i+72, i+72);
-  }
-  puts("\nControl:");
+  puts("Control:");
   puts("0x00,0: NUL\t0x08,8: Backspace\t0x10,16: DataLnkEscape\t0x18,24: Cancel");
-  puts("0x01,1: SOH\t0x09,9: Tab\t\t0x11,17: DC1-XON\t\t0x19,25: EndMedium");
+  puts("0x01,1: SOH\t0x09,9: Tab\t\t0x11,17: DC1-XON\t0x19,25: EndMedium");
   puts("0x02,2: STX\t0x0A,10: LF\t\t0x12,18: DC2\t\t0x1A,26: Substitute");
-  puts("0x03,3: ETX\t0x0B,11: VTab\t\t0x13,19: DC3-XOFF\t\t0x1B,27: Escape");
+  puts("0x03,3: ETX\t0x0B,11: VTab\t\t0x13,19: DC3-XOFF\t0x1B,27: Escape");
   puts("0x04,4: EOT\t0x0C,12: ClearScreen\t0x14,20: DC4\t\t0x1C,28: FileSplit");
   puts("0x05,5: Enquiry\t0x0D,13: CR\t\t0x15,21: NAK\t\t0x1D,29: GrpSplit");
   puts("0x06,6: ACK\t0x0E,14: ShiftOut\t0x16,22: SYN\t\t0x1E,30: RecSplit");
   puts("0x07,7: Bell\t0x0F,15: ShiftIn\t0x17,23: EndTransBlk\t0x1F,31: UnitSplit");
+  puts("\nPrintable:");
+  for (; i<32+24; i++){
+    printf("0x%x,%d: %c\t\t0x%x,%d: %c\t\t0x%x,%d: %c\t\t0x%x,%d: %c\n",
+      i, i, i, i+24, i+24, i+24, i+48, i+48, i+48, i+72, i+72, i+72);
+  }
 }
 
 /******** help_show_csv ********/
@@ -435,11 +435,10 @@ void run_lua(int argc, char** argv){
       printf("run %s, type: %s\n", ret==0?"ok":"fail", lua_typename(L, val_t));
     }
   } else if (0==strcmp(argv[2], "-h")) {
-    puts("enhance with:\nfmt/fmtf; var_dump; ts; tie\n"
-    "map/reduce/filter/range(fn 1st,py-like)\n"
+    puts("enhance with:\nfmt/fmtf/var_dump/tie/range\n"
     "string.split/indexOf/replace/slice/search/trim; utf8.len/char/codes\n"
-    "table.join/pop...; bit32.band...\n"
-    "os.popen; dt.datediff/lsdir/lsfile; sqlite3\n"
+    "table.join/map/reduce/filter/pop...; bit32.band...\n"
+    "os.popen/ts; dt.datediff/lsdir/lsfile; sqlite3\n"
     "set.new/add/delete/has/clear/values\n"
     "enc.md5/sha1/btoa/atob; JSON.stringify/parse");
   } else {

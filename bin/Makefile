@@ -7,8 +7,8 @@
 
 CFLAGS = -I./inc/lua51 -I../lib/ -c -DUSE_WALIB
 
-ifeq ($(VENDOR), 1)
-  EXTCFL = -DUSE_VENDOR
+ifneq ($(VENDOR), )
+  EXTCFL = -DUSE_VENDOR=$(VENDOR)
   EXTLIB = sqlite3.o lsqlite3.o
 else
   EXTCFL =

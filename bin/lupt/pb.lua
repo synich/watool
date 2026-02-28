@@ -1,4 +1,5 @@
---ver260217
+--ver260228
+-------- global func --------
 function fmt(str, ...)
   local hole, lst = "{}", {...}
   local res = str:gsub(hole, function()
@@ -20,21 +21,37 @@ function dprint(...)
   if os.getenv("PB_DEBUG") then print(...)end
 end
 
-function _wc(fname, txt) -- write text to file
+function tie(t)
+  return setmetatable(t, {__index=table,
+  __tostring=function(t)local k=next(t) return "tbl-arr:"..#t..",1st_k:"..(k and k or "nil")end})
+end
+
+function range(a, b)
+	if not b then
+		b, a = a, 0
+	end
+	local _accum_0 = { }
+	local _len_0 = 1
+	for x = a, b - 1 do
+		_accum_0[_len_0] = x
+		_len_0 = _len_0 + 1
+	end
+	return _accum_0
+end
+
+if table.unpack then _G.unpack = table.unpack end
+
+-------- io extend --------
+function io._wc(fname, txt) -- write text to file
   local fout = io.open(fname, "w"); fout:write(txt); fout:close()
 end
-function _rc(fname)
+function io._rc(fname)
   local fout = io.open(fname, "r");local txt=fout:read("*a"); fout:close(); return txt
 end
 
+-------- string extend --------
 string.replace = string.gsub
 string.slice = string.sub
-os.system = os.execute
-
-function table.shift(t) if #t==0 then return nil end return table.remove(t, 1) end
-function table.unshift(t, ...) local v = {...} for i = #v, 1, -1 do table.insert(t, 1, v[i]) end return #t end
-function table.pop(t) if #t==0 then return nil end return table.remove(t) end
-function table.push(t, ...) local v={...} for _, n in ipairs(v) do table.insert(t, n) end return #t end
 
 function string.split(s, delim)
   local t = {}
@@ -70,9 +87,11 @@ function string.search(str, pat)
   if s then return s, e else return -1 end
 end
 
+-------- os extend --------
+os.system = os.execute
 function os.popen(cmd)
   local function fkopen(cmd)
-    local ok, t = os.execute(cmd.." >fk.txt")
+    local ok, t = os.execute(cmd.." 2>&1 >fk.txt")
     if ok then
       local fd = io.open("fk.txt")
       t = fd:read("*a")
@@ -81,7 +100,7 @@ function os.popen(cmd)
     return t
   end
   local function popen(cmd)
-    local fd = io.popen(cmd)
+    local fd = io.popen(cmd.." 2>&1")
     local t = fd:read("*a")
     fd:close()
     return t
@@ -94,7 +113,7 @@ function os.popen(cmd)
   return string.trim(r)
 end
 
-function ts(v)
+function os.ts(v)
   if type(v)=="number" then v=tostring(v) end
   local ret = "accept 6/8/10/13 digit, but input len is "..#v
   if #v ==8 then
@@ -111,12 +130,8 @@ function ts(v)
   return ret
 end
 
-function tie(t)
-  return setmetatable(t, {__index=table,
-  __tostring=function(t)local k=next(t) return "tbl-arr:"..#t..",1st_k:"..(k and k or "nil")end})
-end
-
-function map(f, lst)
+-------- table extend --------
+local function map(f, lst)
 	local _accum_0 = { }
 	local _len_0 = 1
 	for _index_0 = 1, #lst do
@@ -127,7 +142,7 @@ function map(f, lst)
 	return _accum_0
 end
 
-function filter(f, lst)
+local function filter(f, lst)
 	local _accum_0 = { }
 	local _len_0 = 1
 	for _index_0 = 1, #lst do
@@ -140,7 +155,7 @@ function filter(f, lst)
 	return _accum_0
 end
 
-function reduce(f, lst, init)
+local function reduce(f, lst, init)
 	local acc = init
 	for idx = 1, #lst do
 	  local x = lst[idx]
@@ -153,26 +168,16 @@ function reduce(f, lst, init)
 	return acc
 end
 
+function table.shift(t) if #t==0 then return nil end return table.remove(t, 1) end
+function table.unshift(t, ...) local v = {...} for i = #v, 1, -1 do table.insert(t, 1, v[i]) end return #t end
+function table.pop(t) if #t==0 then return nil end return table.remove(t) end
+function table.push(t, ...) local v={...} for _, n in ipairs(v) do table.insert(t, n) end return #t end
 table.join = table.concat
-if table.unpack then _G.unpack = table.unpack end
 table.map=function(t, f) return map(f, t) end
 table.filter=function(t,f) return filter(f, t) end
 table.reduce=function(t,f,i) return reduce(f,t,i) end
 
-function range(a, b)
-	if not b then
-		b, a = a, 0
-	end
-	local _accum_0 = { }
-	local _len_0 = 1
-	for x = a, b - 1 do
-		_accum_0[_len_0] = x
-		_len_0 = _len_0 + 1
-	end
-	return _accum_0
-end
-
--- set.lua like JS
+---- set.lua like JS ----
 set = {}
 set.__index = set
 function set.new(items)
@@ -187,7 +192,6 @@ function set:add(value) self._items[value] = true; return self end
 function set:delete(value) self._items[value] = nil; return self end
 function set:has(value) return self._items[value] ~= nil end
 function set:clear() self._items = {}; return self end
-function set:pairs() return pairs(self._items) end
 function set:values()
   local keys = {}
   for k in pairs(self._items) do table.insert(keys, k) end
@@ -199,9 +203,7 @@ function set:__tostring()
   return "set{" .. table.concat(vals, ", ") .. "}"
 end
 
---
--- json.lua
---
+---- json.lua ----
 -- Copyright (c) 2020 rxi
 --
 -- Permission is hereby granted, free of charge, to any person obtaining a copy of
