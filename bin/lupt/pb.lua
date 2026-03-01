@@ -1,22 +1,35 @@
 --ver260228
 -------- global func --------
 function fmt(str, ...)
-  local hole, lst = "{}", {...}
-  local res = str:gsub(hole, function()
-    if #lst == 0 then return hole end
-    return table.remove(lst, 1)
+  local args, i = {...}, 1
+  return str:gsub("{}", function()
+    if i > #args then return "{}" end
+    local val = args[i]
+    i = i + 1
+    return tostring(val)
   end)
-  return res
 end
-
 function fmtf(s,...) return string.format(s,...) end
 
-function var_dump(t)
-  if "table"==type(t) then
-    local k,v;  for k,v in pairs(t) do print(k,v) end
-  else print(t) end
+function var_dump(t, indent)
+  indent = indent or 0
+  local prefix = string.rep("  ", indent)
+  if type(t) == "table" then
+    print(prefix .. "{")
+    for k, v in pairs(t) do
+      io.write(prefix .. "  [" .. tostring(k) .. "] = ")
+      if type(v) == "table" then
+        print("")
+        var_dump(v, indent + 2)
+      else
+        print(tostring(v))
+      end
+    end
+    print(prefix .. "}")
+  else
+    print(prefix .. tostring(t))
+  end
 end
-
 function dprint(...)
   if os.getenv("PB_DEBUG") then print(...)end
 end
@@ -26,17 +39,16 @@ function tie(t)
   __tostring=function(t)local k=next(t) return "tbl-arr:"..#t..",1st_k:"..(k and k or "nil")end})
 end
 
-function range(a, b)
-	if not b then
-		b, a = a, 0
-	end
-	local _accum_0 = { }
-	local _len_0 = 1
-	for x = a, b - 1 do
-		_accum_0[_len_0] = x
-		_len_0 = _len_0 + 1
-	end
-	return _accum_0
+function range(start, stop)
+  if stop == nil then
+    stop = start
+    start = 0
+  end
+  local res = {}
+  for i = start, stop - 1 do
+    table.insert(res, i)
+  end
+  return res
 end
 
 if table.unpack then _G.unpack = table.unpack end
@@ -77,9 +89,7 @@ function string.indexOf(str, srch, pos)
 end
 
 function string.trim(str)
-  local s = str:gsub("^%s+", "")
-  s = s:gsub("%s+$", "")  -- drop 2nd number
-  return s
+  return (str:gsub("^%s*(.-)%s*$", "%1"))
 end
 
 function string.search(str, pat)
@@ -196,6 +206,12 @@ function set:values()
   local keys = {}
   for k in pairs(self._items) do table.insert(keys, k) end
   return keys
+end
+function set:union(other)
+  local new_set = set.new()
+  for k in pairs(self._items) do new_set:add(k) end
+  for k in pairs(other._items) do new_set:add(k) end
+  return new_set
 end
 function set:__tostring()
   local vals = {}
