@@ -68,6 +68,16 @@ main(){
 main $@
 @@
 
+# comp_bat
+setlocal
+
+call :main %*
+exit /b %errorlevel%
+
+:main
+  exit /b 0
+@@
+
 # comp_html
 <!DOCTYPE html>
 <head>
