@@ -33,10 +33,10 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver260228\nascii\n"
+  printf("personal busybox %dbit ver260303\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
-  "snip|comp [keyword]\n"
+  "snip|comp [keyword] -- {pb}/pb_d/_pb_[snip|comp]\n"
   "xlispindent file|stdin\n"
 #ifdef SUPPORT_LUA
   "el file [luac] -- convert lua to c code\n"
@@ -436,7 +436,7 @@ void run_lua(int argc, char** argv){
     }
   } else if (0==strcmp(argv[2], "-h")) {
     puts("enhance with:\nfmt/fmtf/var_dump/tie/range\n"
-    "string.split/indexOf/replace/slice/search/trim; utf8.len/char/codes\n"
+    "string.split/indexOf/replace/slice/search/trim/at\n"
     "table.join/map/reduce/filter/pop...; bit32.band...\n"
     "os.popen/ts; dt.datediff/lsdir/lsfile; sqlite3\n"
     "set.new/add/delete/has/clear/values\n"

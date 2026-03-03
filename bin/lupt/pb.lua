@@ -97,6 +97,22 @@ function string.search(str, pat)
   if s then return s, e else return -1 end
 end
 
+function string.at(str, pos)
+  if not utf8 then return string.sub(str, pos, pos) end
+
+  local len = utf8.len(str)
+  if not len or len == 0 then return "" end
+  if pos > len or pos < -len then return "" end
+
+  -- unify to positive number
+  pos = pos > 0 and pos or len+1+pos
+  local start_byte = utf8.offset(str, pos)
+  if not start_byte then return "" end
+  local end_byte = utf8.offset(str, pos+1)
+  end_byte = end_byte and (end_byte-1) or #str
+  return str:sub(start_byte, end_byte)
+end
+
 -------- os extend --------
 os.system = os.execute
 function os.popen(cmd)
