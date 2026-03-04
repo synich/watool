@@ -1,4 +1,4 @@
---ver260228
+--ver260304
 -------- global func --------
 function fmt(str, ...)
   local args, i = {...}, 1
@@ -63,7 +63,14 @@ end
 
 -------- string extend --------
 string.replace = string.gsub
-string.slice = string.sub
+
+function string.slice(str, s, e)
+  if not utf8 then return string.sub(str, s, e) end
+  local s_byte = utf8.offset(str, s)
+  local e_byte = utf8.offset(str, e+1)
+  e_byte = e_byte and e_byte-1 or #str
+  return string.sub(str, s_byte, e_byte)
+end
 
 function string.split(s, delim)
   local t = {}
