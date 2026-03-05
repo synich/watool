@@ -1,4 +1,4 @@
---ver260304
+--ver260305
 -------- global func --------
 function fmt(str, ...)
   local args, i = {...}, 1
@@ -64,14 +64,6 @@ end
 -------- string extend --------
 string.replace = string.gsub
 
-function string.slice(str, s, e)
-  if not utf8 then return string.sub(str, s, e) end
-  local s_byte = utf8.offset(str, s)
-  local e_byte = utf8.offset(str, e+1)
-  e_byte = e_byte and e_byte-1 or #str
-  return string.sub(str, s_byte, e_byte)
-end
-
 function string.split(s, delim)
   local t = {}
   local p_start, p_next = 1, 1
@@ -102,6 +94,19 @@ end
 function string.search(str, pat)
   local s, e = string.find(str, pat, 1, false)
   if s then return s, e else return -1 end
+end
+
+function string.slice(str, s, e)
+  if not utf8 then return string.sub(str, s, e) end
+
+  local ulen = utf8.len(str)
+  if not e then e = ulen end
+  if s < 0 then s=ulen+1+s end
+  if e < 0 then e=ulen+1+e end
+  local s_byte = utf8.offset(str, s)
+  local e_byte = utf8.offset(str, e+1)
+  e_byte = e_byte and e_byte-1 or #str
+  return string.sub(str, s_byte, e_byte)
 end
 
 function string.at(str, pos)

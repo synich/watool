@@ -436,7 +436,7 @@ void run_lua(int argc, char** argv){
     }
   } else if (0==strcmp(argv[2], "-h")) {
     puts("enhance with:\nfmt/fmtf/var_dump/tie/range\n"
-    "string.split/indexOf/replace/slice/search/trim/at\n"
+    "string.split/indexOf/replace/search/trim/slice/at\n"
     "table.join/map/reduce/filter/pop...; bit32.band...\n"
     "os.popen/ts; dt.datediff/lsdir/lsfile; sqlite3\n"
     "set.new/add/delete/has/clear/values\n"
