@@ -1,4 +1,4 @@
---ver260305
+--ver260311
 -------- global func --------
 function fmt(str, ...)
   local args, i = {...}, 1
@@ -248,6 +248,30 @@ function set:__tostring()
   local vals = {}
   for k in pairs(self._items) do table.insert(vals, tostring(k)) end
   return "set{" .. table.concat(vals, ", ") .. "}"
+end
+
+---- sqlite3 extend ----
+if sqlite3 then
+function sqlite3_connect(nam)
+  local fd = io.open(nam, "r")
+  if fd then fd:close() else return nil end
+
+  local t = {db=nil}
+  t.db = sqlite3.open(nam) -- return db even nam not exists
+  function t.fetchone(self, sql) -- always return table and use [1] get col
+    for a in self.db:rows(sql) do return a end
+    return {}
+  end
+  function t.fetchall(self, sql) -- always return table and use [1][1] get col
+    local lst = {}
+    for a in self.db:rows(sql) do table.insert(lst, a) end
+    return lst
+  end
+  function t.execute(self, sql)
+    return self.db:exec(sql)
+  end
+  return t
+  end
 end
 
 ---- json.lua ----

@@ -361,10 +361,13 @@ static void* linit(){
 #endif
 #ifdef USE_VENDOR
     luaopen_lsqlite3(L);
-#if LUA_VERSION_NUM > 501
+  #if LUA_VERSION_NUM > 501
     lua_setglobal(L, "sqlite3");
-#endif
+  #endif
     //luaopen_lpeg(L);
+  #if LUA_VERSION_NUM > 501
+    //lua_setglobal(L, "lpeg");
+  #endif
 #endif
     lua_gc(L, LUA_GCRESTART, 0);
     lua_pop(L, lua_gettop(L));  // pop custom open_lib
@@ -436,8 +439,9 @@ void run_lua(int argc, char** argv){
     puts("enhance with:\nfmt/fmtf/var_dump/tie/range\n"
     "string.split/indexOf/replace/search/trim/slice/at\n"
     "table.join/map/reduce/filter/pop...; bit32.band...\n"
-    "os.popen/ts; dt.datediff/lsdir/lsfile; sqlite3\n"
+    "os.popen/ts; dt.datediff/lsdir/lsfile;\n"
     "set.new/add/delete/has/clear/values\n"
+    "sqlite3/sqlite3_connect/lpeg\n"
     "enc.md5/sha1/btoa/atob; JSON.stringify/parse");
   } else {
     int i=1, j=0;
@@ -580,6 +584,8 @@ void lsnip(int argc, char** argv){
   lua_pcall(L, 3, LUA_MULTRET, 0);
 }
 
+#define PB_MAIN
+#ifdef PB_MAIN
 int main(int argc, char** argv){
   int cmd = 0;
   char pp_txt[256] = {0};
@@ -592,7 +598,6 @@ int main(int argc, char** argv){
   } else {
     usage(); return 0;
   }
-  // need the case -1, other -2
   switch(cmd){
     case 'a':
       ascii();
@@ -621,4 +626,5 @@ int main(int argc, char** argv){
   }
   return 0;
 }
+#endif
 
