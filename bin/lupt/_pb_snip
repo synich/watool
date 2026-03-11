@@ -1,6 +1,16 @@
 
 # snip_sh
 if for var
+main(){
+  if [ $# -eq 0 ]; then
+    usage
+    return
+  fi
+  if [ "$1" = "x" ]; then
+  fi
+}
+
+main $@
 @@
 
 
@@ -43,10 +53,50 @@ res=$((1+2))     # calc
 @@
 
 
+# snip_bat
+syn
+setlocal
+
+call :main %*
+exit /b %errorlevel%
+
+:main
+  exit /b 0
+@@
+
+## snip_bat syn
+%var:~0,3%      rem get first 3 char
+%var:~0,-3%     rem drop last 3 char. positive mean len, neg mean position
+%var:a=b%       rem replace a -> b
+set "a=%b% %c%" rem concat b+" "+c -> a
+if /i "%1" == "ABC" (  rem ignore case
+  cmd1
+) else if %errorlevel% equ/leq/geq/neq %random% (
+  cmd2
+)
+for /f %%i in ('cmd') do (set var=%%i)
+@@
+
+
+# snip_make
+HOST = $(shell uname)
+ifeq ($(HOST), MinGW)
+	UTLIB = -L$(DEPATH)lib -lwa -lws2_32
+else
+	UTLIB = -L$(DEPATH)lib -lwa
+endif
+
+lib: $(OBJS)
+	@ar rcu libwa.a $^ $(UTLIB)
+
+obj/%.o : %.c
+	$(CC) $(CFLAGS) -o $@ $<
+@@
+
+
 # snip_awk
 syn var lib
 @@
-
 
 ## snip_awk syn
 $1 !~ /abc/ {print $1, $2}
@@ -98,7 +148,7 @@ strtonum(str)                            # (0xa) -> 10, oct/dec/hex
 
 
 # snip_lua
-syn lib
+syn lib clib
 @@
 
 
@@ -129,6 +179,31 @@ table.concat({"a","b"},"-")   -- return "a-b"
 table.insert({"a","b"},1,"c") -- no return, change inplace and get {"c","a","b"}
 table.remove({"a","b","c"},2) -- return b, change inplace and get {"a","c"}
 table.sort
+@@
+
+## snip_lua clib
+#include "lua.h"
+#include "lauxlib.h"
+
+static int
+sys_strerror (lua_State *L)
+{
+  const char *tocode = luaL_checkstring(L, 1);
+  lua_pushliteral(L, "OK");
+  return 1;
+}
+
+static luaL_Reg sys_lib[] = {
+  {"strerror",		sys_strerror},
+  {NULL, NULL}
+};
+
+LUALIB_API int
+luaopen_nlsys (lua_State *L)
+{
+  luaL_register(L, NULL, sys_lib);
+  return 1;
+}
 @@
 
 
@@ -169,6 +244,7 @@ str = `plain ${var}`
 
 
 # snip_go
+fn
 import | const | var (
 type T struct | interface { // if use inner then `t`
     nums []int
@@ -180,18 +256,11 @@ p := &Person{}              // call new() and assign pointer
 else if len(a)==1 && err!=nil {
 @@
 
-
-# snip_bat
-%var:~0,3%      rem get first 3 char
-%var:~0,-3%     rem drop last 3 char. positive mean len, neg mean position
-%var:a=b%       rem replace a -> b
-set "a=%b% %c%" rem concat b+" "+c -> a
-if /i "%1" == "ABC" (  rem ignore case
-  cmd1
-) else if %errorlevel% equ/leq/geq/neq %random% (
-  cmd2
-)
-for /f %%i in ('cmd') do (set var=%%i)
+## snip_go fn
+func foo(l *State) int{
+  return
+}
+func (self *State) bar() string
 @@
 
 
@@ -229,5 +298,118 @@ timestamp->int  UNIX_TIMESTAMP
 timestamp->str  DATE_FORMAT(ts, "yyyy-MM-dd HH:mm:ss")
 str->timestamp  cast(str as timestamp)
 MySQL use same function
+@@
+
+# snip_html
+<!DOCTYPE html>
+<head>
+  <meta charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title></title>
+  <script src="a.js"></script>
+  <link rel="stylesheet" href="a.css">
+</head>
+<body>
+
+</body>
+</html>
+@@
+
+# snip_rc
+A ICON "x.ico"
+@@
+
+# snip_wingui
+#include <windows.h>
+
+LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
+    LPSTR lpCmdLine, int nCmdShow)
+{
+    WNDCLASS wc = { 0 };
+    wc.lpszClassName = TEXT("MyWindowClass");
+    wc.hInstance = hInstance;
+    wc.lpfnWndProc = WndProc;
+    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    RegisterClass(&wc);
+
+    HWND hwnd = CreateWindow(
+        TEXT("MyWindowClass"),
+        TEXT("CmdWrap"),
+        WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT,
+        CW_USEDEFAULT,
+        500,
+        300,
+        NULL,
+        NULL,
+        hInstance,
+        NULL
+    );
+
+    ShowWindow(hwnd, nCmdShow);
+
+    MSG msg = { 0 };
+    while (GetMessage(&msg, NULL, 0, 0))
+    {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+    return (int)msg.wParam;
+}
+
+LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    static HWND hInput;
+    static HWND hButton;
+    static HWND hOutput;
+
+    switch (msg)
+    {
+    case WM_CREATE:
+        CreateWindow(TEXT("STATIC"), TEXT("Welcome"),
+            WS_CHILD | WS_VISIBLE | SS_LEFT,
+            10, 10, 70, 20,
+            hwnd, NULL, NULL, NULL);
+        hInput = CreateWindow(TEXT("EDIT"), NULL,
+            WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT,
+            80, 10, 120, 20,
+            hwnd, (HMENU)1, NULL, NULL);
+        hButton = CreateWindow(TEXT("BUTTON"), TEXT("Click Me"),
+            WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+            220, 10, 100, 20,
+            hwnd, (HMENU)2, NULL, NULL);
+        hOutput = CreateWindow(TEXT("EDIT"), NULL,
+            WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY,
+            10, 40, 310, 200,
+            hwnd, (HMENU)3, NULL, NULL);
+        break;
+
+    case WM_COMMAND:
+        if (HIWORD(wParam) == BN_CLICKED)
+        {
+            if ((HWND)lParam == hButton)
+            {
+                int len = GetWindowTextLength(hInput) + 1;
+                char text[256] = {0};
+                int len2 = GetWindowTextLength(hOutput);
+                GetWindowText(hInput, text, len);
+                SendMessage(hOutput , EM_SETSEL , (WPARAM)0 , (LPARAM)len2);
+                SendMessage(hOutput, EM_REPLACESEL, FALSE, (LPARAM)text);
+                SendMessage(hOutput, EM_REPLACESEL, FALSE, (LPARAM)"\r\n");
+            }
+        }
+        break;
+
+    case WM_DESTROY:
+        PostQuitMessage(0);
+        break;
+
+    default:
+        return DefWindowProc(hwnd, msg, wParam, lParam);
+    }
+    return 0;
+}
 @@
 

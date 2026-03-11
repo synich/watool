@@ -97,7 +97,10 @@ function string.search(str, pat)
 end
 
 function string.slice(str, s, e)
-  if not utf8 then return string.sub(str, s, e) end
+  if not utf8 then
+    e = not e and e or #str
+    return string.sub(str, s, e)
+  end
 
   local ulen = utf8.len(str)
   if not e then e = ulen end

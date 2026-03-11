@@ -33,10 +33,10 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver260309\nascii\n"
+  printf("personal busybox %dbit ver260311\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
-  "snip|comp [keyword] -- {pb}/pb_d/_pb_[snip|comp]\n"
+  "snip [keyword] -- {pb}/pb_d/_pb_snip[0-9]\n"
   "xlispindent file|stdin\n"
 #ifdef SUPPORT_LUA
   "el file [luac] -- convert lua to c code\n"
@@ -384,11 +384,9 @@ static void _conv2lua(char *fname){
   _cal_ext_fb2bb(cmd);
 }
 
-// bconv: 1-pylike conv lua 0-no conv
-static int ldofile(void* L, char *fname, int narg, int bconv){
+static int ldofile(void* L, char *fname, int narg){
   int status = 0, base;
 #ifdef SUPPORT_LUA
-  //if (1==bconv){ _conv2lua(fname);}
   status = luaL_loadfile(L, fname);
   if (0!=status) {
     err_pf("pb load %s fail[%d]: %s\n", fname, status, lua_tostring(L, -1));
@@ -421,7 +419,7 @@ void run_lua(int argc, char** argv){
     char fname[MAXLINE];
     get_exe_path(fname);
     strcat(fname, "init.lua");
-    ldofile(L, fname, 0, 0);
+    ldofile(L, fname, 0);
   } else if (0==strcmp(argv[2], "-e")) {
     char exprbuff[MAXLINE] = {0};
     int val_t, ret;
@@ -442,10 +440,9 @@ void run_lua(int argc, char** argv){
     "set.new/add/delete/has/clear/values\n"
     "enc.md5/sha1/btoa/atob; JSON.stringify/parse");
   } else {
-    int i=2, j=0, fpos=2, bconv=0;
+    int i=2, j=0, fpos=2;
     lua_newtable(L);
     if ('i'==argv[1][1]) {j=1;} // fennel self on arg[0]
-    //if (0==strcmp(argv[2], "-p")) {i=3;fpos=3;bconv=1;}
     int count = 0;
     for (; i < argc; i++) {
       lua_pushstring(L, argv[i]);
@@ -459,7 +456,7 @@ void run_lua(int argc, char** argv){
     if ('i'==argv[1][1]){ /*lisp*/
       luafn_fennel(L);
     } else {
-      ldofile(L, argv[fpos], count, bconv);
+      ldofile(L, argv[fpos], count);
     }
   }
   debug_lua(L, "exit lua");
@@ -562,22 +559,22 @@ void enc_lua(int argc, char *argv[])
 #ifndef _PB_LUAFN_SNIP
 static void luafn_snip(lua_State* L){puts("SNIP N/A");}
 #endif
-/*wh: 0-snip 1-comp*/
-void lsnip(int argc, char** argv, int wh){
+
+void lsnip(int argc, char** argv){
   char kwd[MAXLINE]={0};
   char fname[MAXLINE];
   char scname[16];
-  char* snip_flag[2] = {"snip", "comp"};
+  char* snip_flag = "snip";
   void *L = linit();
-  int i=0;
+  int i=1;
   get_exe_path(fname);
-  sprintf(scname, "_pb_%s", snip_flag[wh]);
+  sprintf(scname, "_pb_%s", snip_flag);
   strcat(fname, scname);
   for (; i<argc; i++){
     strcat(kwd, argv[i]);strcat(kwd, " ");
   }
   luafn_snip(L);
-  lua_pushstring(L, snip_flag[wh]);
+  lua_pushstring(L, snip_flag);
   lua_pushstring(L, fname);
   lua_pushstring(L, kwd);
   lua_pcall(L, 3, LUA_MULTRET, 0);
@@ -600,9 +597,6 @@ int main(int argc, char** argv){
     case 'a':
       ascii();
       break;
-    case 'c':
-      lsnip(argc-2, argv+2, 1);
-      break;
     case 'd':
       dyn2str(argc-1, argv+1);
       break;
@@ -616,7 +610,7 @@ int main(int argc, char** argv){
       run_lua(argc, argv);
       break;
     case 's':
-      lsnip(argc-2, argv+2, 0);
+      lsnip(argc-1, argv+1);
       break;
     case 'x':
       xlispindent(argc-1, argv+1);
