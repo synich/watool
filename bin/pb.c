@@ -415,16 +415,16 @@ static void lclose(void* L){
 void run_lua(int argc, char** argv){
 #ifdef SUPPORT_LUA
   void *L = linit();
-  if (2==argc) {
+  if (1==argc) {
     char fname[MAXLINE];
     get_exe_path(fname);
     strcat(fname, "init.lua");
     ldofile(L, fname, 0);
-  } else if (0==strcmp(argv[2], "-e")) {
+  } else if (0==strcmp(argv[1], "-e")) {
     char exprbuff[MAXLINE] = {0};
     int val_t, ret;
-    if (3==argc){usage();}
-    sprintf(exprbuff, "return %s", argv[3]);
+    if (2==argc){usage();}
+    sprintf(exprbuff, "return %s", argv[2]);
     ret = luaL_dostring(L, exprbuff);
     val_t = lua_type(L, -1);
     if ((LUA_TSTRING==val_t) || (LUA_TNUMBER==val_t)) {
@@ -432,7 +432,7 @@ void run_lua(int argc, char** argv){
     } else {
       printf("run %s, type: %s\n", ret==0?"ok":"fail", lua_typename(L, val_t));
     }
-  } else if (0==strcmp(argv[2], "-h")) {
+  } else if (0==strcmp(argv[1], "-h")) {
     puts("enhance with:\nfmt/fmtf/var_dump/tie/range\n"
     "string.split/indexOf/replace/search/trim/slice/at\n"
     "table.join/map/reduce/filter/pop...; bit32.band...\n"
@@ -440,9 +440,9 @@ void run_lua(int argc, char** argv){
     "set.new/add/delete/has/clear/values\n"
     "enc.md5/sha1/btoa/atob; JSON.stringify/parse");
   } else {
-    int i=2, j=0, fpos=2;
+    int i=1, j=0;
     lua_newtable(L);
-    if ('i'==argv[1][1]) {j=1;} // fennel self on arg[0]
+    if ('i'==argv[0][1]) {j=1;} // fennel self on arg[0]
     int count = 0;
     for (; i < argc; i++) {
       lua_pushstring(L, argv[i]);
@@ -450,13 +450,13 @@ void run_lua(int argc, char** argv){
       count++;
     }
     lua_setglobal(L, "arg");
-    for (i=2; i<argc; i++) {
+    for (i=1; i<argc; i++) {
       lua_pushstring(L, argv[i]);
     }
-    if ('i'==argv[1][1]){ /*lisp*/
+    if ('i'==argv[0][1]){ /*lisp*/
       luafn_fennel(L);
     } else {
-      ldofile(L, argv[fpos], count);
+      ldofile(L, argv[1], count);
     }
   }
   debug_lua(L, "exit lua");
@@ -607,7 +607,7 @@ int main(int argc, char** argv){
       help_show_csv(argc-1, argv+1);
       break;
     case 'l':
-      run_lua(argc, argv);
+      run_lua(argc-1, argv+1);
       break;
     case 's':
       lsnip(argc-1, argv+1);
