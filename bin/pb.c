@@ -33,7 +33,7 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver260311\nascii\n"
+  printf("personal busybox %dbit ver260312\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip [keyword] -- {pb}/pb_d/_pb_snip[0-9]\n"
@@ -471,25 +471,28 @@ void run_lua(int argc, char** argv){
 
 static int lwriter (lua_State *L, const void* p, size_t sz, void* ud) {
   FILE* fp= (FILE*)ud;
-  return fwrite(p, sz, 1, fp)==1?0:1;
+  return (fwrite(p, sz, 1, fp)!=1)&&(sz!=0);
 }
 
 static int _luac(char *fname){
 #ifdef SUPPORT_LUA
   void *L = linit();
   FILE* fp = fopen("luac.out", "wb");
+  int ret = 0;
   luaL_loadfile(L, fname);
 #if LUA_VERSION_NUM < 503
-  if (0 != lua_dump(L, lwriter, fp)){
+  ret = lua_dump(L, lwriter, fp);
 #else
-  if (0 != lua_dump(L, lwriter, fp, 1)){
+  ret = lua_dump(L, lwriter, fp, 1);
 #endif
-    err_pf("lua dump %s fail\n", fname);
+  if (0 != ret) {
+    err_pf("lua dump %s fail, code: %d\n", fname, ret);
+    _debug_lua(L, "dump fail");
   }
   fclose(fp);
   lclose(L);
 #endif
-  return 0;
+  return ret;
 }
 
 void enc_lua(int argc, char *argv[])
@@ -510,7 +513,7 @@ void enc_lua(int argc, char *argv[])
     sprintf(buf, "%s -s %s", argv[2], argv[1]);/*drop debug*/
     ret = system(buf);
   }
-  if (0!=ret){puts("luac fail");return;}
+  if (0!=ret){return;}
 
   sprintf(buf, "%s.c", argv[1]);
   pos = strchr(buf, '.');

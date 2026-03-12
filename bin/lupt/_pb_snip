@@ -77,6 +77,9 @@ if /i "%1" == "ABC" (  rem ignore case
 for /f %%i in ('cmd') do (set var=%%i)
 @@
 
+# snip_vbs
+cscript //nologo z.vbs
+@@
 
 # snip_make
 HOST = $(shell uname)
@@ -245,7 +248,9 @@ str = `plain ${var}`
 
 # snip_go
 fn
-import | const | var (
+package main
+import ("fmt")
+const | var (
 type T struct | interface { // if use inner then `t`
     nums []int
     prop map[string]int     // use sync.Map in parallel
@@ -267,7 +272,9 @@ func (self *State) bar() string
 # snip_re
 (..)\d*?\1  #non-greedy and group \1 capture, for same cap like 'ab0ab'
 (?<=xx)..   #lookbefore, assert `xx' before capture 2 char
-..(?=xx)    #lookafter, match `xx' but not capture
+(?<!xx)..   #lookbefore, assert not `xx' before
+..(?=xx)    #lookafter, not match(also not capture) but must has `xx'
+..(?:xx)    #non-capture. match `xx' but not capture with group
 ..(?!xx)    #lookafter, capture 2 char assert after not `xx'
 @@
 
@@ -293,8 +300,8 @@ git push origin master --force
 @@
 
 # snip_hive
-int->timestamp  FROM_UNIXTIME
-timestamp->int  UNIX_TIMESTAMP
+int->timestamp  FROM_UNIXTIME(int) --sec
+timestamp->int  UNIX_TIMESTAMP(ts) --sec
 timestamp->str  DATE_FORMAT(ts, "yyyy-MM-dd HH:mm:ss")
 str->timestamp  cast(str as timestamp)
 MySQL use same function
