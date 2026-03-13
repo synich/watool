@@ -584,7 +584,9 @@ void lsnip(int argc, char** argv){
   lua_pushstring(L, snip_flag);
   lua_pushstring(L, fname);
   lua_pushstring(L, kwd);
-  lua_pcall(L, 3, LUA_MULTRET, 0);
+  if (0 != lua_pcall(L, 3, LUA_MULTRET, 0)){
+    _debug_lua(L, "snip fail");
+  }
 }
 
 #define PB_MAIN
