@@ -33,7 +33,7 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver260312\nascii\n"
+  printf("personal busybox %dbit ver260314\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip [keyword] -- {pb}/pb_d/_pb_snip[0-9]\n"
@@ -589,45 +589,118 @@ void lsnip(int argc, char** argv){
   }
 }
 
-#define PB_MAIN
-#ifdef PB_MAIN
-int main(int argc, char** argv){
-  int cmd = 0;
-  char pp_txt[256] = {0};
-  if (1<argc){cmd = argv[1][0];
-  } else if (!isatty(fileno(stdin))) {
-    if (fgets(pp_txt, sizeof(pp_txt), stdin)!=NULL) {
-      cmd = pp_txt[0];
-      printf("not fully support pipe, %s", pp_txt);
-    } else {return 0;}
-  } else {
-    usage(); return 0;
-  }
+/************** main entry *********************/
+/** 按连续空格拆分字符串 0 成功，-1 失败
+ * @param input   输入字符串（会被修改，如需保留原串请先拷贝）
+ * - 连续空格（空格、制表符、换行等）视为一个分隔符 前导和尾随空格会被忽略
+ * - argv[0] 是第一个有效参数（不像 main 的 argv[0] 是程序名） */
+int split_args(char *input, int *argc, char ***argv) {
+    if (!input || !argc || !argv) { return -1; }
+
+    *argc = 0;
+    *argv = NULL;
+    if (input[0] == '\0') { return 0; }
+
+    // 第一遍：统计参数个数
+    int count = 0;
+    char *p = input;
+    int in_token = 0;
+    while (*p) {
+        if (!isspace((unsigned char)*p)) {
+            if (!in_token) {
+                count++;
+                in_token = 1;
+            }
+        } else {
+            in_token = 0;
+        }
+        p++;
+    }
+    if (count == 0) { return 0; }
+
+    // 分配 argv 数组（多分配一个 NULL 结尾，方便某些用法）
+    char **result = malloc((count + 1) * sizeof(char *));
+    if (!result) { return -1; }
+    result[count] = NULL;  // 标准 argv 以 NULL 结尾
+
+    // 第二遍：填充指针
+    int idx = 0;
+    p = input;
+    in_token = 0;
+    char *token_start = NULL;
+
+    while (*p) {
+        if (!isspace((unsigned char)*p)) {
+            if (!in_token) {
+                token_start = p;
+                in_token = 1;
+            }
+        } else {
+            if (in_token) {
+                *p = '\0';  // 原地截断
+                result[idx++] = token_start;
+                in_token = 0;
+            }
+        }
+        p++;
+    }
+
+    // 处理最后一个 token（如果字符串不以空格结尾）
+    if (in_token) {
+        result[idx++] = token_start;
+    }
+    *argc = count;
+    *argv = result;
+    return 0;
+}
+
+void entry(int cmd, int argc, char** argv){
   switch(cmd){
     case 'a':
       ascii();
       break;
     case 'd':
-      dyn2str(argc-1, argv+1);
+      dyn2str(argc, argv);
       break;
     case 'e':
-      enc_lua(argc-1, argv+1);
+      enc_lua(argc, argv);
       break;
     case 'h':
-      help_show_csv(argc-1, argv+1);
+      help_show_csv(argc, argv);
       break;
     case 'l':
-      run_lua(argc-1, argv+1);
+      run_lua(argc, argv);
       break;
     case 's':
-      lsnip(argc-1, argv+1);
+      lsnip(argc, argv);
       break;
     case 'x':
-      xlispindent(argc-1, argv+1);
+      xlispindent(argc, argv);
       break;
   default:
       usage();
       break;
+  }
+}
+
+#define PB_MAIN
+#ifdef PB_MAIN
+int main(int argc, char** argv){
+  int cmd = 0;
+  if (!isatty(fileno(stdin))) { /*call by pipe*/
+    char pp_txt[256] = {0};
+    if (fgets(pp_txt, sizeof(pp_txt), stdin)!=NULL) {
+      int prgc;
+      char** prgv;
+      cmd = pp_txt[0];
+      if (0==split_args(pp_txt, &prgc, &prgv)){
+        entry(cmd, prgc, prgv);
+        free(prgv);
+      } else {puts("can not parse args");}
+    }
+  } else { /*call by cli*/
+    if (1<argc){cmd = argv[1][0];}
+      entry(cmd, argc-1, argv+1);
   }
   return 0;
 }
