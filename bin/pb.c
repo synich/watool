@@ -654,7 +654,8 @@ int split_args(char *input, int *argc, char ***argv) {
     return 0;
 }
 
-void entry(int cmd, int argc, char** argv){
+void cli_entry(int argc, char** argv){
+  int cmd = (argc==0 ?0 :argv[0][0]);
   switch(cmd){
     case 'a':
       ascii();
@@ -683,24 +684,25 @@ void entry(int cmd, int argc, char** argv){
   }
 }
 
+void pipe_entry(char* pp_txt){
+  int prgc;
+  char** prgv;
+  if (0==split_args(pp_txt, &prgc, &prgv)){
+    cli_entry(prgc, prgv);
+    free(prgv);
+  } else {puts("can not parse args");}
+}
+
 #define PB_MAIN
 #ifdef PB_MAIN
 int main(int argc, char** argv){
-  int cmd = 0;
   if (!isatty(fileno(stdin))) { /*call by pipe*/
     char pp_txt[256] = {0};
     if (fgets(pp_txt, sizeof(pp_txt), stdin)!=NULL) {
-      int prgc;
-      char** prgv;
-      cmd = pp_txt[0];
-      if (0==split_args(pp_txt, &prgc, &prgv)){
-        entry(cmd, prgc, prgv);
-        free(prgv);
-      } else {puts("can not parse args");}
+      pipe_entry(pp_txt);
     }
   } else { /*call by cli*/
-    if (1<argc){cmd = argv[1][0];}
-      entry(cmd, argc-1, argv+1);
+    cli_entry(argc-1, argv+1);
   }
   return 0;
 }
