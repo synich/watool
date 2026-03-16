@@ -33,7 +33,7 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver260314\nascii\n"
+  printf("personal busybox %dbit ver260315\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip [keyword] -- {pb}/pb_d/_pb_snip[0-9]\n"
@@ -288,7 +288,7 @@ static void _debug_lua(lua_State *L, char* hint_mess){
     val_t = lua_type(L, i);
     char *idx_mean = "";
     if (i==stk_size){idx_mean = "\t<- top";} else if (1==i){idx_mean = "\t<- bot";}
-    err_pf("  %d or %d: %s", i, ri, lua_typename(L, val_t));
+    err_pf("  %d or %d <%s>:", i, ri, lua_typename(L, val_t));
     if (val_t==LUA_TSTRING) {err_pf(" %s", lua_tostring(L, i));}
     else if (val_t==LUA_TNUMBER) {err_pf(" %.2f", lua_tonumber(L, i));}
     else if (val_t==LUA_TTABLE) {int j=1;err_pf(" arrlen %d, key_5:", (int)lua_rawlen(L, i));
@@ -696,13 +696,17 @@ void pipe_entry(char* pp_txt){
 #define PB_MAIN
 #ifdef PB_MAIN
 int main(int argc, char** argv){
-  if (!isatty(fileno(stdin))) { /*call by pipe*/
-    char pp_txt[256] = {0};
-    if (fgets(pp_txt, sizeof(pp_txt), stdin)!=NULL) {
-      pipe_entry(pp_txt);
-    }
-  } else { /*call by cli*/
+  if (argc > 1) { /*call by cli*/
     cli_entry(argc-1, argv+1);
+  } else {
+    if (!isatty(fileno(stdin))) { /*call by pipe*/
+      char pp_txt[256] = {0};
+      if (fgets(pp_txt, sizeof(pp_txt), stdin)!=NULL) {
+        pipe_entry(pp_txt);
+      }
+    } else {
+      usage();
+    }
   }
   return 0;
 }
