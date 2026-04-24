@@ -1,13 +1,14 @@
---ver260311
+--ver260421
 -------- global func --------
 function fmt(str, ...)
   local args, i = {...}, 1
-  return str:gsub("{}", function()
+  local r = str:gsub("{}", function()
     if i > #args then return "{}" end
     local val = args[i]
     i = i + 1
     return tostring(val)
   end)
+  return r
 end
 function fmtf(s,...) return string.format(s,...) end
 
