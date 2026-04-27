@@ -166,8 +166,10 @@ function foo(a, b, ...)
       return t.k
     elseif t%2 == 1 then
       t = t~1   -- bitwise XOR
+      goto EOF
     end
   end
+::EOF::
 end
 @@
 
