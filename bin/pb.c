@@ -590,10 +590,10 @@ void lsnip(int argc, char** argv){
 }
 
 /************** main entry *********************/
-/** 按连续空格拆分字符串 0 成功，-1 失败
- * @param input   输入字符串（会被修改，如需保留原串请先拷贝）
- * - 连续空格（空格、制表符、换行等）视为一个分隔符 前导和尾随空格会被忽略
- * - argv[0] 是第一个有效参数（不像 main 的 argv[0] 是程序名） */
+/** split with spaces 0:ok -1:fail
+ * @param input   string, will be modified
+ * - spaces as one space, ignore leading and trailing space
+ * - argv[0] is also arg, not like main argv[0]  */
 int split_args(char *input, int *argc, char ***argv) {
     if (!input || !argc || !argv) { return -1; }
 
@@ -601,7 +601,7 @@ int split_args(char *input, int *argc, char ***argv) {
     *argv = NULL;
     if (input[0] == '\0') { return 0; }
 
-    // 第一遍：统计参数个数
+    // first time, count
     int count = 0;
     char *p = input;
     int in_token = 0;
@@ -618,12 +618,12 @@ int split_args(char *input, int *argc, char ***argv) {
     }
     if (count == 0) { return 0; }
 
-    // 分配 argv 数组（多分配一个 NULL 结尾，方便某些用法）
+    // one more argv end with NULL
     char **result = malloc((count + 1) * sizeof(char *));
     if (!result) { return -1; }
-    result[count] = NULL;  // 标准 argv 以 NULL 结尾
+    result[count] = NULL;
 
-    // 第二遍：填充指针
+    // second time fill pointer
     int idx = 0;
     p = input;
     in_token = 0;
@@ -637,7 +637,7 @@ int split_args(char *input, int *argc, char ***argv) {
             }
         } else {
             if (in_token) {
-                *p = '\0';  // 原地截断
+                *p = '\0';
                 result[idx++] = token_start;
                 in_token = 0;
             }
@@ -645,7 +645,7 @@ int split_args(char *input, int *argc, char ***argv) {
         p++;
     }
 
-    // 处理最后一个 token（如果字符串不以空格结尾）
+    // last token(not end with space)
     if (in_token) {
         result[idx++] = token_start;
     }
