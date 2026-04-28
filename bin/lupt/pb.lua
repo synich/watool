@@ -1,4 +1,4 @@
---ver260421
+--ver260428
 -------- global func --------
 function fmt(str, ...)
   local args, i = {...}, 1
@@ -50,6 +50,14 @@ function range(start, stop)
     table.insert(res, i)
   end
   return res
+end
+
+function lunit()
+  for k,v in pairs(_G) do
+    if k:match("^test") and type(v)=="function" then
+      print(fmt("==== UT name: {} ====", k)); v()
+    end
+  end
 end
 
 if table.unpack then _G.unpack = table.unpack end
