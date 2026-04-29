@@ -1,6 +1,6 @@
 
 # snip_sh
-if for var
+-- if for var --
 main(){
   if [ $# -eq 0 ]; then
     usage
@@ -54,7 +54,7 @@ res=$((1+2))     # calc
 
 
 # snip_bat
-syn
+-- syn --
 setlocal
 
 call :main %*
@@ -69,7 +69,7 @@ exit /b %errorlevel%
 %var:~0,-3%     rem drop last 3 char. positive mean len, neg mean position
 %var:a=b%       rem replace a -> b
 set "a=%b% %c%" rem concat b+" "+c -> a
-if /i "%1" == "ABC" (  rem ignore case
+if /i "%~1" == "ABC" (  rem ignore case and %~1 no quote over %1
   cmd1
 ) else if %errorlevel% equ/leq/geq/neq %random% (
   cmd2
@@ -249,7 +249,7 @@ str = `plain ${var}`
 
 
 # snip_go
-fn
+-- fn --
 package main
 import ("fmt")
 const | var (
