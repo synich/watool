@@ -52,12 +52,17 @@ function range(start, stop)
   return res
 end
 
-function lunit()
+function lunit(...)
+  local cnt, ok, msg = 0
   for k,v in pairs(_G) do
     if k:match("^test") and type(v)=="function" then
-      print(fmt("==== UT name: {} ====", k)); v()
+      print(fmt("==== UT name: {} ====", k)); cnt = cnt + 1
+      ok, msg = pcall(v,...)
+      if not ok then print(fmt("exp: {}", msg))
+      else print(fmt("result(1st): {}", msg)) end
     end
   end
+  print(fmt("==== RUN {} UT ====", cnt))
 end
 
 if table.unpack then _G.unpack = table.unpack end
