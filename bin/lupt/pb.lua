@@ -59,7 +59,7 @@ function lunit(...)
       print(fmt("==== UT name: {} ====", k)); cnt = cnt + 1
       ok, msg = pcall(v,...)
       if not ok then print(fmt("exp: {}", msg))
-      else print(fmt("result(1st): {}", msg)) end
+      else print("result(1st):", msg) end
     end
   end
   print(fmt("==== RUN {} UT ====", cnt))
