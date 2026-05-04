@@ -289,6 +289,23 @@ ssh -fN -L 0.0.0.0:l_port:r_ip:r_port -p r_port r_ip
 sed "addr1[,addr2!]{cmd1;!cmd2}"
 @@
 
+# snip_mermaid
+graph LR   TD
+A[py] -->[call] B(node)
+B -.-> C[/cpp/]
+B --- D{if}
+D ==> E[(db)]
+
+subgraph Tile_xx
+%% global ns, so B is the same [node] but F is new node
+B --> F
+end
+
+%% beauty only full line comment
+style A xx:xx
+class B proc
+classDef proc xx:xx
+@@
 
 # snip_git
 -- remove large file from repo
