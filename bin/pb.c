@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -10,7 +11,6 @@
   #define DIR_SEP "\\"
   #define PATH_SEP ';'
 #else
-  #include <unistd.h>
   #define DIR_SEP "/"
   #define PATH_SEP ':'
 #endif
