@@ -211,6 +211,20 @@ luaopen_nlsys (lua_State *L)
 }
 @@
 
+# snip_fnl
+(fn xyz [a1 a2]
+ "a big let block, implicit do"
+ (let [n "double quote"
+ m (.. n "-")      ;; only ", NOT '
+ lst [1 2 3]
+ tbl {:a 1 :b 2}   ;; : also str
+ ]                 ;; const
+ (var x (. lst 1)) ;; modifiable
+ (each [_ v (ipairs a1)]  ;; iter
+  (set x (- x 1)))
+ x           ;; no return, just exp
+))
+@@
 
 # snip_vim
 " scaffold, type more hint
