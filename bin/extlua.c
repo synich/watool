@@ -360,22 +360,6 @@ static int b64dec (lua_State *L) {
   return 1;
 }
 
-static const luaL_Reg enc_funcs[] = {
-  {"md5", md5},
-  {"sha1", sha1},
-  {"btoa", b64enc},
-  {"atob", b64dec},
-  {NULL, NULL}
-};
-
-LUALIB_API int luaopen_enc (lua_State *L) {
-  luaL_register(L, "enc", enc_funcs);
-  return 1;
-}
-#endif
-
-/********dt********/
-#ifdef USE_WALIB
 static int datediff (lua_State *L) {
   const char *from_day = luaL_checkstring(L, 1);
   const char *to_day = luaL_checkstring(L, 2);
@@ -384,6 +368,7 @@ static int datediff (lua_State *L) {
 }
 #endif
 
+/********px********/
 #include <dirent.h>
 #include <sys/stat.h>
 
@@ -434,6 +419,10 @@ static int lsfile (lua_State *L) {
 
 static const luaL_Reg dt_funcs[] = {
 #ifdef USE_WALIB
+  {"md5", md5},
+  {"sha1", sha1},
+  {"btoa", b64enc},
+  {"atob", b64dec},
   {"datediff", datediff},
 #endif
   {"lsdir", lsdir},
@@ -442,8 +431,8 @@ static const luaL_Reg dt_funcs[] = {
 };
 
 
-LUALIB_API int luaopen_dt (lua_State *L) {
-  luaL_register(L, "dt", dt_funcs);
+LUALIB_API int luaopen_px (lua_State *L) {
+  luaL_register(L, "px", dt_funcs);
   return 1;
 }
 
