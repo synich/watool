@@ -212,6 +212,7 @@ luaopen_nlsys (lua_State *L)
 @@
 
 # snip_fnl
+---- syn ----
 (fn xyz [a1 a2]
  "a big let block, implicit do"
  (let [n "double quote"
@@ -224,6 +225,19 @@ luaopen_nlsys (lua_State *L)
   (set x (- x 1)))
  x           ;; no return, just exp
 ))
+@@
+
+# snip_fnl syn
+->, ->>      ; pipe op like |>
+(-> 52
+    (+ 91 2) ; (+ 52 91 2)
+    (- 8)    ; (- (+ 52 91 2) 8)
+    (print "answer")) ; (print (- (+ 52 91 2) 8) "answer")
+
+while & when
+(while (not done?)
+  (when (< 0.95 (math.random))
+    (set done? true)))
 @@
 
 # snip_vim
