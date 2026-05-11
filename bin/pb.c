@@ -409,6 +409,51 @@ static void lclose(void* L){
 #endif
 }
 
+static void _lua_expr(lua_State *L, int argc, char** argv){
+  char exprbuff[MAXLINE] = {0};
+  int val_t, ret;
+  if (2==argc){usage();}
+  sprintf(exprbuff, "return %s", argv[2]);
+  ret = luaL_dostring(L, exprbuff);
+  val_t = lua_type(L, -1);
+  if ((LUA_TSTRING==val_t) || (LUA_TNUMBER==val_t)) {
+    puts(lua_tostring(L, -1));
+  } else {
+    printf("run %s, type: %s\n", ret==0?"ok":"fail", lua_typename(L, val_t));
+  }
+}
+
+static void _lua_help(){
+  puts("enhance with:\nfmt/fmtf/var_dump/tie/range/lunit\n"
+  "string.split/indexOf/replace/search/trim/slice/at\n"
+  "table.join/map/reduce/filter/pop...; bit32.band...\n"
+  "os.popen/ts; JSON.stringify/parse\n"
+  "set.new/add/delete/has/clear/values\n"
+  "sqlite3/sqlite3_connect; lpeg\n"
+  "px.md5/sha1/btoa/atob/datediff/lsdir/lsfile");
+}
+
+static void _lua_dofile(lua_State* L, int argc, char** argv){
+  int i=1, j=0;
+  lua_newtable(L);
+  if ('i'==argv[0][1]) {j=1;} // fennel self on arg[0]
+  int count = 0;
+  for (; i < argc; i++) {
+    lua_pushstring(L, argv[i]);
+    lua_rawseti(L, -2, j++);
+    count++;
+  }
+  lua_setglobal(L, "arg");
+  for (i=1; i<argc; i++) {
+    lua_pushstring(L, argv[i]);
+  }
+  if ('i'==argv[0][1]){ /*lisp*/
+    luafn_fennel(L);
+  } else {
+    ldofile(L, argv[1], count);
+  }
+}
+
 void run_lua(int argc, char** argv){
 #ifdef SUPPORT_LUA
   void *L = linit();
@@ -417,44 +462,17 @@ void run_lua(int argc, char** argv){
     get_exe_path(fname);
     strcat(fname, "init.lua");
     ldofile(L, fname, 0);
-  } else if (0==strcmp(argv[1], "-e")) {
-    char exprbuff[MAXLINE] = {0};
-    int val_t, ret;
-    if (2==argc){usage();}
-    sprintf(exprbuff, "return %s", argv[2]);
-    ret = luaL_dostring(L, exprbuff);
-    val_t = lua_type(L, -1);
-    if ((LUA_TSTRING==val_t) || (LUA_TNUMBER==val_t)) {
-      puts(lua_tostring(L, -1));
-    } else {
-      printf("run %s, type: %s\n", ret==0?"ok":"fail", lua_typename(L, val_t));
-    }
-  } else if (0==strcmp(argv[1], "-h")) {
-    puts("enhance with:\nfmt/fmtf/var_dump/tie/range/lunit\n"
-    "string.split/indexOf/replace/search/trim/slice/at\n"
-    "table.join/map/reduce/filter/pop...; bit32.band...\n"
-    "os.popen/ts; JSON.stringify/parse\n"
-    "set.new/add/delete/has/clear/values\n"
-    "sqlite3/sqlite3_connect; lpeg\n"
-    "px.md5/sha1/btoa/atob/datediff/lsdir/lsfile");
   } else {
-    int i=1, j=0;
-    lua_newtable(L);
-    if ('i'==argv[0][1]) {j=1;} // fennel self on arg[0]
-    int count = 0;
-    for (; i < argc; i++) {
-      lua_pushstring(L, argv[i]);
-      lua_rawseti(L, -2, j++);
-      count++;
-    }
-    lua_setglobal(L, "arg");
-    for (i=1; i<argc; i++) {
-      lua_pushstring(L, argv[i]);
-    }
     if ('i'==argv[0][1]){ /*lisp*/
-      luafn_fennel(L);
-    } else {
-      ldofile(L, argv[1], count);
+      _lua_dofile(L, argc, argv);
+    } else { /*lua*/
+      if (0==strcmp(argv[1], "-e")) {
+        _lua_expr(L, argc, argv);
+      } else if (0==strcmp(argv[1], "-h")) {
+        _lua_help();
+      } else {
+        _lua_dofile(L, argc, argv);
+      }
     }
   }
   debug_lua(L, "exit lua");
