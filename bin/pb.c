@@ -22,7 +22,6 @@
   #include "lualib.h"
   int luaopen_utf8(lua_State *L);
   int luaopen_px(lua_State *L);
-  int luaopen_bit32(lua_State *L);
 #ifdef USE_VENDOR
   int luaopen_lsqlite3(lua_State *L);
   //int luaopen_lpeg (lua_State *L);
@@ -30,7 +29,7 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver260511\nascii\n"
+  printf("personal busybox %dbit ver260512\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip [keyword] -- {pb}/pb_d/_pb_snip[0-9]\n"
@@ -352,7 +351,6 @@ static void* linit(){
     luaopen_utf8(L);
 #endif
     luaopen_px (L);
-    luaopen_bit32(L);
 #ifdef USE_VENDOR
     luaopen_lsqlite3(L);
   #if LUA_VERSION_NUM > 501
@@ -426,11 +424,11 @@ static void _lua_expr(lua_State *L, int argc, char** argv){
 static void _lua_help(){
   puts("enhance with:\nfmt/fmtf/var_dump/tie/range/lunit\n"
   "string.split/indexOf/replace/search/trim/slice/at\n"
-  "table.join/map/reduce/filter/pop...; bit32.band...\n"
+  "table.join/map/reduce/filter/pop...\n"
   "os.popen/ts; JSON.stringify/parse\n"
   "set.new/add/delete/has/clear/values\n"
   "sqlite3/sqlite3_connect; lpeg\n"
-  "px.md5/sha1/btoa/atob/datediff/lsdir/lsfile");
+  "px.md5/sha1/btoa/atob/datediff/lsdir/lsfile/band");
 }
 
 static void _lua_dofile(lua_State* L, int argc, char** argv){

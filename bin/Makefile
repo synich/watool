@@ -5,11 +5,11 @@
 # * lupt/fennel - fennel
 # * lex.l - [opt] parse python like to lua
 
-CFLAGS = -I./inc/lua51 -I../lib/ -c -DUSE_WALIB
+CFLAGS = -I./inc/lua55 -I../lib/ -c -DUSE_WALIB
 
 ifneq ($(VENDOR), )
   EXTCFL = -DUSE_VENDOR=$(VENDOR)
-  EXTLIB = sqlite3.o lsqlite3.o
+  EXTLIB = ./obj/sqlite3.o ./obj/lsqlite3.o
 else
   EXTCFL =
   EXTLIB =
@@ -25,8 +25,8 @@ pb: pb.c extlua.o
 	@echo build pb with VENDOR=$(VENDOR) and FLAGS=$(EXTCFL)
 	@echo export/set VENDOR=1/0  then make again
 	@gcc $(CFLAGS) $(EXTCFL) pb.c
-	@gcc -o pb extlua.o pb.o $(RES) $(EXTLIB) -L./lib/ -L../lib/ -llua -lwa -lm
-	@strip pb
+	gcc -o pb extlua.o pb.o $(RES) $(EXTLIB) -L./lib/ -L../lib/ -lwa -llua -lm
+	@strip pb.exe
 
 extlua.o: extlua.c
 	@gcc $(CFLAGS) extlua.c

@@ -11,6 +11,7 @@
 #define luaL_register(L,name,reg)  luaL_newlib(L,reg);lua_setglobal(L,name)
 #endif
 
+/********utf8********/
 #if LUA_VERSION_NUM < 503
 #define lutf8lib_c
 #define LUA_LIB
@@ -316,7 +317,7 @@ LUALIB_API int luaopen_utf8 (lua_State *L) {
 #endif
 
 
-/********enc********/
+/********px-walib********/
 #ifdef USE_WALIB
 #include "walib.h"
 
@@ -417,26 +418,6 @@ static int lsfile (lua_State *L) {
   return _scan_dir_file(L, 0);
 }
 
-static const luaL_Reg dt_funcs[] = {
-#ifdef USE_WALIB
-  {"md5", md5},
-  {"sha1", sha1},
-  {"btoa", b64enc},
-  {"atob", b64dec},
-  {"datediff", datediff},
-#endif
-  {"lsdir", lsdir},
-  {"lsfile", lsfile},
-  {NULL, NULL}
-};
-
-
-LUALIB_API int luaopen_px (lua_State *L) {
-  luaL_register(L, "px", dt_funcs);
-  return 1;
-}
-
-/********bit32********/
 static int band (lua_State *L) {
   int i, n=lua_gettop(L), r=0xFFFFFFFF;
   for (i=1; i<=n; i++){r &= lua_tointeger(L, i);}
@@ -458,7 +439,17 @@ static int bxor (lua_State *L) {
   return 1;
 }
 
-static const luaL_Reg bit32_funcs[] = {
+
+static const luaL_Reg px_funcs[] = {
+#ifdef USE_WALIB
+  {"md5", md5},
+  {"sha1", sha1},
+  {"btoa", b64enc},
+  {"atob", b64dec},
+  {"datediff", datediff},
+#endif
+  {"lsdir", lsdir},
+  {"lsfile", lsfile},
   {"band", band},
   {"bor",  bor},
   {"bxor", bxor},
@@ -466,8 +457,7 @@ static const luaL_Reg bit32_funcs[] = {
 };
 
 
-LUALIB_API int luaopen_bit32 (lua_State *L) {
-  luaL_register(L, "bit32", bit32_funcs);
+LUALIB_API int luaopen_px (lua_State *L) {
+  luaL_register(L, "px", px_funcs);
   return 1;
 }
-
