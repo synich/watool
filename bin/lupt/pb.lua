@@ -53,16 +53,23 @@ function range(start, stop)
 end
 
 function lunit(...)
-  local cnt, ok, msg = 0
-  for k,v in pairs(_G) do
+  local function _clk(flg, k, v, ...)
+    local ok, msg
     if k:match("^test") and type(v)=="function" then
-      print(fmt("==== UT name: {} ====", k)); cnt = cnt + 1
+      print(fmt("==== UT({}) name: {} ====", flg, k))
       ok, msg = pcall(v,...)
       if not ok then print(fmt("exp: {}", msg))
       else print("result(1st):", msg) end
     end
   end
-  print(fmt("==== RUN {} UT ====", cnt))
+  for k,v in pairs(_G) do
+    _clk("_G", k, v, ...)
+  end
+  for i = 1, 200 do
+    local k, v = debug.getlocal(2, i) -- 1(cur)+1 level find test*
+    if not k then break end
+    _clk("local", k, v, ...)
+  end
 end
 
 if table.unpack then _G.unpack = table.unpack end

@@ -5,7 +5,7 @@
 # * lupt/fennel - fennel
 # * lex.l - [opt] parse python like to lua
 
-CFLAGS = -I./inc/lua55 -I../lib/ -c -DUSE_WALIB
+CFLAGS = -I./inc/lua51 -I../lib/ -c -DUSE_WALIB
 
 ifneq ($(VENDOR), )
   EXTCFL = -DUSE_VENDOR=$(VENDOR)
@@ -26,7 +26,7 @@ pb: pb.c extlua.o
 	@echo export/set VENDOR=1/0  then make again
 	@gcc $(CFLAGS) $(EXTCFL) pb.c
 	gcc -o pb extlua.o pb.o $(RES) $(EXTLIB) -L./lib/ -L../lib/ -lwa -llua -lm
-	@strip pb.exe
+	@strip pb
 
 extlua.o: extlua.c
 	@gcc $(CFLAGS) extlua.c
