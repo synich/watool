@@ -73,6 +73,10 @@ rem def use goto to end(exit is ok, just favorite)
   for /f "delims=" %%I in ('fzf') do (
     set "sel_file=%%I"
   )
+  if not defined sel_file (
+    echo no file
+    goto :end
+  )
 rem !var! is special with for
   npp !sel_file!
   goto :end
