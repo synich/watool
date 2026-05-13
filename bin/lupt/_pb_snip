@@ -243,7 +243,8 @@ luaopen_nlsys (lua_State *L)
  tbl {:a 1 : m}   ;; : also str
  ]                 ;; const
  (var x (. lst 1)) ;; modifiable
- (each [_ v (ipairs a1)]  ;; iter
+ (each [i v (ipairs a1)
+   &until (> i 2)] ;; iter
   (set x (- x 1)))
  x           ;; no return, just exp
 ))
@@ -256,10 +257,12 @@ luaopen_nlsys (lua_State *L)
   (- 8)          ;; (- (+ 52 91 2) 8)
   (print "ans")) ;; (print (- (+ 52 91 2) 8) "ans")
 
-while & when
+while & when & for
 (while (not done?)
   (when (< 0.95 (math.random)) ;; like if but only ture
     (set done? true)))
+(for [i 1 10 2 &until (> i 5)]
+ (print i))
 @@
 
 # snip_fnl mcr
