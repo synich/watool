@@ -55,26 +55,47 @@ res=$((1+2))     # calc
 
 # snip_bat
 -- syn --
-setlocal
+setlocal EnableDelayedExpansion
 
-call :main %*
-exit /b %errorlevel%
+if "%1" == "" (
+  echo usage
+  exit /b %errorlevel%
+)
 
+rem call like fork, must with %* and (goto or exit)
+if "%1" == "f" (
+  call :main %*
+  exit /b %errorlevel%
+)
+
+rem def use goto to end(exit is ok, just favorite)
 :main
-  exit /b 0
+  for /f "delims=" %%I in ('fzf') do (
+    set "sel_file=%%I"
+  )
+rem !var! is special with for
+  npp !sel_file!
+  goto :end
+
+:end
+rem must end avoid exception
+endlocal
 @@
 
 ## snip_bat syn
 %var:~0,3%      rem get first 3 char
 %var:~0,-3%     rem drop last 3 char. positive mean len, neg mean position
 %var:a=b%       rem replace a -> b
+set name=%~n1
+set ext=%~x1
 set "a=%b% %c%" rem concat b+" "+c -> a
 if /i "%~1" == "ABC" (  rem ignore case and %~1 no quote over %1
   cmd1
 ) else if %errorlevel% equ/leq/geq/neq %random% (
   cmd2
 )
-for /f %%i in ('cmd') do (set var=%%i)
+rem single quote in for is `` in shell, and use double quote after set is good
+for /f %%i in ('cmd') do (set "var=%%i")
 @@
 
 # snip_vbs
