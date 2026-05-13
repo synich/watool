@@ -40,13 +40,16 @@ function tie(t)
   __tostring=function(t)local k=next(t) return "tbl-arr:"..#t..",1st_k:"..(k and k or "nil")end})
 end
 
-function range(start, stop)
+function range(start, stop, step)
+  step = step or 1
   if stop == nil then
     stop = start
     start = 0
   end
   local res = {}
-  for i = start, stop - 1 do
+  local end_iter = stop-1
+  if step < 0 then end_iter = stop+1 end
+  for i = start, end_iter, step do
     table.insert(res, i)
   end
   return res

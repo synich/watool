@@ -57,13 +57,14 @@ res=$((1+2))     # calc
 -- syn --
 setlocal EnableDelayedExpansion
 
-if "%1" == "" (
+if "%~1" == "" (
   echo usage
   exit /b %errorlevel%
 )
 
 rem call like fork, must with %* and (goto or exit)
 if "%1" == "f" (
+  shift  rem %* drop %1(f)
   call :main %*
   exit /b %errorlevel%
 )
@@ -263,6 +264,9 @@ while & when & for
     (set done? true)))
 (for [i 1 10 2 &until (> i 5)]
  (print i))
+
+(local lst (tie (range 5)))
+(: lst :map #(* $1 2))         ;; #{:a $1}/#[$1 $1]
 @@
 
 # snip_fnl mcr

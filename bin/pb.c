@@ -29,7 +29,7 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver260512\nascii\n"
+  printf("personal busybox %dbit ver260514\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip [keyword] -- {pb}/pb_d/_pb_snip[0-9]\n"
@@ -422,7 +422,7 @@ static void _lua_expr(lua_State *L, int argc, char** argv){
 }
 
 static void _lua_help(){
-  puts("enhance with:\nfmt/fmtf/var_dump/tie/range/lunit\n"
+  puts("enhance with:\nfmt/fmtf/var_dump/tie/range[0,n)/lunit\n"
   "string.split/indexOf/replace/search/trim/slice/at\n"
   "table.join/map/reduce/filter/pop...\n"
   "os.popen/ts; JSON.stringify/parse\n"
