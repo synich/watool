@@ -1,6 +1,6 @@
 --ver260514
 -------- global func --------
-function fmt(str, ...)
+local function _fmt(str, ...)
   local args, i = {...}, 1
   local r = str:gsub("{}", function()
     if i > #args then return "{}" end
@@ -10,7 +10,14 @@ function fmt(str, ...)
   end)
   return r
 end
-function fmtf(s,...) return string.format(s,...) end
+local function _fmtf(s,...) return string.format(s,...) end
+function fmt(s, ...)
+  if s:find("{}") then
+    return _fmt(s, ...)
+  else
+    return _fmtf(s, ...)
+  end
+end
 
 function var_dump(t, indent)
   indent = indent or 0
@@ -31,16 +38,16 @@ function var_dump(t, indent)
     print(prefix .. tostring(t))
   end
 end
-function dprint(...)
-  if os.getenv("PB_DEBUG") then print(...)end
-end
 
 function tie(t)
   return setmetatable(t, {__index=table,
   __tostring=function(t)local k=next(t) return "tbl-arr:"..#t..",1st_k:"..(k and k or "nil")end})
 end
 
-function range(start, stop, step)
+-------- pb extend --------
+pb = {}
+
+pb.range = function(start, stop, step)
   step = step or 1
   if stop == nil then
     stop = start
@@ -55,7 +62,7 @@ function range(start, stop, step)
   return res
 end
 
-function lunit(...)
+pb.lunit = function(...)
   local function _clk(flg, k, v, ...)
     local ok, msg
     if k:match("^test") and type(v)=="function" then
@@ -75,7 +82,37 @@ function lunit(...)
   end
 end
 
-if table.unpack then _G.unpack = table.unpack end
+pb.dprint = function (...)
+  if os.getenv("PB_DEBUG") then
+    local info = debug.getinfo(2, "Sl")
+    local fname = info.source:match("^@?(.+)$"):match("([^/\\]+)$") or "unknown"
+    local nowtime = os.date("%Y-%m-%d %H:%M:%S")
+    print(_fmt("[{}:{}]({}): ", fname, info.currentline, nowtime), ...)
+  end
+end
+
+if sqlite3 then
+pb.sqlite3_connect = function(nam)
+  local fd = io.open(nam, "r")
+  if fd then fd:close() else return nil end
+
+  local t = {db=nil}
+  t.db = sqlite3.open(nam) -- return db even nam not exists
+  function t.fetchone(self, sql) -- always return table and use [1] get col
+    for a in self.db:rows(sql) do return a end
+    return {}
+  end
+  function t.fetchall(self, sql) -- always return table and use [1][1] get col
+    local lst = {}
+    for a in self.db:rows(sql) do table.insert(lst, a) end
+    return lst
+  end
+  function t.execute(self, sql)
+    return self.db:exec(sql)
+  end
+  return t
+  end
+end
 
 -------- io extend --------
 function io._wc(fname, txt) -- write text to file
@@ -242,6 +279,7 @@ table.join = table.concat
 table.map=function(t, f) return map(f, t) end
 table.filter=function(t,f) return filter(f, t) end
 table.reduce=function(t,f,i) return reduce(f,t,i) end
+if not table.unpack then table.unpack = unpack end
 
 ---- set.lua like JS ----
 set = {}
@@ -273,30 +311,6 @@ function set:__tostring()
   local vals = {}
   for k in pairs(self._items) do table.insert(vals, tostring(k)) end
   return "set{" .. table.concat(vals, ", ") .. "}"
-end
-
----- sqlite3 extend ----
-if sqlite3 then
-function sqlite3_connect(nam)
-  local fd = io.open(nam, "r")
-  if fd then fd:close() else return nil end
-
-  local t = {db=nil}
-  t.db = sqlite3.open(nam) -- return db even nam not exists
-  function t.fetchone(self, sql) -- always return table and use [1] get col
-    for a in self.db:rows(sql) do return a end
-    return {}
-  end
-  function t.fetchall(self, sql) -- always return table and use [1][1] get col
-    local lst = {}
-    for a in self.db:rows(sql) do table.insert(lst, a) end
-    return lst
-  end
-  function t.execute(self, sql)
-    return self.db:exec(sql)
-  end
-  return t
-  end
 end
 
 ---- json.lua ----
@@ -682,4 +696,3 @@ function JSON.parse(str)
   end
   return res
 end
-
