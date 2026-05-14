@@ -1,4 +1,4 @@
---ver260428
+--ver260514
 -------- global func --------
 function fmt(str, ...)
   local args, i = {...}, 1
@@ -221,16 +221,17 @@ local function filter(f, lst)
 end
 
 local function reduce(f, lst, init)
-	local acc = init
-	for idx = 1, #lst do
-	  local x = lst[idx]
-      if idx==1 and not init then
-        acc = lst[idx]
-      else
-		acc = f(acc, x)
-      end
-	end
-	return acc
+  if #lst==0 and init==nil then error("Not allow 0-len array with nil init") end
+  local acc = init
+  for idx = 1, #lst do
+    local x = lst[idx]
+    if idx==1 and not init then
+      acc = lst[idx]
+    else
+      acc = f(acc, x)
+    end
+  end
+  return acc
 end
 
 function table.shift(t) if #t==0 then return nil end return table.remove(t, 1) end
