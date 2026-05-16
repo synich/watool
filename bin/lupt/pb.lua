@@ -237,6 +237,8 @@ function os.ts(v)
   return ret
 end
 
+if px and px.setenv then os.setenv = px.setenv end
+
 -------- table extend --------
 local function map(f, lst)
 	local _accum_0 = { }

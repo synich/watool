@@ -372,6 +372,10 @@ static int datediff (lua_State *L) {
 /********px********/
 #include <dirent.h>
 #include <sys/stat.h>
+#ifdef _WIN32
+  #include <windows.h>
+  #define setenv(name, value, overwrite) _putenv_s(name, value)
+#endif
 
 static int _scan_dir_file (lua_State *L, int is_dir) { //dir 1, otherwise 0
   struct dirent *entry;
@@ -418,6 +422,27 @@ static int lsfile (lua_State *L) {
   return _scan_dir_file(L, 0);
 }
 
+static int l_setenv(lua_State *L) {
+    const char *name = luaL_checkstring(L, 1);
+    const char *value = luaL_checkstring(L, 2);
+
+    if (name == NULL || strlen(name) == 0) {
+        lua_pushboolean(L, 0);
+        lua_pushstring(L, "Environment variable name cannot be empty");
+        return 2;
+    }
+
+    int result = setenv(name, value, 1);
+    if (result == 0) {
+        lua_pushboolean(L, 1);
+        return 1;  // 成功，返回 true
+    } else {
+        lua_pushboolean(L, 0);
+        lua_pushstring(L, "Failed to set environment variable");
+        return 2;  // 失败，返回 false 和错误信息
+    }
+}
+
 static int band (lua_State *L) {
   int i, n=lua_gettop(L), r=0xFFFFFFFF;
   for (i=1; i<=n; i++){r &= lua_tointeger(L, i);}
@@ -450,6 +475,7 @@ static const luaL_Reg px_funcs[] = {
 #endif
   {"lsdir", lsdir},
   {"lsfile", lsfile},
+  {"setenv", l_setenv},
   {"band", band},
   {"bor",  bor},
   {"bxor", bxor},
