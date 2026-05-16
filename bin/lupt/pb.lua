@@ -1,4 +1,4 @@
---ver260514
+--ver260516
 -------- global func --------
 local function _fmt(str, ...)
   local args, i = {...}, 1
@@ -19,8 +19,8 @@ function fmt(s, ...)
   end
 end
 
-function var_dump(t, indent)
-  indent = indent or 0
+local function _var_dump(t)
+  local indent = 0
   local prefix = string.rep("  ", indent)
   if type(t) == "table" then
     print(prefix .. "{")
@@ -28,7 +28,7 @@ function var_dump(t, indent)
       io.write(prefix .. "  [" .. tostring(k) .. "] = ")
       if type(v) == "table" then
         print("")
-        var_dump(v, indent + 2)
+        _var_dump(v, indent + 2)
       else
         print(tostring(v))
       end
@@ -38,8 +38,13 @@ function var_dump(t, indent)
     print(prefix .. tostring(t))
   end
 end
+function var_dump(...)
+  local tt = {...}
+  for i,v in ipairs(tt) do _var_dump(v) end
+end
 
 function tie(t)
+  t = t or {}
   return setmetatable(t, {__index=table,
   __tostring=function(t)local k=next(t) return "tbl-arr:"..#t..",1st_k:"..(k and k or "nil")end})
 end
