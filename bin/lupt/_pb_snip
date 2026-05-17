@@ -109,6 +109,7 @@ cscript //nologo z.vbs
 
 # snip_make
 HOST = $(shell uname)
+$(info $(filter MinGW MSYS,$(HOST)))
 ifeq ($(HOST), MinGW)
 	UTLIB = -L$(DEPATH)lib -lwa -lws2_32
 else
@@ -255,7 +256,7 @@ luaopen_nlsys (lua_State *L)
 ))
 @@
 
-# snip_fnl syn
+## snip_fnl syn
 ->, ->>, doto    ;; pipe op like |>
 (-> 52
   (+ 91 2)       ;; (+ 52 91 2)
@@ -273,7 +274,7 @@ while & when & for
 (: lst :map #(* $1 2))         ;; #{:a $1}/#[$1 $1]
 @@
 
-# snip_fnl mcr
+## snip_fnl mcr
 (macro m1 [] ;; macro->fn
 `(let [a# 1] ;; must gensym
  (print a#)
@@ -281,6 +282,11 @@ while & when & for
 {: m1}       ;; when export, change macro->fn
 
 (import-macros {: m1} :my_macro)
+@@
+
+# snip_k
+elem: {x@y-1}  / index from 0
+elem["abcd";2] / call use ; sep params
 @@
 
 # snip_vim
