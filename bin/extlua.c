@@ -367,7 +367,59 @@ static int datediff (lua_State *L) {
   lua_pushinteger(L, wa_datediff(from_day, to_day));
   return 1;
 }
-#endif
+
+#define HTTPBUF 8192  // 更大的缓冲区
+
+/**
+ * Lua: http_get(ip, port, path, headers, buf_size)
+ * 发送HTTP请求并返回响应头和响应体 */
+static int l_http_get(lua_State *L) {
+    const char *ip = luaL_checkstring(L, 1);
+    int port = luaL_checkinteger(L, 2);
+    const char *path = luaL_optstring(L, 3, "/");
+    const char *headers = luaL_optstring(L, 4, "Content-Type: application/json\r\n");
+    int rcvbuf_size = luaL_optinteger(L, 5, 8192);
+
+    char recvbuf[HTTPBUF] = {0};
+    char request[1024];
+    snprintf(request, sizeof(request), "GET %s", path);
+    initsock();
+    wa_settcpopt(10);  // 10秒超时
+    int ret = http10((char*)ip, port, request, (char*)headers, "", recvbuf, HTTPBUF);
+    finisock();
+
+    if (ret >= 0) {
+        char *pos = strstr(recvbuf, "\r\n\r\n");
+        if (pos) {
+            // 分离响应头和响应体
+            size_t header_len = pos + 4 - recvbuf;
+            char *header = malloc(header_len + 1);
+            char *response_body = malloc(strlen(pos + 4) + 1);
+
+            if (header && response_body) {
+                strncpy(header, recvbuf, header_len);
+                header[header_len] = '\0';
+                strcpy(response_body, pos + 4);
+
+                lua_pushstring(L, response_body);
+                lua_pushstring(L, header);
+                free(header);
+                free(response_body);
+                return 2;  // 返回响应头和响应体
+            }
+        }
+
+        // 没有找到分隔符，返回整个响应
+        lua_pushstring(L, recvbuf);
+        lua_pushstring(L, "");
+        return 2;
+    } else {
+        lua_pushnil(L);
+        lua_pushfstring(L, "HTTP request failed: error code %d", ret);
+        return 2;
+    }
+}
+#endif /*USE_WALIB*/
 
 /********px********/
 #include <dirent.h>
@@ -472,6 +524,7 @@ static const luaL_Reg px_funcs[] = {
   {"btoa", b64enc},
   {"atob", b64dec},
   {"datediff", datediff},
+  {"http_get", l_http_get},
 #endif
   {"lsdir", lsdir},
   {"lsfile", lsfile},
