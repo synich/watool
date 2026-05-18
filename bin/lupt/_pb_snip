@@ -275,9 +275,9 @@ while & when & for
 @@
 
 ## snip_fnl mcr
-(macro m1 [] ;; macro->fn
-`(let [a# 1] ;; must gensym
- (print a#)
+(macro += [a b]  ;; macro->fn
+ `(let [a# 1]    ;; must gensym
+ (set ,a (+ ,a ,b a#))
 ))
 {: m1}       ;; when export, change macro->fn
 
