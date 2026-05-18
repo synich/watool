@@ -10,6 +10,12 @@
 #include <unistd.h>
 #include "walib.h"
 
+#ifdef _WIN32
+#define WA_CLOSE(fd) closesocket(fd)
+#else
+#define WA_CLOSE(fd) close(fd)
+#endif
+
 int initsock(void){
   int err = 0;
 #ifdef _WIN32
@@ -42,6 +48,7 @@ int opentcp(char* ip, unsigned short port){
 	if(connect(clientSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0)
 	{
 		perror("connect fail");
+        WA_CLOSE(clientSocket);
 		return -1;
 	}
 
@@ -62,34 +69,39 @@ void wa_settcpopt(int rcvtimeo){
 
 static int httpreq(int fd, char* sendbuf, char* recvbuf, int len){
   int iDataNum;
-  int iTotalNum = 0;
-  char tmpBuf[256];
+  int truncated = 0;
+  int curLen = 0;
+  char tmpBuf[4096];
 
-  send(fd, sendbuf, strlen(sendbuf), 0);
-  recvbuf[0] = 0;
-  fd_set set;
-  struct timeval tout;
-  tout.tv_sec = 1;
-  tout.tv_usec = 0;
-  if (sv.rcvtimeo != 0) {
-	tout.tv_sec = sv.rcvtimeo;
+  if (send(fd, sendbuf, strlen(sendbuf), 0)<=0){
+    return -1;
   }
+  recvbuf[0] = 0;
   while(1){
+    fd_set set;
+    struct timeval tout;
+    tout.tv_sec = sv.rcvtimeo ?sv.rcvtimeo :1;
+    tout.tv_usec = 0;
 	FD_ZERO(&set);
 	FD_SET(fd, &set);
 	int sr = select(fd+1, &set, NULL, NULL, &tout);
 	if ( 0<sr ) {
 	  if ( FD_ISSET(fd, &set) ) {
 		iDataNum = recv(fd, tmpBuf, sizeof(tmpBuf)-1, 0);
-		tmpBuf[iDataNum] = 0;
-		iTotalNum += iDataNum;
+		//tmpBuf[iDataNum] = 0;
 		if ( iDataNum <= 0) {
 		  break;
 		}
-		if (iTotalNum < len) {
-		  strncat(recvbuf, tmpBuf, iDataNum);
+		if (curLen+iDataNum < len) {
+		  memcpy(recvbuf+curLen, tmpBuf, iDataNum);
+          curLen += iDataNum;
 		} else {
-		  strncat(recvbuf, tmpBuf, len-strlen(recvbuf)-1);
+          int copylen = len - curLen -1;
+          if (copylen > 0) {
+		    memcpy(recvbuf+curLen, tmpBuf, copylen);
+            curLen += copylen;
+          }
+          truncated = 1;
 		  break;
 		}
 	  } else {
@@ -99,7 +111,8 @@ static int httpreq(int fd, char* sendbuf, char* recvbuf, int len){
 		return sr-1;
 	}
   }
-  return strlen(recvbuf);
+  recvbuf[curLen] = 0;
+  return truncated ?-2 :curLen;
 }
 
 int http10(char* ip, int port, char* mthurl, char* header, char* body,
@@ -108,7 +121,7 @@ int http10(char* ip, int port, char* mthurl, char* header, char* body,
   int ret = -1;
   int bodylen = body?strlen(body):0;
   if (fd != -1) {
-    int sndlen = strlen(mthurl)+ (header?strlen(header):0) + bodylen;
+    int sndlen = strlen(mthurl)+ strlen(ip)+ (header?strlen(header):0) + bodylen;
     char* sendbuf = malloc(sndlen+128);
 	/*Some server response but not close sock, so use read timeout
 	struct timeval tout;
@@ -120,7 +133,7 @@ int http10(char* ip, int port, char* mthurl, char* header, char* body,
     ret = httpreq(fd, sendbuf, recvbuf, len);
     free(sendbuf);
     shutdown(fd, 2);/*windows close not terminate TCP state, use shutdown */
-    close(fd);
+    WA_CLOSE(fd);
   }
   return ret;
 }

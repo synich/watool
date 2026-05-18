@@ -371,20 +371,22 @@ static int datediff (lua_State *L) {
 #define HTTPBUF 8192  // 更大的缓冲区
 
 /**
- * Lua: http_get(ip, port, path, headers, buf_size)
- * 发送HTTP请求并返回响应头和响应体 */
+ * Lua: http_get(ip_port, path, headers, buf_size) **/
 static int l_http_get(lua_State *L) {
-    const char *ip = luaL_checkstring(L, 1);
-    int port = luaL_checkinteger(L, 2);
-    const char *path = luaL_optstring(L, 3, "/");
-    const char *headers = luaL_optstring(L, 4, "Content-Type: application/json\r\n");
-    int rcvbuf_size = luaL_optinteger(L, 5, 8192);
+    char *addr = (char*)luaL_checkstring(L, 1);
+    const char *path = luaL_optstring(L, 2, "/");
+    const char *headers = luaL_optstring(L, 3, "Content-Type: application/json\r\n");
+    int rcvbuf_size = luaL_optinteger(L, 4, 8192);
 
     char recvbuf[HTTPBUF] = {0};
     char request[1024];
+    char *pos = strchr(addr, ':');
+    *pos = 0;
+    char *ip = addr;
+    int port = atoi(pos+1);
     snprintf(request, sizeof(request), "GET %s", path);
     initsock();
-    wa_settcpopt(10);  // 10秒超时
+    wa_settcpopt(10);  // 10 seconds timeout
     int ret = http10((char*)ip, port, request, (char*)headers, "", recvbuf, HTTPBUF);
     finisock();
 
