@@ -368,26 +368,36 @@ static int datediff (lua_State *L) {
   return 1;
 }
 
-#define HTTPBUF 8192  // 更大的缓冲区
-
 /**
- * Lua: http_get(ip_port, path, headers, buf_size) **/
-static int l_http_get(lua_State *L) {
-    char *addr = (char*)luaL_checkstring(L, 1);
-    const char *path = luaL_optstring(L, 2, "/");
-    const char *headers = luaL_optstring(L, 3, "Content-Type: application/json\r\n");
-    int rcvbuf_size = luaL_optinteger(L, 4, 8192);
-
-    char recvbuf[HTTPBUF] = {0};
+ * Lua: http_get(url, headers, buf_size) **/
+static int _http_do(const char* mth, lua_State *L) {
+#define URL_LEN 1024
+    char url[URL_LEN] = {0};
+    strncpy(url, luaL_checkstring(L, 1), URL_LEN-1);
+    char* body = "";
+    int h_pos = 2;
+    if (0==strcmp(mth, "POST")){
+        body = (char*)luaL_checkstring(L, 2);
+        h_pos = 3;
+    }
+    const char *headers = luaL_optstring(L, h_pos, "Content-Type: application/json\r\n");
+    int rcvbuf_size = luaL_optinteger(L, h_pos+1, 8192);
+    char* recvbuf = (char*)malloc(rcvbuf_size); recvbuf[0] = 0;
     char request[1024];
-    char *pos = strchr(addr, ':');
+    char *pos = strchr(url, ':');
+    char *port_s = pos+1;
     *pos = 0;
-    char *ip = addr;
-    int port = atoi(pos+1);
-    snprintf(request, sizeof(request), "GET %s", path);
+    char *ip = url;
+    pos = strchr(port_s, '/');
+    *pos = 0;
+    int port = atoi(port_s);
+    char *path = pos+1;
+    snprintf(request, sizeof(request), "%s /%s", mth, path);
+    //printf("DEBUG: %s, %d, %s, %s", ip, port, request, headers);
+
     initsock();
     wa_settcpopt(10);  // 10 seconds timeout
-    int ret = http10((char*)ip, port, request, (char*)headers, "", recvbuf, HTTPBUF);
+    int ret = http10((char*)ip, port, request, (char*)headers, body, recvbuf, rcvbuf_size);
     finisock();
 
     if (ret >= 0) {
@@ -407,7 +417,7 @@ static int l_http_get(lua_State *L) {
                 lua_pushstring(L, header);
                 free(header);
                 free(response_body);
-                return 2;  // 返回响应头和响应体
+                return 2;  // return body and head
             }
         }
 
@@ -417,9 +427,17 @@ static int l_http_get(lua_State *L) {
         return 2;
     } else {
         lua_pushnil(L);
-        lua_pushfstring(L, "HTTP request failed: error code %d", ret);
+        lua_pushfstring(L, "%d[%s]:%s", ret, ret==-1?"error":"buf too short", recvbuf);
         return 2;
     }
+}
+
+static int l_http_get(lua_State *L) {
+  return _http_do("GET", L);
+}
+
+static int l_http_post(lua_State *L) {
+  return _http_do("POST", L);
 }
 #endif /*USE_WALIB*/
 
@@ -527,6 +545,7 @@ static const luaL_Reg px_funcs[] = {
   {"atob", b64dec},
   {"datediff", datediff},
   {"http_get", l_http_get},
+  {"http_post",l_http_post},
 #endif
   {"lsdir", lsdir},
   {"lsfile", lsfile},

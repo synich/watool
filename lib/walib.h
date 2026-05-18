@@ -31,7 +31,7 @@ int initsock(void);
 void finisock(void);
 int opentcp(char* ip, unsigned short port);
 void wa_settcpopt(int rcvtimeo);
-/*return -1:network error, >0 http response length*/
+/*return -1:network error, -2:buf too short >0 http response length*/
 int http10(char* ip, int port, char* mthurl, char* header, char* body,char* recvbuf, int len);
 char* wa_readfile(const char* path);
 void* wa_setfd4l(char* fname);

@@ -34,37 +34,37 @@ void finisock(void){
 }
 
 int opentcp(char* ip, unsigned short port){
-	int clientSocket;
-	struct sockaddr_in serverAddr;
-	if((clientSocket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-	{
-		perror("create socket fail");
-		return -1;
-	}
+    int clientSocket;
+    struct sockaddr_in serverAddr;
+    if((clientSocket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    {
+        perror("create socket fail");
+        return -1;
+    }
 
-	serverAddr.sin_family = AF_INET;
-	serverAddr.sin_port = htons(port);
-	serverAddr.sin_addr.s_addr = inet_addr(ip);
-	if(connect(clientSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0)
-	{
-		perror("connect fail");
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(port);
+    serverAddr.sin_addr.s_addr = inet_addr(ip);
+    if(connect(clientSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0)
+    {
+        perror("connect fail");
         WA_CLOSE(clientSocket);
-		return -1;
-	}
+        return -1;
+    }
 
   return clientSocket;
 }
 
 struct stTcpOption {
-	int rcvtimeo;
+    int rcvtimeo;
 };
 
 static struct stTcpOption sv;
 
 void wa_settcpopt(int rcvtimeo){
-	if (rcvtimeo>0) {
-		sv.rcvtimeo = rcvtimeo;
-	}
+    if (rcvtimeo>0) {
+        sv.rcvtimeo = rcvtimeo;
+    }
 }
 
 static int httpreq(int fd, char* sendbuf, char* recvbuf, int len){
@@ -82,34 +82,34 @@ static int httpreq(int fd, char* sendbuf, char* recvbuf, int len){
     struct timeval tout;
     tout.tv_sec = sv.rcvtimeo ?sv.rcvtimeo :1;
     tout.tv_usec = 0;
-	FD_ZERO(&set);
-	FD_SET(fd, &set);
-	int sr = select(fd+1, &set, NULL, NULL, &tout);
-	if ( 0<sr ) {
-	  if ( FD_ISSET(fd, &set) ) {
-		iDataNum = recv(fd, tmpBuf, sizeof(tmpBuf)-1, 0);
-		//tmpBuf[iDataNum] = 0;
-		if ( iDataNum <= 0) {
-		  break;
-		}
-		if (curLen+iDataNum < len) {
-		  memcpy(recvbuf+curLen, tmpBuf, iDataNum);
+    FD_ZERO(&set);
+    FD_SET(fd, &set);
+    int sr = select(fd+1, &set, NULL, NULL, &tout);
+    if ( 0<sr ) {
+      if ( FD_ISSET(fd, &set) ) {
+        iDataNum = recv(fd, tmpBuf, sizeof(tmpBuf)-1, 0);
+        //tmpBuf[iDataNum] = 0;
+        if ( iDataNum <= 0) {
+          break;
+        }
+        if (curLen+iDataNum < len) {
+          memcpy(recvbuf+curLen, tmpBuf, iDataNum);
           curLen += iDataNum;
-		} else {
+        } else {
           int copylen = len - curLen -1;
           if (copylen > 0) {
-		    memcpy(recvbuf+curLen, tmpBuf, copylen);
+            memcpy(recvbuf+curLen, tmpBuf, copylen);
             curLen += copylen;
           }
           truncated = 1;
-		  break;
-		}
-	  } else {
-		break;
-	  }
-	} else {//sr<=0 is error, either timeout or other error
-		return sr-1;
-	}
+          break;
+        }
+      } else {
+        break;
+      }
+    } else {//sr<=0 is error, either timeout or other error
+        return sr-1;
+    }
   }
   recvbuf[curLen] = 0;
   return truncated ?-2 :curLen;
@@ -117,17 +117,25 @@ static int httpreq(int fd, char* sendbuf, char* recvbuf, int len){
 
 int http10(char* ip, int port, char* mthurl, char* header, char* body,
   char* recvbuf, int len){
+  if (header!=NULL){
+    int len = strlen(header);
+    if (0!=len) {
+      if (len < 3) {puts("header like A:1\\r\\n is too short"); return -1;}
+      if (header[len-2] != '\r' || header[len-1] != '\n') {puts("header must end with \\r\\n"); return -1;}
+    }
+  }
+
   int fd = opentcp(ip, (unsigned short)port);
   int ret = -1;
   int bodylen = body?strlen(body):0;
   if (fd != -1) {
     int sndlen = strlen(mthurl)+ strlen(ip)+ (header?strlen(header):0) + bodylen;
     char* sendbuf = malloc(sndlen+128);
-	/*Some server response but not close sock, so use read timeout
-	struct timeval tout;
-	tout.tv_sec = 2;
-	tout.tv_usec = 0;
-	setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (void*)&tout, sizeof(tout) );*/
+    /*Some server response but not close sock, so use read timeout
+    struct timeval tout;
+    tout.tv_sec = 2;
+    tout.tv_usec = 0;
+    setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (void*)&tout, sizeof(tout) );*/
     sprintf(sendbuf, "%s HTTP/1.0\r\nHost: %s:%d\r\nContent-Length: %d\r\nConnection: Close\r\n%s\r\n%s",
       mthurl, ip, port, bodylen, header?header:"", body?body:"");
     ret = httpreq(fd, sendbuf, recvbuf, len);
