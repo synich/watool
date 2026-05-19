@@ -402,8 +402,7 @@ static int _http_do(const char* mth, lua_State *L) {
 
     if (ret >= 0) {
         char *pos = strstr(recvbuf, "\r\n\r\n");
-        if (pos) {
-            // 分离响应头和响应体
+        if (pos) { // split body and header
             size_t header_len = pos + 4 - recvbuf;
             char *header = malloc(header_len + 1);
             char *response_body = malloc(strlen(pos + 4) + 1);
@@ -417,19 +416,17 @@ static int _http_do(const char* mth, lua_State *L) {
                 lua_pushstring(L, header);
                 free(header);
                 free(response_body);
-                return 2;  // return body and head
             }
+        } else { // no sep seams illegal
+            lua_pushstring(L, "");
+            lua_pushstring(L, recvbuf);
         }
-
-        // 没有找到分隔符，返回整个响应
-        lua_pushstring(L, recvbuf);
-        lua_pushstring(L, "");
-        return 2;
     } else {
         lua_pushnil(L);
         lua_pushfstring(L, "%d[%s]:%s", ret, ret==-1?"error":"buf too short", recvbuf);
-        return 2;
     }
+    free(recvbuf);
+    return 2;
 }
 
 static int l_http_get(lua_State *L) {
