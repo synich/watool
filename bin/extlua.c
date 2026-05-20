@@ -438,6 +438,13 @@ static int l_http_get(lua_State *L) {
 static int l_http_post(lua_State *L) {
   return _http_do("POST", L);
 }
+
+static int l_http_timeout(lua_State *L) {
+  int t = lua_tointeger(L, 1);
+  wa_settcpopt(t);
+  lua_pushboolean(L, 1);
+  return 1;
+}
 #endif /*USE_WALIB*/
 
 /********px********/
@@ -545,6 +552,7 @@ static const luaL_Reg px_funcs[] = {
   {"datediff", datediff},
   {"http_get", l_http_get},
   {"http_post",l_http_post},
+  {"http_timeout",l_http_timeout},
 #endif
   {"lsdir", lsdir},
   {"lsfile", lsfile},

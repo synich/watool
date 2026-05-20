@@ -67,11 +67,22 @@ void wa_settcpopt(int rcvtimeo){
     }
 }
 
+static int find_content_length(char* buf){
+  char *p = strstr(buf, "Content-Length:");
+  if (!p) p = strstr(buf, "content-length:");
+  if (!p) return -1;
+  p += sizeof("Content-Length:")-1;
+  while (*p == ' ') p++;
+  return atoi(p);
+}
+
 static int httpreq(int fd, char* sendbuf, char* recvbuf, int len){
   int iDataNum;
   int truncated = 0;
   int curLen = 0;
   char tmpBuf[4096];
+  int headerEnd = -1;
+  int contentLen = -1;
 
   if (send(fd, sendbuf, strlen(sendbuf), 0)<=0){
     return -1;
@@ -80,7 +91,7 @@ static int httpreq(int fd, char* sendbuf, char* recvbuf, int len){
   while(1){
     fd_set set;
     struct timeval tout;
-    tout.tv_sec = sv.rcvtimeo ?sv.rcvtimeo :1;
+    tout.tv_sec = sv.rcvtimeo ?sv.rcvtimeo :3;
     tout.tv_usec = 0;
     FD_ZERO(&set);
     FD_SET(fd, &set);
@@ -88,13 +99,23 @@ static int httpreq(int fd, char* sendbuf, char* recvbuf, int len){
     if ( 0<sr ) {
       if ( FD_ISSET(fd, &set) ) {
         iDataNum = recv(fd, tmpBuf, sizeof(tmpBuf)-1, 0);
-        //tmpBuf[iDataNum] = 0;
         if ( iDataNum <= 0) {
           break;
         }
         if (curLen+iDataNum < len) {
           memcpy(recvbuf+curLen, tmpBuf, iDataNum);
           curLen += iDataNum;
+          recvbuf[curLen] = 0;
+          if (headerEnd < 0){
+            char *hend = strstr(recvbuf, "\r\n\r\n");
+            if (hend) {
+              headerEnd = (int)(hend - recvbuf)+4;
+              contentLen = find_content_length(recvbuf);
+            }
+          }
+          if (contentLen >=0 && headerEnd > 0){
+            if ((curLen - headerEnd) >= contentLen) break; // body complete
+          }
         } else {
           int copylen = len - curLen -1;
           if (copylen > 0) {
@@ -136,7 +157,7 @@ int http10(char* ip, int port, char* mthurl, char* header, char* body,
     tout.tv_sec = 2;
     tout.tv_usec = 0;
     setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (void*)&tout, sizeof(tout) );*/
-    sprintf(sendbuf, "%s HTTP/1.0\r\nHost: %s:%d\r\nContent-Length: %d\r\nConnection: Close\r\n%s\r\n%s",
+    sprintf(sendbuf, "%s HTTP/1.1\r\nHost: %s:%d\r\nContent-Length: %d\r\nUser-Agent: pb\r\nAccept: */*\r\n%s\r\n%s",
       mthurl, ip, port, bodylen, header?header:"", body?body:"");
     ret = httpreq(fd, sendbuf, recvbuf, len);
     free(sendbuf);

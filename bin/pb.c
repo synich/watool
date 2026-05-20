@@ -416,6 +416,8 @@ static void _lua_expr(lua_State *L, int argc, char** argv){
   val_t = lua_type(L, -1);
   if ((LUA_TSTRING==val_t) || (LUA_TNUMBER==val_t)) {
     puts(lua_tostring(L, -1));
+  } else if (LUA_TBOOLEAN==val_t) {
+    puts(lua_toboolean(L, -1)?"true":"false");
   } else {
     printf("run %s, type: %s\n", ret==0?"ok":"fail", lua_typename(L, val_t));
   }
@@ -430,7 +432,7 @@ static void _lua_help(){
   "sqlite3/lpeg\n"
   "pb.range[0,n)/lunit/dprint/sqlite3_connect\n"
   "px.md5/sha1/btoa/atob/datediff/lsdir/lsfile/band\n"
-  "  .http_get|post(url, [bd], <hd>, <rcv_sz>)");
+  "  .http_get|post|timeout(url, [bd], <hd>, <rcv_sz>)");
 }
 
 static void _lua_dofile(lua_State* L, int argc, char** argv){
