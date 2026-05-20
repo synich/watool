@@ -1,4 +1,15 @@
---ver260516
+local _doc=[[ver260521
+fmt/var_dump/tie
+string.split/indexOf/replace/search/trim/slice/at
+table.join/map/reduce/filter/pop...
+os.popen/ts/setenv; JSON.stringify/parse
+set.new/add/delete/has/clear/values
+sqlite3/lpeg
+pb.range[0,n)/lunit/dprint/sqlite3_connect
+px.md5/sha1/btoa/atob/datediff/lsdir/lsfile/band
+  .http_get|post|timeout(url, [bd], <hd>, <rcv_sz>)
+]]
+
 -------- global func --------
 local function _fmt(str, ...)
   local args, i = {...}, 1
@@ -50,7 +61,7 @@ function tie(t)
 end
 
 -------- pb extend --------
-pb = {}
+pb = {__doc__ = _doc}
 
 pb.range = function(start, stop, step)
   step = step or 1

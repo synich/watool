@@ -277,14 +277,10 @@ void xlispindent(int argc, char** argv){
 #define lua_rawlen  lua_objlen
 #endif
 #ifdef SUPPORT_LUA
-static void _debug_lua(lua_State *L, char* hint_mess){
-  int stk_size = lua_gettop(L), ri=-1, i, val_t;
-  err_pf("[DEBUG %s]: elem num is %d\n", hint_mess, stk_size);
-  for(i=stk_size;i>=1;i--){
-    val_t = lua_type(L, i);
-    char *idx_mean = "";
-    if (i==stk_size){idx_mean = "\t<- top";} else if (1==i){idx_mean = "\t<- bot";}
-    err_pf("  %d or %d <%s>:", i, ri, lua_typename(L, val_t));
+static void _print_one_lua_val(lua_State *L, int i){
+    int val_t = lua_type(L, i);
+    err_pf("<%s>: ", lua_typename(L, val_t));
+
     if (val_t==LUA_TSTRING) {err_pf(" %s", lua_tostring(L, i));}
     else if (val_t==LUA_TNUMBER) {err_pf(" %.2f", lua_tonumber(L, i));}
     else if (val_t==LUA_TTABLE) {int j=1;err_pf(" arrlen %d, key_5:", (int)lua_rawlen(L, i));
@@ -296,8 +292,18 @@ static void _debug_lua(lua_State *L, char* hint_mess){
         else {err_pf(" %s", lua_typename(L, lua_type(L, -2)));}
         lua_pop(L, 1);/* removes 'value'; keeps 'key' for next iteration */
         } }
-      }
+    }
     else if (val_t==LUA_TBOOLEAN) {err_pf(" %s", 1==lua_toboolean(L, i)?"true":"false");}
+}
+
+static void _debug_lua(lua_State *L, char* hint_mess){
+  int stk_size = lua_gettop(L), ri=-1, i;
+  err_pf("[DEBUG %s]: elem num is %d\n", hint_mess, stk_size);
+  for(i=stk_size;i>=1;i--){
+    char *idx_mean = "";
+    if (i==stk_size){idx_mean = "\t<- top";} else if (1==i){idx_mean = "\t<- bot";}
+    err_pf("  %d or %d ", i, ri);
+    _print_one_lua_val(L, i);
     err_pf("%s\n", idx_mean);
     ri--;
   }
@@ -413,26 +419,14 @@ static void _lua_expr(lua_State *L, int argc, char** argv){
   if (2==argc){usage();}
   sprintf(exprbuff, "return %s", argv[2]);
   ret = luaL_dostring(L, exprbuff);
-  val_t = lua_type(L, -1);
-  if ((LUA_TSTRING==val_t) || (LUA_TNUMBER==val_t)) {
-    puts(lua_tostring(L, -1));
-  } else if (LUA_TBOOLEAN==val_t) {
-    puts(lua_toboolean(L, -1)?"true":"false");
-  } else {
-    printf("run %s, type: %s\n", ret==0?"ok":"fail", lua_typename(L, val_t));
-  }
+  printf("run %s\n", ret==0?"ok":"fail");
+  _print_one_lua_val(L, -1);
 }
 
-static void _lua_help(){
-  puts("enhance with:\nfmt/var_dump/tie\n"
-  "string.split/indexOf/replace/search/trim/slice/at\n"
-  "table.join/map/reduce/filter/pop...\n"
-  "os.popen/ts/setenv; JSON.stringify/parse\n"
-  "set.new/add/delete/has/clear/values\n"
-  "sqlite3/lpeg\n"
-  "pb.range[0,n)/lunit/dprint/sqlite3_connect\n"
-  "px.md5/sha1/btoa/atob/datediff/lsdir/lsfile/band\n"
-  "  .http_get|post|timeout(url, [bd], <hd>, <rcv_sz>)");
+static void _lua_help(lua_State *L){
+  lua_getglobal(L, "pb");
+  lua_getfield(L, -1, "__doc__");
+  puts(lua_tostring(L, -1));
 }
 
 static void _lua_dofile(lua_State* L, int argc, char** argv){
@@ -471,7 +465,7 @@ void run_lua(int argc, char** argv){
       if (0==strcmp(argv[1], "-e")) {
         _lua_expr(L, argc, argv);
       } else if (0==strcmp(argv[1], "-h")) {
-        _lua_help();
+        _lua_help(L);
       } else {
         _lua_dofile(L, argc, argv);
       }
