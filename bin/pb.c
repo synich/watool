@@ -29,7 +29,7 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver260516\nascii\n"
+  printf("personal busybox %dbit ver260519\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip [keyword] -- {pb}/pb_d/_pb_snip[0-9]\n"
@@ -429,7 +429,8 @@ static void _lua_help(){
   "set.new/add/delete/has/clear/values\n"
   "sqlite3/lpeg\n"
   "pb.range[0,n)/lunit/dprint/sqlite3_connect\n"
-  "px.md5/sha1/btoa/atob/datediff/lsdir/lsfile/band");
+  "px.md5/sha1/btoa/atob/datediff/lsdir/lsfile/band\n"
+  "  .http_get|post(url, [bd], <hd>, <rcv_sz>)");
 }
 
 static void _lua_dofile(lua_State* L, int argc, char** argv){

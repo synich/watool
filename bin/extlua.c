@@ -369,9 +369,6 @@ static int datediff (lua_State *L) {
 }
 
 static int s_has_initsock = 0;
-static void _clean_on_lua(){
-    finisock();
-}
 static int _http_do(const char* mth, lua_State *L) {
 #define URL_LEN 1024
     char url[URL_LEN] = {0};
@@ -401,7 +398,7 @@ static int _http_do(const char* mth, lua_State *L) {
       initsock();
       wa_settcpopt(10);  // 10 seconds timeout
       s_has_initsock = 1;
-      atexit(_clean_on_lua);
+      atexit(finisock);
     }
     int ret = http10((char*)ip, port, request, (char*)headers, body, recvbuf, rcvbuf_size);
 
