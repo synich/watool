@@ -1,10 +1,10 @@
 #include "walib.h"
 
-int test_md5(){
+int test_md5(char** _){
 	unsigned char encrypt[] ="a";
     char output[33] = {0};
     //char anosrc[4];
-	wa_md5(encrypt, output);
+	wa_md5((char*)encrypt, output);
     wa_utok(0==strcmp(output, "0cc175b9c0f1b6a831c399e269772661"));
     wa_md5(NULL, output);
     wa_utok(output==NULL);
@@ -14,10 +14,10 @@ int test_md5(){
 	return 0;
 }
 
-int test_sha1(){
+int test_sha1(char** _){
 	unsigned char encrypt[] ="a";
     char output[41] = {0};
-	wa_sha1(encrypt, output);
+	wa_sha1((char*)encrypt, output);
     wa_utok(0==strcmp(output, "86f7e437faa5a7fce15d1ddcb9eaeaea377667b8"));
     wa_sha1(NULL, output);
     wa_utok(output==NULL);
@@ -27,7 +27,7 @@ int test_sha1(){
 	return 0;
 }
 
-int test_base64(){
+int test_base64(char** _){
     char src[] = "abc";
     char output[8] = {0};
     wa_base64enc(src, output);
@@ -35,11 +35,11 @@ int test_base64(){
     return 0;
 }
 
-int test_base16() {
+int test_base16(char** _) {
     char hexres[16]={0};
     char tobin[4];
     unsigned char src[4] = {5, 188, 127, 200};
-    wa_base16enc(src, 4, hexres);
+    wa_base16enc((char*)src, 4, hexres);
     wa_utok(0==strcmp(hexres, "05bc7fc8") );
     wa_base16dec(hexres, tobin);
     wa_utok(tobin[2]==src[2] );
@@ -188,13 +188,13 @@ int test_mujs(){
 */
 int main(int argc, char *argv[])
 {
-	//TEST(_md5);
-    //TEST(_sha1);
-    //TEST(_base64);
-    //TEST(_base16);
+	TEST(_md5, NULL);
+    TEST(_sha1, NULL);
+    TEST(_base64, NULL);
+    TEST(_base16, NULL);
     //test_http(argv[1], atoi(argv[2]));
 	//TEST(_calendar);
-    TEST(_datediff);
+    //TEST(_datediff);
 	//test_rand();
     //TEST(_match);
 	//test_mempool( atoi(argv[1]) );

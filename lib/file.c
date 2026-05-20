@@ -64,14 +64,14 @@ int wa_utok(int result){
 	return result ? 0 : 1;
 }
 
-void wa_utrun(const char* name, wa_utfn f){
+void wa_utrun(const char* name, wa_utfn f, char** argv){
 	char buf[128] = {0};
-	int i = f();
+	int i = f(argv);
 	s_utresult.sum += i;
 	if (i) {
-		sprintf(buf, "%s: %d FAIL\n", name, i);
+		sprintf(buf, "test%s: %d FAIL\n", name, i);
 	} else {
-		sprintf(buf, "%s: OK\n", name);
+		sprintf(buf, "test%s: OK\n", name);
 	}
 	strncat(s_utresult.report, buf, sizeof(s_utresult.report)-1);
 }

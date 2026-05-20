@@ -12,8 +12,10 @@
 
 #ifdef _WIN32
 #define WA_CLOSE(fd) closesocket(fd)
+#define WA_SHUT SD_BOTH
 #else
 #define WA_CLOSE(fd) close(fd)
+#define WA_SHUT SHUT_RDWR
 #endif
 
 int initsock(void){
@@ -161,7 +163,7 @@ int http10(char* ip, int port, char* mthurl, char* header, char* body,
       mthurl, ip, port, bodylen, header?header:"", body?body:"");
     ret = httpreq(fd, sendbuf, recvbuf, len);
     free(sendbuf);
-    shutdown(fd, 2);/*windows close not terminate TCP state, use shutdown */
+    shutdown(fd, WA_SHUT);/*graceful shutdown */
     WA_CLOSE(fd);
   }
   return ret;

@@ -36,10 +36,11 @@ int http10(char* ip, int port, char* mthurl, char* header, char* body,char* recv
 char* wa_readfile(const char* path);
 void* wa_setfd4l(char* fname);
 int wa_log(char* fmt, ...);
-#define TEST(x) wa_utrun(#x, test##x)
+/*test fn with char** */
+#define TEST(x, arg) wa_utrun(#x, test##x, arg)
 int wa_utok(int result);/*if result true return 0, else 1. Sum all is error count*/
-typedef int(*wa_utfn)(void);
-void wa_utrun(const char* name, wa_utfn f);
+typedef int(*wa_utfn)(char**);
+void wa_utrun(const char* name, wa_utfn f, char** arg);
 /* int testA(){}
   TEST(A); wa_utsum(); */
 int wa_utsum(void);
