@@ -279,7 +279,10 @@ void xlispindent(int argc, char** argv){
 #ifdef SUPPORT_LUA
 static void _print_one_lua_val(lua_State *L, int i, int stk_size){
     int val_t = lua_type(L, i);
-    err_pf("%d or %d <%s>: ", i, i-1-stk_size, lua_typename(L, val_t));
+    char *idx_mean = "    ";
+    if (i==stk_size){idx_mean = "top:";}
+    else if (1==i){idx_mean = "bot:";}
+    err_pf("%s%d or %d <%s>: ", idx_mean, i, i-1-stk_size, lua_typename(L, val_t));
 
     if (val_t==LUA_TSTRING) {err_pf(" %s", lua_tostring(L, i));}
     else if (val_t==LUA_TNUMBER) {err_pf(" %.2f", lua_tonumber(L, i));}
@@ -294,10 +297,7 @@ static void _print_one_lua_val(lua_State *L, int i, int stk_size){
         } }
     }
     else if (val_t==LUA_TBOOLEAN) {err_pf(" %s", 1==lua_toboolean(L, i)?"true":"false");}
-    char *idx_mean = "";
-    if (i==stk_size){idx_mean = "\t<- top";}
-    else if (1==i){idx_mean = "\t<- bot";}
-    err_pf("%s\n", idx_mean);
+    err_pf("\n");
 }
 
 static void _debug_lua(lua_State *L, char* hint_mess){
@@ -419,7 +419,7 @@ static void _lua_expr(lua_State *L, int argc, char** argv){
   sprintf(exprbuff, "return %s", argv[2]);
   ret = luaL_dostring(L, exprbuff);
   printf("run %s\n", ret==0?"ok":"fail");
-  _print_one_lua_val(L, 1, lua_gettop(L));
+  _debug_lua(L, "Expr");
 }
 
 static void _lua_help(lua_State *L){

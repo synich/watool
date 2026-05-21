@@ -108,14 +108,15 @@ cscript //nologo z.vbs
 @@
 
 # snip_make
+-include opt.mk
 HOST = $(shell uname)
-$(info $(filter MinGW MSYS,$(HOST)))
 ifeq ($(HOST), MinGW)
 	UTLIB = -L$(DEPATH)lib -lwa -lws2_32
-else
+else ifeq ($(HOST), win)
 	UTLIB = -L$(DEPATH)lib -lwa
 endif
 
+.PHONY: clean all
 lib: $(OBJS)
 	@ar rcu libwa.a $^ $(UTLIB)
 
@@ -123,6 +124,10 @@ obj/%.o : %.c
 	$(CC) $(CFLAGS) -o $@ $<
 @@
 
+## snip_make syn
+$(info $(filter MinGW MSYS,$(HOST)))
+$(x a, b) both var or fn call syntax, aka one namespace. can't escape comma(,)
+@@
 
 # snip_awk
 syn var lib

@@ -5,10 +5,10 @@ THIRDPATH = E:/oldturtle/D/code/op3rd/
 DEPINC = -I$(THIRDPATH)include/
 DEPLIB = -L$(THIRDPATH)lib64/
 HOST = $(shell uname)
-ifeq ($(HOST), MinGW)
-	UTLIB = -lwa -lws2_32
-else
+ifeq ($(HOST), Linux)
 	UTLIB = -lwa
+else
+	UTLIB = -lwa -lws2_32
 endif
 
 lib: $(OBJS)
