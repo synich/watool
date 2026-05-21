@@ -51,7 +51,7 @@ void test_http(char* ip, int port ){
 #define HTTPBUF 2194
   char recvbuf[HTTPBUF] = {1};
 
-  initsock();
+  wa_autosock();
   wa_settcpopt(10);
   if (0<=http10(ip, port,
     "POST /video ", "Content-Type: application/json\r\n", "{}",
@@ -65,7 +65,6 @@ void test_http(char* ip, int port ){
   } else {
       puts("other http error");
   }
-  finisock();
 }
 
 int test_calendar(char** _){

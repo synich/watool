@@ -18,7 +18,7 @@
 #define WA_SHUT SHUT_RDWR
 #endif
 
-int initsock(void){
+static int initsock(void){
   int err = 0;
 #ifdef _WIN32
   WORD wVersionRequested;
@@ -29,10 +29,20 @@ int initsock(void){
   return err;
 }
 
-void finisock(void){
+static void finisock(void){
 #ifdef _WIN32
   WSACleanup();
 #endif
+}
+
+static int s_sock_st = 0;
+int wa_autosock(void){
+  if (0==s_sock_st){
+    s_sock_st++;
+    initsock();
+    atexit(finisock);
+  }
+  return 0;
 }
 
 int opentcp(char* ip, unsigned short port){
