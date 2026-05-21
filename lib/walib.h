@@ -28,11 +28,10 @@ int wa_rands(int from, int to);/* [from, to) */
 #define wa_rand(r) wa_rands(0, r)
 /*benifit for socket*/
 int wa_autosock(void);
-int opentcp(char* ip, unsigned short port);
+int wa_opentcp(char* ip, unsigned short port);
 void wa_settcpopt(int rcvtimeo);
 /*return -1:network error, -2:buf too short >0 http response length*/
-int http10(char* ip, int port, char* mthurl, char* header, char* body,char* recvbuf, int len);
-#define wa_http http10
+int wa_http(char* ip, int port, char* mthurl, char* header, char* body,char* recvbuf, int len);
 char* wa_readfile(const char* path);
 void* wa_setfd4l(char* fname);
 int wa_log(char* fmt, ...);

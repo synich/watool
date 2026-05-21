@@ -45,7 +45,7 @@ int wa_autosock(void){
   return 0;
 }
 
-int opentcp(char* ip, unsigned short port){
+int wa_opentcp(char* ip, unsigned short port){
     int clientSocket;
     struct sockaddr_in serverAddr;
     if((clientSocket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
@@ -148,7 +148,7 @@ static int httpreq(int fd, char* sendbuf, char* recvbuf, int len){
   return truncated ?-2 :curLen;
 }
 
-int http10(char* ip, int port, char* mthurl, char* header, char* body,
+int wa_http(char* ip, int port, char* mthurl, char* header, char* body,
   char* recvbuf, int len){
   if (header!=NULL){
     int len = strlen(header);
@@ -158,7 +158,7 @@ int http10(char* ip, int port, char* mthurl, char* header, char* body,
     }
   }
 
-  int fd = opentcp(ip, (unsigned short)port);
+  int fd = wa_opentcp(ip, (unsigned short)port);
   int ret = -1;
   int bodylen = body?strlen(body):0;
   if (fd != -1) {

@@ -7,7 +7,7 @@ int test_md5(char** _){
     wa_md5((char*)encrypt, output);
     wa_utok(0==strcmp(output, "0cc175b9c0f1b6a831c399e269772661"));
     wa_md5(NULL, output);
-    wa_utok(output==NULL);
+    wa_utok(output[0]==0);
     strcpy(output, "abc");
     wa_md5(output, output);
     wa_utok(0==strcmp(output, "900150983cd24fb0d6963f7d28e17f72"));
@@ -20,7 +20,7 @@ int test_sha1(char** _){
     wa_sha1((char*)encrypt, output);
     wa_utok(0==strcmp(output, "86f7e437faa5a7fce15d1ddcb9eaeaea377667b8"));
     wa_sha1(NULL, output);
-    wa_utok(output==NULL);
+    wa_utok(output[0]==0);
     strcpy(output, "abc");
     wa_sha1(output, output);
     wa_utok(0==strcmp(output, "a9993e364706816aba3e25717850c26c9cd0d89d") );
@@ -186,7 +186,7 @@ int test_mujs(){
 }
 */
 
-#define FL
+#define ENC
 int main(int argc, char *argv[])
 {
 #ifdef ENC

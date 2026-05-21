@@ -206,12 +206,12 @@ void wa_md5(char* src, char* dst){
 	int i;
 	unsigned char decrypt[16];
 	MD5_CTX md5;
+    dst[0] = 0;
     if (!src) return;
 
     MD5Init(&md5);
 	MD5Update(&md5,(unsigned char*)src,strlen((char *)src));
 	MD5Final(&md5,decrypt);
-    dst[0] = 0;
 	for(i=0;i<16;i++)
 	{
       char tmp[4]={0};
@@ -622,6 +622,7 @@ void wa_sha1(char* src, char* dst) {
 	SHA1Context sha;
 	int i, err=0;
 	uint8_t Message_Digest[20];
+    dst[0] = 0;
     if (!src) return;
 
 	err |= SHA1Reset(&sha);
@@ -630,7 +631,6 @@ void wa_sha1(char* src, char* dst) {
 			strlen(src));
     err |= SHA1Result(&sha, Message_Digest);
     if (0==err) {
-      dst[0] = 0;
       for(i = 0; i < 20 ; ++i)
       {
         char tmpbuf[4]={0};

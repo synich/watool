@@ -29,7 +29,7 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver260519\nascii\n"
+  printf("personal busybox %dbit ver260521\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip [keyword] -- {pb}/pb_d/_pb_snip[0-9]\n"
@@ -279,7 +279,7 @@ void xlispindent(int argc, char** argv){
 #ifdef SUPPORT_LUA
 static void _print_one_lua_val(lua_State *L, int i, int stk_size){
     int val_t = lua_type(L, i);
-    char *idx_mean = "    ";
+    char *idx_mean = " | :";
     if (i==stk_size){idx_mean = "top:";}
     else if (1==i){idx_mean = "bot:";}
     err_pf("%s%d or %d <%s>: ", idx_mean, i, i-1-stk_size, lua_typename(L, val_t));
