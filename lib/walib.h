@@ -35,14 +35,13 @@ int wa_http(char* ip, int port, char* mthurl, char* header, char* body,char* rec
 char* wa_readfile(const char* path);
 void* wa_setfd4l(char* fname);
 int wa_log(char* fmt, ...);
-/*test fn with char** */
+/* int testA(char**){}
+  TEST(A); wa_utsum(); */
 #define TEST(x, arg) wa_utrun(#x, test##x, arg)
 #define wa_utok(res) _wa_utok(res, __LINE__)
-int _wa_utok(int result, int line);/*if result true return 0, else 1. Sum all is error count*/
+int _wa_utok(int result, int line);/*if result true(not 0) return 0, else 1. Sum all is error count*/
 typedef int(*wa_utfn)(char**);
 void wa_utrun(const char* name, wa_utfn f, char** arg);
-/* int testA(){}
-  TEST(A); wa_utsum(); */
 int wa_utsum(void);
 
 #define REG_MAXSUB 10

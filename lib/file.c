@@ -63,7 +63,7 @@ static struct {
 
 int _wa_utok(int result, int line){
     int ret = 0;
-    if (0==result){
+    if (0!=result){
 	  s_utresult.ok_sum += 1;
     } else {
       char buf[8]={0};

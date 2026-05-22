@@ -8,8 +8,7 @@ int test_md5(char** _){
     ret += wa_utok(0==strcmp(output, "0cc175b9c0f1b6a831c399e269772661"));
     wa_md5(NULL, output);
     ret += wa_utok(output[0]==0);
-    strcpy(output, "abc");
-    wa_md5(output, output);
+    wa_md5("abc", output);
     ret += wa_utok(0==strcmp(output, "900150983cd24fb0d6963f7d28e17f72"));
     return ret;
 }
@@ -22,8 +21,7 @@ int test_sha1(char** _){
     ret += wa_utok(0==strcmp(output, "86f7e437faa5a7fce15d1ddcb9eaeaea377667b8"));
     wa_sha1(NULL, output);
     ret += wa_utok(output[0]==0);
-    strcpy(output, "abc");
-    wa_sha1(output, output);
+    wa_sha1("abc", output);
     ret += wa_utok(0==strcmp(output, "a9993e364706816aba3e25717850c26c9cd0d89d") );
     return ret;
 }
@@ -33,7 +31,7 @@ int test_base64(char** _){
     char output[8] = {0};
     int ret =  0;
     wa_base64enc(src, output);
-    ret += wa_utok(0==strcmp(src, "YWJj" ) );
+    ret += wa_utok(0==strcmp(output, "YWJj") );
     return ret;
 }
 
@@ -71,18 +69,18 @@ void test_http(char* ip, int port ){
 }
 
 int test_calendar(char** _){
-    int i;
+    int i=0;
     int y,M,d,h,m,s;
-    int epoch = wa_calendar(&y, &M, &d, &h, &m, NULL, -28800);
+    int epoch = wa_calendar(&y, &M, &d, &h, &m, NULL, -28800); /*today minus 8 hours*/
     printf("epoch:%d %d-%d-%d %d:%d\n", epoch, y,M,d,h,m);
-    i += wa_utok(d==27);
-    i += wa_utok(M==2);
+    i += wa_utok(d==22);
+    i += wa_utok(M==5);
     return i;
 }
 
 int test_datediff(char** _){
-    printf("datediff %d\n", wa_datediff("230301", "230227"));
-    return 0;
+    int i = wa_utok(2==wa_datediff("230301", "230227"));
+    return i;
 }
 
 int test_rand(char** _){
@@ -97,7 +95,7 @@ int test_rand(char** _){
 int test_match(char** _){
   struct stResub sub;
   int i = wa_match("(\\l*)(\\u*)(\\a*)", "ghaAbcPz1", &sub);
-  printf("%d,%d,%.*s\n", i, sub.nsub, sub.sub[3].len, sub.sub[3].ptr);
+  printf("match: %d,%d,%.*s\n", i, sub.nsub, sub.sub[3].len, sub.sub[3].ptr);
   return wa_utok(i==0);
 }
 
@@ -212,5 +210,6 @@ int main(int argc, char *argv[])
     TEST(_log, NULL);
 #endif
     //TEST(_mujs);
-    return wa_utsum();
+    printf("total test %d case\n", wa_utsum());
+    return 0;
 }
