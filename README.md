@@ -6,6 +6,20 @@
 
 个人工具集合，打包成单文件，取名pb（personal busybox）。
 
+- ascii: 
+- snip:
+- lua:
+- lisp:
+- xlispindent:
+
 ## lib
 
 输入 make 编译出 libwa.a 库，函数声明全部在 walib.h 文件。
+
+- enc: md5/sha1/base64
+- net: http
+- time: 
+- regex: match
+- mem:
+- unittest:
+

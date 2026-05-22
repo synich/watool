@@ -37,7 +37,8 @@ void* wa_setfd4l(char* fname);
 int wa_log(char* fmt, ...);
 /*test fn with char** */
 #define TEST(x, arg) wa_utrun(#x, test##x, arg)
-int wa_utok(int result);/*if result true return 0, else 1. Sum all is error count*/
+#define wa_utok(res) _wa_utok(res, __LINE__)
+int _wa_utok(int result, int line);/*if result true return 0, else 1. Sum all is error count*/
 typedef int(*wa_utfn)(char**);
 void wa_utrun(const char* name, wa_utfn f, char** arg);
 /* int testA(){}

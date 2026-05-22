@@ -57,17 +57,27 @@ int wa_log(char* fmt, ...) {
 
 static struct {
 	char report[1020];
-	int sum;
+	int ok_sum;
+	int err_sum;
 } s_utresult;
 
-int wa_utok(int result){
-	return result ? 0 : 1;
+int _wa_utok(int result, int line){
+    int ret = 0;
+    if (0==result){
+	  s_utresult.ok_sum += 1;
+    } else {
+      char buf[8]={0};
+      sprintf(buf, "(E:%d)", line);
+	  strncat(s_utresult.report, buf, sizeof(s_utresult.report)-1);
+	  s_utresult.err_sum += 1;
+      ret = 1;
+    }
+	return ret;
 }
 
 void wa_utrun(const char* name, wa_utfn f, char** argv){
 	char buf[128] = {0};
 	int i = f(argv);
-	s_utresult.sum += i;
 	if (i) {
 		sprintf(buf, "test%s: %d FAIL\n", name, i);
 	} else {
@@ -77,6 +87,6 @@ void wa_utrun(const char* name, wa_utfn f, char** argv){
 }
 
 int wa_utsum(void){
-	printf("****UNIT TEST BEGIN****\n%s*****UNIT TEST END*****\n", s_utresult.report);
-	return s_utresult.sum;
+	printf("****UNIT TEST BEGIN****\n%s[DETAIL]: %d ok, %d err\n*****UNIT TEST END*****\n", s_utresult.report, s_utresult.ok_sum, s_utresult.err_sum);
+	return s_utresult.ok_sum + s_utresult.err_sum;
 }

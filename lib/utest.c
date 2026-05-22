@@ -3,47 +3,50 @@
 int test_md5(char** _){
     unsigned char encrypt[] ="a";
     char output[33] = {0};
-    //char anosrc[4];
+    int ret = 0;
     wa_md5((char*)encrypt, output);
-    wa_utok(0==strcmp(output, "0cc175b9c0f1b6a831c399e269772661"));
+    ret += wa_utok(0==strcmp(output, "0cc175b9c0f1b6a831c399e269772661"));
     wa_md5(NULL, output);
-    wa_utok(output[0]==0);
+    ret += wa_utok(output[0]==0);
     strcpy(output, "abc");
     wa_md5(output, output);
-    wa_utok(0==strcmp(output, "900150983cd24fb0d6963f7d28e17f72"));
-    return 0;
+    ret += wa_utok(0==strcmp(output, "900150983cd24fb0d6963f7d28e17f72"));
+    return ret;
 }
 
 int test_sha1(char** _){
     unsigned char encrypt[] ="a";
     char output[41] = {0};
+    int ret =  0;
     wa_sha1((char*)encrypt, output);
-    wa_utok(0==strcmp(output, "86f7e437faa5a7fce15d1ddcb9eaeaea377667b8"));
+    ret += wa_utok(0==strcmp(output, "86f7e437faa5a7fce15d1ddcb9eaeaea377667b8"));
     wa_sha1(NULL, output);
-    wa_utok(output[0]==0);
+    ret += wa_utok(output[0]==0);
     strcpy(output, "abc");
     wa_sha1(output, output);
-    wa_utok(0==strcmp(output, "a9993e364706816aba3e25717850c26c9cd0d89d") );
-    return 0;
+    ret += wa_utok(0==strcmp(output, "a9993e364706816aba3e25717850c26c9cd0d89d") );
+    return ret;
 }
 
 int test_base64(char** _){
     char src[] = "abc";
     char output[8] = {0};
+    int ret =  0;
     wa_base64enc(src, output);
-    wa_utok(0==strcmp(src, "YWJj" ) );
-    return 0;
+    ret += wa_utok(0==strcmp(src, "YWJj" ) );
+    return ret;
 }
 
 int test_base16(char** _) {
     char hexres[16]={0};
     char tobin[4];
     unsigned char src[4] = {5, 188, 127, 200};
+    int ret =  0;
     wa_base16enc((char*)src, 4, hexres);
-    wa_utok(0==strcmp(hexres, "05bc7fc8") );
+    ret += wa_utok(0==strcmp(hexres, "05bc7fc8") );
     wa_base16dec(hexres, tobin);
-    wa_utok(tobin[2]==src[2] );
-    return 0;
+    ret += wa_utok(tobin[2]==src[2] );
+    return ret;
 }
 
 void test_http(char* ip, int port ){
@@ -53,7 +56,7 @@ void test_http(char* ip, int port ){
 
   wa_autosock();
   wa_settcpopt(10);
-  if (0<=http10(ip, port,
+  if (0<=wa_http(ip, port,
     "POST /video ", "Content-Type: application/json\r\n", "{}",
     recvbuf, HTTPBUF)){
     pos = strstr(recvbuf, "\r\n\r\n");
