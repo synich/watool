@@ -1,11 +1,12 @@
-local _doc=[[ver260521
+local _doc=[[ver260522
 fmt/var_dump/tie
 string.split/indexOf/replace/search/trim/slice/at
 table.join/map/reduce/filter/pop...
-os.popen/ts/setenv; JSON.stringify/parse
-set.new/add/delete/has/clear/values
+os.popen/ts/setenv
 sqlite3/lpeg
 pb.range[0,n)/lunit/dprint/sqlite3_connect
+  .json:stringify/parse
+  .set:new/add/delete/has/clear/values
 px.md5/sha1/btoa/atob/datediff/lsdir/lsfile/band
   .http_get|post|timeout(url, [bd], <hd>, <rcv_sz>)
 ]]
@@ -300,7 +301,7 @@ table.reduce=function(t,f,i) return reduce(f,t,i) end
 if not table.unpack then table.unpack = unpack end
 
 ---- set.lua like JS ----
-set = {}
+local set = {}
 set.__index = set
 function set.new(items)
     local self = setmetatable({}, set)
@@ -353,7 +354,7 @@ end
 -- SOFTWARE.
 --
 
-JSON = { _version = "0.1.2" }
+local JSON = { _version = "0.1.2" }
 
 -------------------------------------------------------------------------------
 -- Encode
@@ -714,3 +715,6 @@ function JSON.parse(str)
   end
   return res
 end
+
+pb.json = JSON
+pb.set = set
