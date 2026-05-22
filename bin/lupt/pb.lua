@@ -31,14 +31,15 @@ function fmt(s, ...)
   end
 end
 
-local function _var_dump(t)
-  local indent = 0
+local function _var_dump(t, indent)
+  indent = indent or 0
+  if indent >= 6 then return end -- avoid deep recusive
   local prefix = string.rep("  ", indent)
   if type(t) == "table" then
     print(prefix .. "{")
     for k, v in pairs(t) do
       io.write(prefix .. "  [" .. tostring(k) .. "] = ")
-      if type(v) == "table" then
+      if type(v) == "table" and v~= t then
         print("")
         _var_dump(v, indent + 2)
       else
@@ -52,7 +53,7 @@ local function _var_dump(t)
 end
 function var_dump(...)
   local tt = {...}
-  for i,v in ipairs(tt) do _var_dump(v) end
+  for i,v in ipairs(tt) do _var_dump(v, 0) end
 end
 
 function tie(t)
