@@ -329,6 +329,14 @@ for (let v of arr/str) {} // iter value(ES6 only)
 str = `plain ${var}`
 @@
 
+# snip_c
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(int argc, char** argv){
+  return 0;
+}
+@@
 
 # snip_go
 -- fn --

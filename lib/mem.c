@@ -224,3 +224,9 @@ char* wa_ephemem(int n){
 	sv_ephememarr.ptr[i][0]=0;
 	return sv_ephememarr.ptr[i];
 }
+
+void _wa_auto_free_char_p(char **ptr) {
+  if (ptr && *ptr) {
+    free(*ptr);  *ptr = NULL;
+  }
+}

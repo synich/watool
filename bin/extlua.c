@@ -369,9 +369,7 @@ static int datediff (lua_State *L) {
 }
 
 static int _http_do(const char* mth, lua_State *L) {
-#define URL_LEN 1024
-    char url[URL_LEN] = {0};
-    strncpy(url, luaL_checkstring(L, 1), URL_LEN-1);
+    AUTO_CHAR_P(url) = strdup(luaL_checkstring(L, 1));
     char* body = "";
     int h_pos = 2;
     if (0==strcmp(mth, "POST")){
