@@ -82,8 +82,10 @@ struct stResub {
 int wa_match(char* reg, char* txt, struct stResub *sub);
 
 /* Memory Pool */
-void _wa_auto_free_char_p(char **ptr);
-#define AUTO_CHAR_P(var)  char *var __attribute__((cleanup(_wa_auto_free_char_p)))
+void _wa_auto_free_char(char **ptr);
+void _wa_auto_free_file_p(FILE **ptr);
+#define AUTO_MEM_P(ty, var) ty *var __attribute__((cleanup(_wa_auto_free_##ty)))
+#define AUTO_FILE_P(var) FILE *var __attribute__((cleanup(_wa_auto_free_file_p)))
 
 #define wa_alloc(n) wa_alloc_(n, __FILE__, __LINE__)
 char* wa_alloc_(int n, const char* f, int l);

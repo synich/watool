@@ -162,6 +162,13 @@ int test_log(char** _){
     fclose(fd);
     return 0;
 }
+
+int test_clean(char** _){
+    AUTO_MEM_P(char, p) = strdup("hello");
+    AUTO_FILE_P(f) = fopen("Makefile", "r");
+    printf("%s, %p\n", p, f);
+    return 0;
+}
 /*
 int test_mujs(){
     int r=0;
@@ -187,7 +194,7 @@ int test_mujs(){
 }
 */
 
-#define ENC
+#define ENC1
 int main(int argc, char *argv[])
 {
 #ifdef ENC
@@ -196,20 +203,21 @@ int main(int argc, char *argv[])
     TEST(_base64, NULL);
     TEST(_base16, NULL);
 #endif
-    //test_http(argv[1], atoi(argv[2]));
 #ifdef DT
     TEST(_calendar, NULL);
     TEST(_datediff, NULL);
     TEST(_rand, NULL);
     TEST(_match, NULL);
 #endif
-    //test_mempool( atoi(argv[1]) );
-    //test_ephemem();
 #ifdef FL
     TEST(_file, NULL);
     TEST(_log, NULL);
 #endif
-    //TEST(_mujs);
+    TEST(_clean, NULL);
+    //test_http(argv[1], atoi(argv[2]));
+    //test_mempool( atoi(argv[1]) );
+    //test_ephemem();
+
     printf("total test %d case\n", wa_utsum());
     return 0;
 }
