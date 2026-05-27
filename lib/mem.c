@@ -225,11 +225,9 @@ char* wa_ephemem(int n){
 	return sv_ephememarr.ptr[i];
 }
 
-void _wa_auto_free_char(char **ptr) {
-  if (ptr && *ptr) {
-    free(*ptr);  *ptr = NULL;
-  }
-}
+#define _FREE_MEM_TY(ty) void _wa_auto_free_##ty(ty **ptr) { if (ptr && *ptr) {free(*ptr); *ptr = NULL;} }
+
+_FREE_MEM_TY(char)
 
 void _wa_auto_free_file_p(FILE **ptr) {
   if (ptr && *ptr) {
