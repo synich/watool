@@ -1,7 +1,7 @@
-local _doc=[[ver260522
+local _doc=[[ver260528
 fmt/var_dump/tie
 string.split/indexOf/replace/search/trim/slice/at
-table.join/map/reduce/filter/pop...
+table.join/map/reduce/filter/pop/clone...
 os.popen/ts/setenv
 sqlite3/lpeg
 pb.range[0,n)/lunit/dprint/sqlite3_connect
@@ -254,27 +254,27 @@ if px and px.setenv then os.setenv = px.setenv end
 
 -------- table extend --------
 local function map(f, lst)
-	local _accum_0 = { }
-	local _len_0 = 1
-	for _index_0 = 1, #lst do
-		local x = lst[_index_0]
-		_accum_0[_len_0] = f(x)
-		_len_0 = _len_0 + 1
-	end
-	return _accum_0
+  local _accum_0 = { }
+  local _len_0 = 1
+  for _index_0 = 1, #lst do
+    local x = lst[_index_0]
+    _accum_0[_len_0] = f(x)
+    _len_0 = _len_0 + 1
+  end
+  return _accum_0
 end
 
 local function filter(f, lst)
-	local _accum_0 = { }
-	local _len_0 = 1
-	for _index_0 = 1, #lst do
-		local x = lst[_index_0]
-		if f(x) then
-			_accum_0[_len_0] = x
-			_len_0 = _len_0 + 1
-		end
-	end
-	return _accum_0
+  local _accum_0 = { }
+  local _len_0 = 1
+  for _index_0 = 1, #lst do
+    local x = lst[_index_0]
+    if f(x) then
+      _accum_0[_len_0] = x
+      _len_0 = _len_0 + 1
+    end
+  end
+  return _accum_0
 end
 
 local function reduce(f, lst, init)
@@ -296,9 +296,19 @@ function table.unshift(t, ...) local v = {...} for i = #v, 1, -1 do table.insert
 function table.pop(t) if #t==0 then return nil end return table.remove(t) end
 function table.push(t, ...) local v={...} for _, n in ipairs(v) do table.insert(t, n) end return #t end
 table.join = table.concat
-table.map=function(t, f) return map(f, t) end
-table.filter=function(t,f) return filter(f, t) end
-table.reduce=function(t,f,i) return reduce(f,t,i) end
+table.map  =function(t, f) return map(f, t) end
+table.filter =function(t,f) return filter(f, t) end
+table.reduce =function(t,f,i) return reduce(f,t,i) end
+table.clone  =function(base)
+    if type(base) ~= "table" then return base end
+    local copy = {}
+    for k, v in pairs(base) do
+        copy[k] = table.clone(v)
+    end
+    local mt = getmetatable(base)
+    if mt then setmetatable(copy, mt) end
+    return copy
+end
 if not table.unpack then table.unpack = unpack end
 
 ---- set.lua like JS ----
