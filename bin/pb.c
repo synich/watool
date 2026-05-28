@@ -9,10 +9,8 @@
 #ifdef _WIN32
   #include <windows.h>
   #define DIR_SEP "\\"
-  #define PATH_SEP ';'
 #else
   #define DIR_SEP "/"
-  #define PATH_SEP ':'
 #endif
 
 #define SUPPORT_LUA
@@ -29,7 +27,7 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver260521\nascii\n"
+  printf("personal busybox %dbit ver260528\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip [keyword] -- {pb}/pb_d/_pb_snip[0-9]\n"
@@ -367,10 +365,10 @@ static void* linit(){
   #endif
 #endif
     lua_gc(L, LUA_GCRESTART, 0);
-    lua_pop(L, lua_gettop(L));  // pop custom open_lib
     luafn_pb(L);
-    sprintf(s_lua_precode, "package.cpath=[[%s?.dll%c]]..package.cpath", pb_d_path, PATH_SEP);
+    sprintf(s_lua_precode, "package.path=[[%s?.lua;]]..package.path", pb_d_path);
     luaL_dostring(L, s_lua_precode);
+    lua_pop(L, lua_gettop(L)); // clean
   }
 #endif
   return L;
