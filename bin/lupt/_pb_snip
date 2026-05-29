@@ -437,7 +437,7 @@ A ICON "x.ico"
 @@
 
 # snip_wingui
-// gcc mmm.c -lcomctl32
+// gcc mmm.c
 #include <windows.h>
 #include <commctrl.h>
 #include <stdio.h>
@@ -453,12 +453,37 @@ HWND g_hCombo;
 HWND g_hEditInput;
 HWND g_hEditOutput;
 
+// 执行拼接操作的核心函数
+static void BrgGui2Buss(void)
+{
+    // 获取ComboBox当前选中文本
+    TCHAR comboText[256] = { 0 };
+    int sel = (int)SendMessage(g_hCombo, CB_GETCURSEL, 0, 0);
+    if (sel != CB_ERR) {
+        SendMessage(g_hCombo, CB_GETLBTEXT, sel, (LPARAM)comboText);
+    }
+
+    // 获取中间文本框内容
+    int midLen = GetWindowTextLength(g_hEditInput);
+    TCHAR* midText = (TCHAR*)GlobalAlloc(GPTR, (midLen + 1) * sizeof(TCHAR));
+    if (midText) {
+        GetWindowText(g_hEditInput, midText, midLen + 1);
+
+        // 拼接并输出到下方文本框
+        TCHAR result[4096] = { 0 };
+        _snprintf(result, _countof(result), TEXT("%s%s"), comboText, midText);
+        SetWindowText(g_hEditOutput, result);
+
+        GlobalFree(midText);
+    }
+}
+
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-    INITCOMMONCONTROLSEX icex = { sizeof(icex), ICC_STANDARD_CLASSES };
-    InitCommonControlsEx(&icex);
+    //INITCOMMONCONTROLSEX icex = { sizeof(icex), ICC_STANDARD_CLASSES };
+    //InitCommonControlsEx(&icex); //-lcomctl32
 
     WNDCLASSEX wc = { 0 };
     wc.cbSize        = sizeof(WNDCLASSEX);
@@ -494,53 +519,33 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     // ========== 带加速器的消息循环 ==========
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0)) {
-        // 关键：TranslateAccelerator 会拦截 Ctrl+R 并发送 WM_COMMAND
-        if (!TranslateAccelerator(hWnd, hAccel, &msg)) {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
+        if (msg.message == WM_KEYDOWN){
+            if ((GetKeyState(VK_CONTROL) & 0x8000) && (msg.wParam == 'R')) {
+                BrgGui2Buss();
+                continue;
+            }
         }
+        // may not work: 拦截 Ctrl+R 并发送 WM_COMMAND
+        if (TranslateAccelerator(hWnd, hAccel, &msg)) {
+            continue;
+        }
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
     }
 
     DestroyAcceleratorTable(hAccel);
     return (int)msg.wParam;
 }
 
-// 执行拼接操作的核心函数
-static void DoConcatAction(void)
-{
-    // 获取ComboBox当前选中文本
-    TCHAR comboText[256] = { 0 };
-    int sel = (int)SendMessage(g_hCombo, CB_GETCURSEL, 0, 0);
-    if (sel != CB_ERR) {
-        SendMessage(g_hCombo, CB_GETLBTEXT, sel, (LPARAM)comboText);
-    }
-
-    // 获取中间文本框内容
-    int midLen = GetWindowTextLength(g_hEditInput);
-    TCHAR* midText = (TCHAR*)GlobalAlloc(GPTR, (midLen + 1) * sizeof(TCHAR));
-    if (midText) {
-        GetWindowText(g_hEditInput, midText, midLen + 1);
-
-        // 拼接并输出到下方文本框
-        TCHAR result[4096] = { 0 };
-        _snprintf(result, _countof(result), TEXT("%s%s"), comboText, midText);
-        SetWindowText(g_hEditOutput, result);
-
-        GlobalFree(midText);
-    }
-}
-
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     switch (msg) {
     case WM_CREATE: {
-        // Label "hello"
         CreateWindow(TEXT("STATIC"), TEXT("Ctrl+R"),
             WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE,
             10, 10, 60, 25,
             hWnd, NULL, NULL, NULL);
 
-        // ComboBox
         g_hCombo = CreateWindow(TEXT("COMBOBOX"), TEXT(""),
             WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL,
             80, 8, 120, 200,
@@ -553,14 +558,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         // 中间多行文本框 (~1/3)
         g_hEditInput = CreateWindow(TEXT("EDIT"), TEXT(""),
             WS_CHILD | WS_VISIBLE | WS_BORDER | ES_MULTILINE |
-            ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_VSCROLL | WS_HSCROLL,
+            ES_AUTOVSCROLL | WS_VSCROLL,  //| ES_AUTOHSCROLL | WS_HSCROLL
             10, 45, 780, 180,
             hWnd, (HMENU)ID_EDIT_MIDDLE, NULL, NULL);
 
         // 下面多行文本框 (~2/3)
         g_hEditOutput = CreateWindow(TEXT("EDIT"), TEXT(""),
             WS_CHILD | WS_VISIBLE | WS_BORDER | ES_MULTILINE |
-            ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_VSCROLL | WS_HSCROLL,
+            ES_AUTOVSCROLL | WS_VSCROLL,  //| ES_AUTOHSCROLL | WS_HSCROLL
             10, 235, 780, 355,
             hWnd, (HMENU)ID_EDIT_BOTTOM, NULL, NULL);
         break;
@@ -569,7 +574,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     // ========== 接收加速器转换后的 WM_COMMAND ==========
     case WM_COMMAND: {
         if (LOWORD(wParam) == IDM_CTRL_R && HIWORD(wParam) == 1) {
-            DoConcatAction();
+            BrgGui2Buss();
             return 0;
         }
         break;
