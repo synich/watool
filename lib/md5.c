@@ -793,3 +793,51 @@ int wa_base16enc(char* src, int len, char* dst) {
   }
   return 0;
 }
+
+#ifdef _WIN32
+#include <windows.h>
+
+void gb2utf(const char* gb, char* utf) {
+    if (!gb || !utf) return;
+
+    // 1. GB18030 (54936) -> WideChar (UTF-16)
+    int wlen = MultiByteToWideChar(54936, 0, gb, -1, NULL, 0);
+    if (wlen == 0) { *utf = '\0'; return; } // 转换失败，输出空串
+
+    wchar_t* wbuf = (wchar_t*)malloc(sizeof(wchar_t) * wlen);
+    if (!wbuf) { *utf = '\0'; return; }
+    MultiByteToWideChar(54936, 0, gb, -1, wbuf, wlen);
+
+    // 2. WideChar (UTF-16) -> UTF-8 (65001)
+    int u8len = WideCharToMultiByte(65001, 0, wbuf, -1, utf, 0, NULL, NULL);
+    if (u8len > 0) {
+        WideCharToMultiByte(65001, 0, wbuf, -1, utf, u8len, NULL, NULL);
+    } else {
+        *utf = '\0';
+    }
+
+    free(wbuf);
+}
+
+void utf2gb(const char* utf, char* gb) {
+    if (!utf || !gb) return;
+
+    // 1. UTF-8 (65001) -> WideChar (UTF-16)
+    int wlen = MultiByteToWideChar(65001, 0, utf, -1, NULL, 0);
+    if (wlen == 0) { *gb = '\0'; return; }
+
+    wchar_t* wbuf = (wchar_t*)malloc(sizeof(wchar_t) * wlen);
+    if (!wbuf) { *gb = '\0'; return; }
+    MultiByteToWideChar(65001, 0, utf, -1, wbuf, wlen);
+
+    // 2. WideChar (UTF-16) -> GB18030 (54936)
+    int gblen = WideCharToMultiByte(54936, 0, wbuf, -1, gb, 0, NULL, NULL);
+    if (gblen > 0) {
+        WideCharToMultiByte(54936, 0, wbuf, -1, gb, gblen, NULL, NULL);
+    } else {
+        *gb = '\0';
+    }
+
+    free(wbuf);
+}
+#endif
