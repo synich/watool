@@ -437,7 +437,6 @@ A ICON "x.ico"
 @@
 
 # snip_wingui
-// gcc mmm.c
 #include <windows.h>
 #include <commctrl.h>
 #include <stdio.h>
@@ -453,7 +452,13 @@ HWND g_hCombo;
 HWND g_hEditInput;
 HWND g_hEditOutput;
 
-// 执行拼接操作的核心函数
+void bussCode(TCHAR* comboText, TCHAR* midText){
+    TCHAR result[4096] = { 0 };
+    _snprintf(result, _countof(result), TEXT("%s%d:%s"), comboText, sizeof(TCHAR), midText);
+    SetWindowText(g_hEditOutput, result);
+}
+
+// GUI参数转业务逻辑
 static void BrgGui2Buss(void)
 {
     // 获取ComboBox当前选中文本
@@ -468,12 +473,7 @@ static void BrgGui2Buss(void)
     TCHAR* midText = (TCHAR*)GlobalAlloc(GPTR, (midLen + 1) * sizeof(TCHAR));
     if (midText) {
         GetWindowText(g_hEditInput, midText, midLen + 1);
-
-        // 拼接并输出到下方文本框
-        TCHAR result[4096] = { 0 };
-        _snprintf(result, _countof(result), TEXT("%s%s"), comboText, midText);
-        SetWindowText(g_hEditOutput, result);
-
+        bussCode(comboText, midText);
         GlobalFree(midText);
     }
 }
@@ -484,7 +484,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 {
     //INITCOMMONCONTROLSEX icex = { sizeof(icex), ICC_STANDARD_CLASSES };
     //InitCommonControlsEx(&icex); //-lcomctl32
-
     WNDCLASSEX wc = { 0 };
     wc.cbSize        = sizeof(WNDCLASSEX);
     wc.style         = CS_HREDRAW | CS_VREDRAW;
@@ -516,7 +515,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     ShowWindow(hWnd, nCmdShow);
     UpdateWindow(hWnd);
 
-    // ========== 带加速器的消息循环 ==========
+    // ========== 先用按键编码捕获，加速器不一定工具 ==========
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0)) {
         if (msg.message == WM_KEYDOWN){
@@ -525,7 +524,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
                 continue;
             }
         }
-        // may not work: 拦截 Ctrl+R 并发送 WM_COMMAND
+        // 加速器会将 Ctrl+R 转为 WM_COMMAND
         if (TranslateAccelerator(hWnd, hAccel, &msg)) {
             continue;
         }
