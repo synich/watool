@@ -437,6 +437,7 @@ A ICON "x.ico"
 @@
 
 # snip_wingui
+// default is A(char, ""); define UNICODE and _UNICODE to W(wchar_t, L"")
 #include <windows.h>
 #include <commctrl.h>
 #include <stdio.h>

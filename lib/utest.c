@@ -47,6 +47,12 @@ int test_base16(char** _) {
     return ret;
 }
 
+int test_conv(char** _) {
+  char gb[8] = {0xD6, 0xD0, 0xB9, 0xFA, 0};
+  char utf[8] = {0xE4, 0xB8, 0xAD, 0xE5, 0x9B, 0xBD, 0};
+  return 0;
+}
+
 void test_http(char* ip, int port ){
   char* pos;
 #define HTTPBUF 2194

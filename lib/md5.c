@@ -797,7 +797,7 @@ int wa_base16enc(char* src, int len, char* dst) {
 #ifdef _WIN32
 #include <windows.h>
 
-void gb2utf(const char* gb, char* utf) {
+void gb2utf(const char* gb, char* utf, int* len) {
     if (!gb || !utf) return;
 
     // 1. GB18030 (54936) -> WideChar (UTF-16)
@@ -810,16 +810,17 @@ void gb2utf(const char* gb, char* utf) {
 
     // 2. WideChar (UTF-16) -> UTF-8 (65001)
     int u8len = WideCharToMultiByte(65001, 0, wbuf, -1, utf, 0, NULL, NULL);
-    if (u8len > 0) {
+    if ((u8len > 0) && (u8len <= *len)) {
         WideCharToMultiByte(65001, 0, wbuf, -1, utf, u8len, NULL, NULL);
+        *len = u8len;
     } else {
-        *utf = '\0';
+        *utf = '\0'; printf("need %d, but %d not enough\n", u8len, *len);
     }
 
     free(wbuf);
 }
 
-void utf2gb(const char* utf, char* gb) {
+void utf2gb(const char* utf, char* gb, int* len) {
     if (!utf || !gb) return;
 
     // 1. UTF-8 (65001) -> WideChar (UTF-16)
@@ -832,12 +833,14 @@ void utf2gb(const char* utf, char* gb) {
 
     // 2. WideChar (UTF-16) -> GB18030 (54936)
     int gblen = WideCharToMultiByte(54936, 0, wbuf, -1, gb, 0, NULL, NULL);
-    if (gblen > 0) {
+    if ((gblen > 0) && (gblen <= *len)) {
         WideCharToMultiByte(54936, 0, wbuf, -1, gb, gblen, NULL, NULL);
+        *len = gblen;
     } else {
-        *gb = '\0';
+        *gb = '\0'; printf("need %d, but %d not enough\n", gblen, *len);
     }
 
     free(wbuf);
 }
 #endif
+
