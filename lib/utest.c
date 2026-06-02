@@ -50,6 +50,12 @@ int test_base16(char** _) {
 int test_conv(char** _) {
   char gb[8] = {0xD6, 0xD0, 0xB9, 0xFA, 0};
   char utf[8] = {0xE4, 0xB8, 0xAD, 0xE5, 0x9B, 0xBD, 0};
+  char res[8] = {0};
+  int len = 8;
+  gb2utf(gb, res, &len);
+  wa_utok(len==7);
+  utf2gb(utf, res, &len);
+  wa_utok(len==5);
   return 0;
 }
 
@@ -200,7 +206,7 @@ int test_mujs(){
 }
 */
 
-#define ENC1
+#define ENC
 int main(int argc, char *argv[])
 {
 #ifdef ENC
@@ -208,6 +214,7 @@ int main(int argc, char *argv[])
     TEST(_sha1, NULL);
     TEST(_base64, NULL);
     TEST(_base16, NULL);
+    TEST(_conv, NULL);
 #endif
 #ifdef DT
     TEST(_calendar, NULL);
@@ -218,8 +225,8 @@ int main(int argc, char *argv[])
 #ifdef FL
     TEST(_file, NULL);
     TEST(_log, NULL);
-#endif
     TEST(_clean, NULL);
+#endif
     //test_http(argv[1], atoi(argv[2]));
     //test_mempool( atoi(argv[1]) );
     //test_ephemem();
