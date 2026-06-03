@@ -48,14 +48,16 @@ int test_base16(char** _) {
 }
 
 int test_conv(char** _) {
+#ifdef _WIN32
   char gb[8] = {0xD6, 0xD0, 0xB9, 0xFA, 0};
   char utf[8] = {0xE4, 0xB8, 0xAD, 0xE5, 0x9B, 0xBD, 0};
   char res[8] = {0};
-  int len = 8;
-  gb2utf(gb, res, &len);
+  int len = 0;
+  len = gb2utf(gb, res, 0);
   wa_utok(len==7);
-  utf2gb(utf, res, &len);
+  len = utf2gb(utf, res, 0);
   wa_utok(len==5);
+#endif
   return 0;
 }
 

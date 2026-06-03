@@ -19,8 +19,8 @@ int wa_base64dec(char* src, char* dst);
 int wa_base16enc(char* src, int len, char* dst);
 int wa_base16dec(char* src, char* dst);
 #ifdef _WIN32
-int gb2utf(const char* gb, char* utf, int* len);
-int utf2gb(const char* utf, char* gb, int* len);
+int gb2utf(const char* gb, char* utf, int len);
+int utf2gb(const char* utf, char* gb, int len);
 #endif
 
 /*return epoch, tz=0 -> localtime, tz=3600 -> plus one zone*/
