@@ -110,7 +110,10 @@ int test_match(char** _){
   struct stResub sub;
   int i = wa_match("(\\l*)(\\u*)(\\a*)", "ghaAbcPz1", &sub);
   printf("match: %d,%d,%.*s\n", i, sub.nsub, sub.sub[3].len, sub.sub[3].ptr);
-  return wa_utok(i==0);
+  int ret = wa_utok(i==0);
+  i = wa_match("abc|def+", "adefffg", &sub);
+  printf("match: %d,%d,%d\n", i, sub.nsub, sub.sub[0].len);
+  return ret;
 }
 
 void test_mempool(int sze){
@@ -208,7 +211,7 @@ int test_mujs(){
 }
 */
 
-#define ENC
+#define DT
 int main(int argc, char *argv[])
 {
 #ifdef ENC
