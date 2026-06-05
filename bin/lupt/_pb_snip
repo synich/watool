@@ -447,6 +447,7 @@ A ICON "x.ico"
 #define ID_EDIT_MIDDLE   1002
 #define ID_EDIT_BOTTOM   1003
 #define IDM_CTRL_R       2001  // Ctrl+R 的命令ID
+#define countof(a)    (sizeof(a)/sizeof((a)[0]))
 
 // 全局句柄
 HWND g_hCombo;
@@ -455,7 +456,7 @@ HWND g_hEditOutput;
 
 void bussCode(TCHAR* comboText, TCHAR* midText){
     TCHAR result[4096] = { 0 };
-    _snprintf(result, _countof(result), TEXT("%s%d:%s"), comboText, sizeof(TCHAR), midText);
+    _snprintf(result, countof(result), TEXT("%s%d:%s"), comboText, sizeof(TCHAR), midText);
     SetWindowText(g_hEditOutput, result);
 }
 
@@ -479,43 +480,12 @@ static void BrgGui2Buss(void)
     }
 }
 
-LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-{
-    //INITCOMMONCONTROLSEX icex = { sizeof(icex), ICC_STANDARD_CLASSES };
-    //InitCommonControlsEx(&icex); //-lcomctl32
-    WNDCLASSEX wc = { 0 };
-    wc.cbSize        = sizeof(WNDCLASSEX);
-    wc.style         = CS_HREDRAW | CS_VREDRAW;
-    wc.lpfnWndProc   = WndProc;
-    wc.hInstance     = hInstance;
-    wc.hCursor       = LoadCursor(NULL, IDC_ARROW);
-    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-    wc.lpszClassName = TEXT("MyWin32App");
-    RegisterClassEx(&wc);
-
-    // ========== 创建加速器表 (Ctrl+R) ==========
+int msg_loop(HWND hWnd) {
+        // ========== 创建加速器表 (Ctrl+R) ==========
     ACCEL acc[] = {
         { FVIRTKEY | FCONTROL, 'R', IDM_CTRL_R }
     };
-    HACCEL hAccel = CreateAcceleratorTable(acc, _countof(acc));
-
-    DWORD dwStyle = WS_OVERLAPPEDWINDOW;
-    RECT rc = { 0, 0, 800, 600 };
-    AdjustWindowRect(&rc, dwStyle, FALSE);
-
-    HWND hWnd = CreateWindow(
-        TEXT("MyWin32App"), TEXT("Win32 Demo"),
-        dwStyle,
-        CW_USEDEFAULT, CW_USEDEFAULT,
-        rc.right - rc.left, rc.bottom - rc.top,
-        NULL, NULL, hInstance, NULL
-    );
-
-    ShowWindow(hWnd, nCmdShow);
-    UpdateWindow(hWnd);
-
+    HACCEL hAccel = CreateAcceleratorTable(acc, countof(acc));
     // ========== 先用按键编码捕获，加速器不一定工具 ==========
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0)) {
@@ -535,6 +505,38 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     DestroyAcceleratorTable(hAccel);
     return (int)msg.wParam;
+}
+
+LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+{
+    //INITCOMMONCONTROLSEX icex = { sizeof(icex), ICC_STANDARD_CLASSES };
+    //InitCommonControlsEx(&icex); //-lcomctl32
+    WNDCLASSEX wc = { 0 };
+    wc.cbSize        = sizeof(WNDCLASSEX);
+    wc.style         = CS_HREDRAW | CS_VREDRAW;
+    wc.lpfnWndProc   = WndProc;
+    wc.hInstance     = hInstance;
+    wc.hCursor       = LoadCursor(NULL, IDC_ARROW);
+    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    wc.lpszClassName = TEXT("MyWin32App");
+    RegisterClassEx(&wc);
+
+    DWORD dwStyle = WS_OVERLAPPEDWINDOW;
+    RECT rc = { 0, 0, 800, 600 };
+    AdjustWindowRect(&rc, dwStyle, FALSE);
+    HWND hWnd = CreateWindow(
+        TEXT("MyWin32App"), TEXT("Win32 Demo"),
+        dwStyle,
+        CW_USEDEFAULT, CW_USEDEFAULT,
+        rc.right - rc.left, rc.bottom - rc.top,
+        NULL, NULL, hInstance, NULL
+    );
+
+    ShowWindow(hWnd, nCmdShow);
+    UpdateWindow(hWnd);
+    return msg_loop(hWnd);
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
