@@ -433,7 +433,27 @@ MySQL use same function
 @@
 
 # snip_rc
+#include <windows.h>
+#include "resource.h"
+
 A ICON "x.ico"
+// 定义对话框模板，单位是 DLU
+IDD_MAIN_DIALOG DIALOGEX 0, 0, 600, 300
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX
+CAPTION "Win32 Dialog Demo"
+FONT 12, "Microsoft YaHei UI", 400, 0, 0x1
+BEGIN
+    // 第一行：Label + ComboBox + Button
+    LTEXT           "Hello:", IDC_STATIC, 5, 5, 20, 10
+    COMBOBOX        ID_COMBOBOX, 40, 3, 60, 100, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Action (Ctrl+R)", ID_BTN_CONCAT, 180, 3, 60, 12
+
+    // 中间文本框 (输入)
+    EDITTEXT        ID_EDIT_MIDDLE, 5, 20, 590, 120, ES_MULTILINE | ES_AUTOVSCROLL | WS_VSCROLL | WS_BORDER | WS_TABSTOP
+
+    // 下面文本框 (输出)
+    EDITTEXT        ID_EDIT_BOTTOM, 5, 155, 590, 140, ES_MULTILINE | ES_AUTOVSCROLL | WS_VSCROLL | WS_BORDER | WS_TABSTOP
+END
 @@
 
 # snip_wingui
