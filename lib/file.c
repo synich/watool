@@ -92,3 +92,39 @@ int wa_utsum(void){
 	printf("****UNIT TEST BEGIN****\n%s[DETAIL]: %d ok, %d err\n*****UNIT TEST END*****\n", s_utresult.report, s_utresult.ok_sum, s_utresult.err_sum);
 	return s_utresult.ok_sum + s_utresult.err_sum;
 }
+
+/* printf to console or string */
+struct _Prt_str {
+  int collect;
+  int len;
+  int cap;
+  char* p;
+};
+static struct _Prt_str _pstr;
+
+int wa_prtcol(int sz) {
+  _pstr.collect = 1;
+  _pstr.cap = sz;
+  _pstr.p = (char*)malloc(sz);
+  _pstr.p[0] = 0;
+  _pstr.len = 0;
+  return 0;
+}
+
+void wa_prtcs(const char* format, ...){
+  va_list args;
+  va_start(args, format);
+  if (_pstr.collect) {
+    vsnprintf(_pstr.p+_pstr.len, _pstr.cap-_pstr.len, format, args);
+    _pstr.len = strlen(_pstr.p);
+  } else {
+    vfprintf(stderr, format, args);
+  }
+  va_end(args);
+}
+
+char* wa_prtdup(void){
+  _pstr.collect = 0;
+  return _pstr.p;
+}
+

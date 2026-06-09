@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <ctype.h>
-#include <stdarg.h>
+#include "walib.h"
 #define MAXLINE 256
 
 #ifdef _WIN32
@@ -83,13 +83,6 @@ int frontcmp(const char* s, const char* target, int most){
   return strncmp(s,target, tlen);
 }
 
-void err_pf(const char* format, ...){
-  va_list args;
-  va_start(args, format);
-  vfprintf(stderr, format, args);
-  va_end(args);
-}
-
 /******** show ascii char ********/
 void ascii(){
   int i = 32;
@@ -162,7 +155,7 @@ void dyn2str(int argc, char *argv[])
   pos = strchr(buf, '.');
   *pos = '_'; /*At least has one .c, must available*/
 
-  err_pf("dyn2str to %s\n", buf);
+  wa_prtcs("dyn2str to %s\n", buf);
   fin = fopen(argv[1], "r");
   fout = fopen(buf, "w");
   fseek(fin, 0, SEEK_END);
@@ -280,27 +273,27 @@ static void _print_one_lua_val(lua_State *L, int i, int stk_size){
     char *idx_mean = " | :";
     if (i==stk_size){idx_mean = "top:";}
     else if (1==i){idx_mean = "bot:";}
-    err_pf("%s%d or %d <%s>: ", idx_mean, i, i-1-stk_size, lua_typename(L, val_t));
+    wa_prtcs("%s%d or %d <%s>: ", idx_mean, i, i-1-stk_size, lua_typename(L, val_t));
 
-    if (val_t==LUA_TSTRING) {err_pf(" %s", lua_tostring(L, i));}
-    else if (val_t==LUA_TNUMBER) {err_pf(" %.2f", lua_tonumber(L, i));}
-    else if (val_t==LUA_TTABLE) {int j=1;err_pf(" arrlen %d, key_5:", (int)lua_rawlen(L, i));
+    if (val_t==LUA_TSTRING) {wa_prtcs(" %s", lua_tostring(L, i));}
+    else if (val_t==LUA_TNUMBER) {wa_prtcs(" %.2f", lua_tonumber(L, i));}
+    else if (val_t==LUA_TTABLE) {int j=1;wa_prtcs(" arrlen %d, key_5:", (int)lua_rawlen(L, i));
       lua_pushnil(L);
       for(;j<=5;j++){if (0==lua_next(L,i)){break;} else {
         val_t = lua_type(L, -2);
-        if (val_t==LUA_TSTRING) {err_pf(" %s",lua_tostring(L,-2));}
-        else if (val_t==LUA_TNUMBER) {err_pf(" %.0f",lua_tonumber(L,-2));}
-        else {err_pf(" %s", lua_typename(L, lua_type(L, -2)));}
+        if (val_t==LUA_TSTRING) {wa_prtcs(" %s",lua_tostring(L,-2));}
+        else if (val_t==LUA_TNUMBER) {wa_prtcs(" %.0f",lua_tonumber(L,-2));}
+        else {wa_prtcs(" %s", lua_typename(L, lua_type(L, -2)));}
         lua_pop(L, 1);/* removes 'value'; keeps 'key' for next iteration */
         } }
     }
-    else if (val_t==LUA_TBOOLEAN) {err_pf(" %s", 1==lua_toboolean(L, i)?"true":"false");}
-    err_pf("\n");
+    else if (val_t==LUA_TBOOLEAN) {wa_prtcs(" %s", 1==lua_toboolean(L, i)?"true":"false");}
+    wa_prtcs("\n");
 }
 
 static void _debug_lua(lua_State *L, char* hint_mess){
   int stk_size = lua_gettop(L), i;
-  err_pf("[DEBUG %s]: elem num is %d\n", hint_mess, stk_size);
+  wa_prtcs("[DEBUG %s]: elem num is %d\n", hint_mess, stk_size);
   for(i=stk_size;i>=1;i--){
     _print_one_lua_val(L, i, stk_size);
   }
@@ -387,7 +380,7 @@ static int ldofile(void* L, char *fname, int narg){
 #ifdef SUPPORT_LUA
   status = luaL_loadfile(L, fname);
   if (0!=status) {
-    err_pf("pb load %s fail[%d]: %s\n", fname, status, lua_tostring(L, -1));
+    wa_prtcs("pb load %s fail[%d]: %s\n", fname, status, lua_tostring(L, -1));
     lua_pop(L, lua_gettop(L));
     return status;
   }
@@ -397,7 +390,7 @@ static int ldofile(void* L, char *fname, int narg){
   lua_insert(L, base);  /* put it under chunk and args */
   status = lua_pcall(L, narg, LUA_MULTRET, base); /*LUA_MULTRET*/
   if (0!=status) {
-    err_pf("pb run %s fail[%d]: %s\n",fname, status, lua_tostring(L, -1));
+    wa_prtcs("pb run %s fail[%d]: %s\n",fname, status, lua_tostring(L, -1));
   }
   lua_pop(L, lua_gettop(L));
 #endif
@@ -491,7 +484,7 @@ static int _luac(char *fname){
   ret = lua_dump(L, lwriter, fp, 1);
 #endif
   if (0 != ret) {
-    err_pf("lua dump %s fail, code: %d\n", fname, ret);
+    wa_prtcs("lua dump %s fail, code: %d\n", fname, ret);
     _debug_lua(L, "dump fail");
   }
   fclose(fp);

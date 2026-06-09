@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,6 +48,9 @@ int _wa_utok(int result, int line);/*if result true(not 0) return 0, else 1. Sum
 typedef int(*wa_utfn)(char**);
 void wa_utrun(const char* name, wa_utfn f, char** arg);
 int wa_utsum(void);
+int wa_prtcol(int sz);
+void wa_prtcs(const char* format, ...);
+char* wa_prtdup(void);
 
 #define REG_MAXSUB 10
 struct stResub {
@@ -86,7 +90,9 @@ struct stResub {
 int wa_match(char* reg, char* txt, struct stResub *sub);
 
 /* Memory Pool */
+void _wa_auto_free_int(int **ptr);
 void _wa_auto_free_char(char **ptr);
+void _wa_auto_free_double(double **ptr);
 void _wa_auto_free_file_p(FILE **ptr);
 #define AUTO_MEM_P(ty, var) ty *var __attribute__((cleanup(_wa_auto_free_##ty)))
 #define AUTO_FILE_P(var) FILE *var __attribute__((cleanup(_wa_auto_free_file_p)))

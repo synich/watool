@@ -227,7 +227,9 @@ char* wa_ephemem(int n){
 
 #define _FREE_MEM_TY(ty) void _wa_auto_free_##ty(ty **ptr) { if (ptr && *ptr) {free(*ptr); *ptr = NULL;} }
 
+_FREE_MEM_TY(int)
 _FREE_MEM_TY(char)
+_FREE_MEM_TY(double)
 
 void _wa_auto_free_file_p(FILE **ptr) {
   if (ptr && *ptr) {

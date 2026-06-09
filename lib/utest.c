@@ -181,9 +181,22 @@ int test_log(char** _){
 }
 
 int test_clean(char** _){
+    AUTO_MEM_P(int, pi) = (int*)malloc(4);
+    pi[0] = 15;
+    AUTO_MEM_P(double, pd) = (double*)malloc(4);
+    pd[0] = 5.17;
     AUTO_MEM_P(char, p) = strdup("hello");
     AUTO_FILE_P(f) = fopen("Makefile", "r");
-    printf("%s, %p\n", p, f);
+    printf("%d, %g, %s, %p\n", pi[0], pd[0], p, f);
+    return 0;
+}
+
+int test_prtcs(char** _){
+    wa_prtcol(16);
+    wa_prtcs("%d", 1);
+    wa_prtcs("%g", 3.14);
+    AUTO_MEM_P(char, p) = wa_prtdup();
+    printf("col: %s", p);
     return 0;
 }
 /*
@@ -211,7 +224,7 @@ int test_mujs(){
 }
 */
 
-#define DT
+#define FL
 int main(int argc, char *argv[])
 {
 #ifdef ENC
@@ -231,6 +244,7 @@ int main(int argc, char *argv[])
     TEST(_file, NULL);
     TEST(_log, NULL);
     TEST(_clean, NULL);
+    TEST(_prtcs, NULL);
 #endif
     //test_http(argv[1], atoi(argv[2]));
     //test_mempool( atoi(argv[1]) );
