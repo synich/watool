@@ -27,7 +27,7 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver260528\nascii\n"
+  printf("personal busybox %dbit ver260609\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip [keyword] -- {pb}/pb_d/_pb_snip[0-9]\n"
@@ -86,18 +86,18 @@ int frontcmp(const char* s, const char* target, int most){
 /******** show ascii char ********/
 void ascii(){
   int i = 32;
-  puts("Control:");
-  puts("0x00,0: NUL\t0x08,8: Backspace\t0x10,16: DataLnkEscape\t0x18,24: Cancel");
-  puts("0x01,1: SOH\t0x09,9: Tab\t\t0x11,17: DC1-XON\t0x19,25: EndMedium");
-  puts("0x02,2: STX\t0x0A,10: LF\t\t0x12,18: DC2\t\t0x1A,26: Substitute");
-  puts("0x03,3: ETX\t0x0B,11: VTab\t\t0x13,19: DC3-XOFF\t0x1B,27: Escape");
-  puts("0x04,4: EOT\t0x0C,12: ClearScreen\t0x14,20: DC4\t\t0x1C,28: FileSplit");
-  puts("0x05,5: Enquiry\t0x0D,13: CR\t\t0x15,21: NAK\t\t0x1D,29: GrpSplit");
-  puts("0x06,6: ACK\t0x0E,14: ShiftOut\t0x16,22: SYN\t\t0x1E,30: RecSplit");
-  puts("0x07,7: Bell\t0x0F,15: ShiftIn\t0x17,23: EndTransBlk\t0x1F,31: UnitSplit");
-  puts("\nPrintable:");
+  wa_prtcs("Control:\n");
+  wa_prtcs("0x00,0: NUL\t0x08,8: Backspace\t0x10,16: DataLnkEscape\t0x18,24: Cancel\n");
+  wa_prtcs("0x01,1: SOH\t0x09,9: Tab\t\t0x11,17: DC1-XON\t0x19,25: EndMedium\n");
+  wa_prtcs("0x02,2: STX\t0x0A,10: LF\t\t0x12,18: DC2\t\t0x1A,26: Substitute\n");
+  wa_prtcs("0x03,3: ETX\t0x0B,11: VTab\t\t0x13,19: DC3-XOFF\t0x1B,27: Escape\n");
+  wa_prtcs("0x04,4: EOT\t0x0C,12: ClearScreen\t0x14,20: DC4\t\t0x1C,28: FileSplit\n");
+  wa_prtcs("0x05,5: Enquiry\t0x0D,13: CR\t\t0x15,21: NAK\t\t0x1D,29: GrpSplit\n");
+  wa_prtcs("0x06,6: ACK\t0x0E,14: ShiftOut\t0x16,22: SYN\t\t0x1E,30: RecSplit\n");
+  wa_prtcs("0x07,7: Bell\t0x0F,15: ShiftIn\t0x17,23: EndTransBlk\t0x1F,31: UnitSplit\n");
+  wa_prtcs("\nPrintable:\n");
   for (; i<32+24; i++){
-    printf("0x%x,%d: %c\t\t0x%x,%d: %c\t\t0x%x,%d: %c\t\t0x%x,%d: %c\n",
+    wa_prtcs("0x%x,%d: %c\t\t0x%x,%d: %c\t\t0x%x,%d: %c\t\t0x%x,%d: %c\n",
       i, i, i, i+24, i+24, i+24, i+48, i+48, i+48, i+72, i+72, i+72);
   }
 }
@@ -221,12 +221,12 @@ void indent_file(FILE* file){
     while (1){
         char line[120] = {0};
         if (NULL == fgets(line, sizeof(line), file)){
-            printf("%s", output);
+            wa_prtcs("%s", output);
             break;
         }
         //if this line is meanless, output all reserve string
         if(isspaceline(line)){
-            printf("%s\n", output);
+            wa_prtcs("%s\n", output);
             memset(output, 0, sizeof(output));
         }
         else{
@@ -273,6 +273,7 @@ static void _print_one_lua_val(lua_State *L, int i, int stk_size){
     char *idx_mean = " | :";
     if (i==stk_size){idx_mean = "top:";}
     else if (1==i){idx_mean = "bot:";}
+    wa_prtto(-1);  /* to stderr */
     wa_prtcs("%s%d or %d <%s>: ", idx_mean, i, i-1-stk_size, lua_typename(L, val_t));
 
     if (val_t==LUA_TSTRING) {wa_prtcs(" %s", lua_tostring(L, i));}
@@ -288,7 +289,7 @@ static void _print_one_lua_val(lua_State *L, int i, int stk_size){
         } }
     }
     else if (val_t==LUA_TBOOLEAN) {wa_prtcs(" %s", 1==lua_toboolean(L, i)?"true":"false");}
-    wa_prtcs("\n");
+    wa_prtcs("\n");  wa_prtto(0);
 }
 
 static void _debug_lua(lua_State *L, char* hint_mess){
@@ -409,7 +410,7 @@ static void _lua_expr(lua_State *L, int argc, char** argv){
   if (2==argc){usage();}
   sprintf(exprbuff, "return %s", argv[2]);
   ret = luaL_dostring(L, exprbuff);
-  printf("run %s\n", ret==0?"ok":"fail");
+  wa_prtcs("run %s\n", ret==0?"ok":"fail");
   _debug_lua(L, "Expr");
 }
 

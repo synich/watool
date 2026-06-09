@@ -192,9 +192,10 @@ int test_clean(char** _){
 }
 
 int test_prtcs(char** _){
-    wa_prtcol(16);
-    wa_prtcs("%d", 1);
+    wa_prtto(8);
+    wa_prtcs("%d", 1234);
     wa_prtcs("%g", 3.14);
+    wa_prtcs("%d", 7); // never collect
     AUTO_MEM_P(char, p) = wa_prtdup();
     printf("col: %s", p);
     return 0;

@@ -318,7 +318,6 @@ LUALIB_API int luaopen_utf8 (lua_State *L) {
 
 
 /********px-walib********/
-#ifdef USE_WALIB
 #include "walib.h"
 
 static int md5 (lua_State *L) {
@@ -437,7 +436,6 @@ static int l_http_timeout(lua_State *L) {
   lua_pushboolean(L, 1);
   return 1;
 }
-#endif /*USE_WALIB*/
 
 /********px********/
 #include <dirent.h>
@@ -536,7 +534,6 @@ static int bxor (lua_State *L) {
 
 
 static const luaL_Reg px_funcs[] = {
-#ifdef USE_WALIB
   {"md5", md5},
   {"sha1", sha1},
   {"btoa", b64enc},
@@ -545,7 +542,7 @@ static const luaL_Reg px_funcs[] = {
   {"http_get", l_http_get},
   {"http_post",l_http_post},
   {"http_timeout",l_http_timeout},
-#endif
+
   {"lsdir", lsdir},
   {"lsfile", lsfile},
   {"setenv", l_setenv},

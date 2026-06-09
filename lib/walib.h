@@ -48,7 +48,7 @@ int _wa_utok(int result, int line);/*if result true(not 0) return 0, else 1. Sum
 typedef int(*wa_utfn)(char**);
 void wa_utrun(const char* name, wa_utfn f, char** arg);
 int wa_utsum(void);
-int wa_prtcol(int sz);
+int wa_prtto(int sz);
 void wa_prtcs(const char* format, ...);
 char* wa_prtdup(void);
 
