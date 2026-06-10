@@ -27,7 +27,7 @@
 #endif
 
 void usage(){
-  printf("personal busybox %dbit ver260609\nascii\n"
+  wa_prtcs("personal busybox %dbit ver260609\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip [keyword] -- {pb}/pb_d/_pb_snip[0-9]\n"
@@ -257,7 +257,7 @@ void xlispindent(int argc, char** argv){
         int i=1;
         for(; i<argc; ++i){
             FILE* f = fopen(argv[i], "r");
-            f? indent_file(f): printf("cant open file %s\n", argv[i]);
+            f? indent_file(f): wa_prtcs("cant open file %s\n", argv[i]);
         }
     }
 }
@@ -273,7 +273,6 @@ static void _print_one_lua_val(lua_State *L, int i, int stk_size){
     char *idx_mean = " | :";
     if (i==stk_size){idx_mean = "top:";}
     else if (1==i){idx_mean = "bot:";}
-    wa_prtto(-1);  /* to stderr */
     wa_prtcs("%s%d or %d <%s>: ", idx_mean, i, i-1-stk_size, lua_typename(L, val_t));
 
     if (val_t==LUA_TSTRING) {wa_prtcs(" %s", lua_tostring(L, i));}
@@ -289,15 +288,17 @@ static void _print_one_lua_val(lua_State *L, int i, int stk_size){
         } }
     }
     else if (val_t==LUA_TBOOLEAN) {wa_prtcs(" %s", 1==lua_toboolean(L, i)?"true":"false");}
-    wa_prtcs("\n");  wa_prtto(0);
+    wa_prtcs("\n");
 }
 
 static void _debug_lua(lua_State *L, char* hint_mess){
   int stk_size = lua_gettop(L), i;
+  wa_prtto(-1);  /* to stderr */
   wa_prtcs("[DEBUG %s]: elem num is %d\n", hint_mess, stk_size);
   for(i=stk_size;i>=1;i--){
     _print_one_lua_val(L, i, stk_size);
   }
+  wa_prtto(0);
 }
 static void debug_lua(lua_State *L, char* hint_mess){
   if (getenv("PB_DEBUG") != NULL) { _debug_lua(L, hint_mess); }
@@ -519,7 +520,7 @@ void enc_lua(int argc, char *argv[])
   if (pos) {*pos = '_';}
   fr = fopen("luac.out", "rb");
   fw = fopen(buf, "w");
-  printf("encode lua bytecode to %s\n", buf);
+  wa_prtcs("encode lua bytecode to %s\n", buf);
   fl_pos = strrchr(buf, '/')?strrchr(buf, '/'):strrchr(buf, '\\');
   if (NULL==fl_pos){strcpy(flname, buf);}
   else {strcpy(flname, fl_pos+1);}
