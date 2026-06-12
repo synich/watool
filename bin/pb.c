@@ -27,7 +27,7 @@
 #endif
 
 void usage(){
-  wa_prtcs("personal busybox %dbit ver260609\nascii\n"
+  wa_prtcs("personal busybox %dbit ver260612\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip [keyword] -- {pb}/pb_d/_pb_snip[0-9]\n"
@@ -361,6 +361,7 @@ static void* linit(){
 #endif
     lua_gc(L, LUA_GCRESTART, 0);
     luafn_pb(L);
+    lua_setglobal(L, "pb");
     sprintf(s_lua_precode, "package.path=[[%s?.lua;]]..package.path", pb_d_path);
     luaL_dostring(L, s_lua_precode);
     lua_pop(L, lua_gettop(L)); // clean

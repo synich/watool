@@ -1,4 +1,4 @@
-local _doc=[[ver260528
+local _doc=[[ver260612
 fmt/var_dump/tie
 string.split/indexOf/replace/search/trim/slice/at
 table.join/map/reduce/filter/pop/clone...
@@ -63,7 +63,7 @@ function tie(t)
 end
 
 -------- pb extend --------
-pb = {__doc__ = _doc}
+local pb = {__doc__ = _doc}
 
 pb.range = function(start, stop, step)
   step = step or 1
@@ -729,3 +729,5 @@ end
 
 pb.json = JSON
 pb.set = set
+return pb
+
