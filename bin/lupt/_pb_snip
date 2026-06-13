@@ -459,13 +459,14 @@ END
 # snip_win_c
 // default is A(char, ""); define UNICODE and _UNICODE to W(wchar_t, L"")
 #include <windows.h>
-#include <commctrl.h>
 #include <stdio.h>
 
 // 控件ID与命令ID定义
 #define ID_COMBOBOX      1001
 #define ID_EDIT_MIDDLE   1002
 #define ID_EDIT_BOTTOM   1003
+#define ID_CHECKBOX      1004
+#define ID_LISTBOX       1005
 #define IDM_CTRL_R       2001  // Ctrl+R 的命令ID
 #define countof(a)    (sizeof(a)/sizeof((a)[0]))
 
@@ -473,29 +474,29 @@ END
 HWND g_hCombo;
 HWND g_hEditInput;
 HWND g_hEditOutput;
+HWND g_hCheck;
+HWND g_hList;
 
-void bussCode(TCHAR* comboText, TCHAR* midText){
+void bussCode(TCHAR* comboText, TCHAR* midText, int isChecked, int index){
     TCHAR result[4096] = { 0 };
-    _snprintf(result, countof(result), TEXT("%s%d:%s"), comboText, sizeof(TCHAR), midText);
+    _snprintf(result, countof(result), TEXT("%s,%d,%d:%s"), comboText, isChecked, index, midText);
     SetWindowText(g_hEditOutput, result);
 }
 
 // GUI参数转业务逻辑
 static void BrgGui2Buss(void)
 {
-    // 获取ComboBox当前选中文本
+    // 获取每个控件的值
     TCHAR comboText[256] = { 0 };
     int sel = (int)SendMessage(g_hCombo, CB_GETCURSEL, 0, 0);
-    if (sel != CB_ERR) {
-        SendMessage(g_hCombo, CB_GETLBTEXT, sel, (LPARAM)comboText);
-    }
-
-    // 获取中间文本框内容
+    if (sel != CB_ERR) { SendMessage(g_hCombo, CB_GETLBTEXT, sel, (LPARAM)comboText); }
+    int isChecked = (SendMessage(g_hCheck, BM_GETCHECK, 0, 0) == BST_CHECKED);
+    int index = SendMessage(g_hList, LB_GETCURSEL, 0, 0);
     int midLen = GetWindowTextLength(g_hEditInput);
     TCHAR* midText = (TCHAR*)GlobalAlloc(GPTR, (midLen + 1) * sizeof(TCHAR));
     if (midText) {
         GetWindowText(g_hEditInput, midText, midLen + 1);
-        bussCode(comboText, midText);
+        bussCode(comboText, midText, isChecked, index);
         GlobalFree(midText);
     }
 }
@@ -519,8 +520,6 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-    //INITCOMMONCONTROLSEX icex = { sizeof(icex), ICC_STANDARD_CLASSES };
-    //InitCommonControlsEx(&icex); //-lcomctl32
     WNDCLASSEX wc = { 0 };
     wc.cbSize        = sizeof(WNDCLASSEX);
     wc.style         = CS_HREDRAW | CS_VREDRAW;
@@ -547,33 +546,56 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     return msg_loop(hWnd);
 }
 
-static void layout_win(HWND hWnd){
+static void layout_win(HWND hWnd)
+{
+    // ========== 第一行：Label + ComboBox + CheckBox ==========
+    // 1. Label "Ctrl+R"
     CreateWindow(TEXT("STATIC"), TEXT("Ctrl+R"),
         WS_CHILD | WS_VISIBLE | SS_CENTERIMAGE,
         10, 10, 60, 25,
         hWnd, NULL, NULL, NULL);
 
+    // 2. ComboBox
     g_hCombo = CreateWindow(TEXT("COMBOBOX"), TEXT(""),
         WS_CHILD | WS_VISIBLE | CBS_DROPDOWNLIST | WS_VSCROLL,
-        80, 8, 120, 200,
+        80, 8, 100, 200, // 宽度稍微减小以腾出空间给 CheckBox
         hWnd, (HMENU)ID_COMBOBOX, NULL, NULL);
+
     SendMessage(g_hCombo, CB_ADDSTRING, 0, (LPARAM)TEXT("A"));
     SendMessage(g_hCombo, CB_ADDSTRING, 0, (LPARAM)TEXT("B"));
     SendMessage(g_hCombo, CB_ADDSTRING, 0, (LPARAM)TEXT("C"));
     SendMessage(g_hCombo, CB_SETCURSEL, 0, 0);
 
-    // 中间多行文本框 (~1/3)
+    // 3. CheckBox 使用 BS_AUTOCHECKBOX，点击时系统自动切换勾选状态
+    g_hCheck = CreateWindow(TEXT("BUTTON"), TEXT("Enable"),
+        WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
+        190, 12, 100, 20, // x=190, y=12
+        hWnd, (HMENU)ID_CHECKBOX, NULL, NULL);
+
+    // 4. ListBox 放在右侧下方，占据一部分空间
+    g_hList = CreateWindow(TEXT("LISTBOX"), TEXT(""),
+        WS_CHILD | WS_VISIBLE | WS_BORDER | LBS_NOTIFY | WS_VSCROLL,
+        300, 8, 150, 60, // x=300, y=8, 宽150, 高60
+        hWnd, (HMENU)ID_LISTBOX, NULL, NULL);
+
+    // 初始化 ListBox 内容
+    SendMessage(g_hList, LB_ADDSTRING, 0, (LPARAM)TEXT("Item 1"));
+    SendMessage(g_hList, LB_ADDSTRING, 0, (LPARAM)TEXT("Item 2"));
+    SendMessage(g_hList, LB_ADDSTRING, 0, (LPARAM)TEXT("Item 3"));
+    SendMessage(g_hList, LB_SETCURSEL, 0, 0); // 默认选中第一项
+
+    // ========== 中间多行文本框 (~1/3 剩余空间) ==========
     g_hEditInput = CreateWindow(TEXT("EDIT"), TEXT(""),
         WS_CHILD | WS_VISIBLE | WS_BORDER | ES_MULTILINE |
-        ES_AUTOVSCROLL | WS_VSCROLL,  //| ES_AUTOHSCROLL | WS_HSCROLL
-        10, 45, 780, 180,
+        ES_AUTOVSCROLL | WS_VSCROLL | ES_WANTRETURN,
+        10, 85, 780, 160,
         hWnd, (HMENU)ID_EDIT_MIDDLE, NULL, NULL);
 
-    // 下面多行文本框 (~2/3)
+    // ========== 下面多行文本框 (~2/3 剩余空间) ==========
     g_hEditOutput = CreateWindow(TEXT("EDIT"), TEXT(""),
         WS_CHILD | WS_VISIBLE | WS_BORDER | ES_MULTILINE |
-        ES_AUTOVSCROLL | WS_VSCROLL,  //| ES_AUTOHSCROLL | WS_HSCROLL
-        10, 235, 780, 355,
+        ES_AUTOVSCROLL | WS_VSCROLL | ES_WANTRETURN,
+        10, 255, 780, 335,
         hWnd, (HMENU)ID_EDIT_BOTTOM, NULL, NULL);
 }
 
