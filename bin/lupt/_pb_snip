@@ -505,7 +505,7 @@ int msg_loop() {
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0)) {
         if (msg.message == WM_KEYDOWN){ // choose your favor
-            if ((GetKeyState(VK_CONTROL) & 0x8000) && (msg.wParam == 'R')) {
+            if ((GetKeyState(VK_CONTROL) & 0x8000) && (msg.wParam == 'R')) { /* VK_MENU VK_SHIFT */
                 BrgGui2Buss();
                 continue;
             }
