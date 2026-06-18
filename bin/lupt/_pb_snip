@@ -382,7 +382,7 @@ sed "addr1[,addr2!]{cmd1;!cmd2}"
 
 # snip_mermaid
 graph LR   TD
-A[py] -->[call] B(node)
+A[py] -->|call| B(node)
 B -.-> C[/cpp/]
 B --- D{if}
 D ==> E[(db)]
@@ -393,9 +393,9 @@ B --> F
 end
 
 %% beauty only full line comment
-style A xx:xx
+style A color:#fff,stroke:none
 class B proc
-classDef proc xx:xx
+classDef proc x:y,z:x
 @@
 
 # snip_git
