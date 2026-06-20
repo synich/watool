@@ -20,9 +20,18 @@ int wa_base64dec(char* src, char* dst);
 int wa_base16enc(char* src, int len, char* dst);
 int wa_base16dec(char* src, char* dst);
 #ifdef _WIN32
-int gb2utf(const char* gb, char* utf, int len);
-int utf2gb(const char* utf, char* gb, int len);
+int gb2utfA(const char* gb, char* utf, int len);
+int utf2gbA(const char* utf, char* gb, int len);
+int gb2utfW(const char* gb, char* utf, int len);
+int utf2gbW(const char* utf, char* gb, int len);
+#ifdef UNICODE
+ #define gb2utf gb2utfW
+ #define utf2gb utf2gbW
+#else
+ #define gb2utf gb2utfA
+ #define utf2gb utf2gbA
 #endif
+#endif /* _WIN32 */
 
 /*return epoch, tz=0 -> localtime, tz=3600 -> plus one zone*/
 int wa_calendar(int* year, int* mon, int* day, int* hour, int* min, int* sec, int tz);
