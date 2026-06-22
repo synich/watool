@@ -47,7 +47,7 @@ int test_base16(char** _) {
     return ret;
 }
 
-int test_conv(char** _) {
+int test_convA(char** _) {
 #ifdef _WIN32
   char gb[8] = {0xD6, 0xD0, 0xB9, 0xFA, 0};
   char utf[8] = {0xE4, 0xB8, 0xAD, 0xE5, 0x9B, 0xBD, 0};
@@ -57,6 +57,23 @@ int test_conv(char** _) {
   wa_utok(len==7);
   len = utf2gb(utf, res, 0);
   wa_utok(len==5);
+#endif
+  return 0;
+}
+
+int test_convW(char** _) {
+#ifdef _WIN32
+  wchar_t gb[3] = {L'中', L'国'};
+  char res_u[8] = {0};
+  char utf[8] = {0xE4, 0xB8, 0xAD, 0xE5, 0x9B, 0xBD, 0};
+  wchar_t res[8] = {0};
+  int len = 0;
+  len = gb2utfW(gb, res_u, 0);
+  printf("U: %hhx, %hhx, %hhx\n", res_u[0], res_u[1], res_u[2]);
+  wa_utok(len==7);
+  len = utf2gbW(utf, res, 0);
+  printf("W: %hhx, %hhx, %hhx, %hhx", res[0]>>8, res[0], res[1]>>8, res[1]);
+  wa_utok(len==3);
 #endif
   return 0;
 }
@@ -225,7 +242,7 @@ int test_mujs(){
 }
 */
 
-#define FL
+#define ENC
 int main(int argc, char *argv[])
 {
 #ifdef ENC
@@ -233,7 +250,8 @@ int main(int argc, char *argv[])
     TEST(_sha1, NULL);
     TEST(_base64, NULL);
     TEST(_base16, NULL);
-    TEST(_conv, NULL);
+    TEST(_convA, NULL);
+    TEST(_convW, NULL);
 #endif
 #ifdef DT
     TEST(_calendar, NULL);

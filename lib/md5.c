@@ -867,7 +867,12 @@ int utf2gbW(const char* utf, wchar_t* wbuf, int len) {
     // UTF-8 (65001) -> WideChar (UTF-16)
     int wlen = MultiByteToWideChar(65001, 0, utf, -1, NULL, 0);
     if (wlen == 0) { *wbuf = '\0'; return ret; }
-    MultiByteToWideChar(65001, 0, utf, -1, wbuf, wlen);
+    if ((wlen > 0) && ((len<=0) || (wlen <= len))) {
+        MultiByteToWideChar(65001, 0, utf, -1, wbuf, wlen);
+        ret = wlen;
+    } else {
+        *wbuf = '\0'; printf("need %d, but %d not enough\n", wlen, len);
+    }
     return ret;
 }
 #endif
