@@ -477,9 +477,10 @@ HWND g_hEditOutput;
 HWND g_hCheck;
 HWND g_hList;
 
-void bussCode(TCHAR* comboText, TCHAR* midText, int isChecked, int index){
+void bussCode(TCHAR* comboText, TCHAR* uIn, int isChecked, int index){
     TCHAR result[4096] = { 0 };
-    _snprintf(result, countof(result), TEXT("%s,%d,%d:%s"), comboText, isChecked, index, midText);
+    _snprintf(result, countof(result), TEXT("%s,%d,%d:%s"), comboText, isChecked, index, uIn);
+    /* utf2gb(, result, 0); */
     SetWindowText(g_hEditOutput, result);
 }
 
@@ -496,6 +497,7 @@ static void BrgGui2Buss(void)
     TCHAR* midText = (TCHAR*)GlobalAlloc(GPTR, (midLen + 1) * sizeof(TCHAR));
     if (midText) {
         GetWindowText(g_hEditInput, midText, midLen + 1);
+        /* gb2utf(midText, uIn, 0); */
         bussCode(comboText, midText, isChecked, index);
         GlobalFree(midText);
     }
