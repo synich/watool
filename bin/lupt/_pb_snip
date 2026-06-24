@@ -508,9 +508,9 @@ HWND g_hEditOutput;
 HWND g_hCheck;
 HWND g_hList;
 
-void bussCode(TCHAR* comboText, TCHAR* uIn, int isChecked, int index){
+void bussCode(TCHAR* uCombo, TCHAR* uIn, int isChecked, int index){
     TCHAR result[4096] = { 0 };
-    _snprintf(result, countof(result), TEXT("%s,%d,%d:%s"), comboText, isChecked, index, uIn);
+    _snprintf(result, countof(result), TEXT("%s,%d,%d:%s"), uCombo, isChecked, index, uIn);
     /* utf2gb(, result, 0); */
     SetWindowText(g_hEditOutput, result);
 }
@@ -528,17 +528,28 @@ static void BrgGui2Buss(void)
     TCHAR* midText = (TCHAR*)GlobalAlloc(GPTR, (midLen + 1) * sizeof(TCHAR));
     if (midText) {
         GetWindowText(g_hEditInput, midText, midLen + 1);
-        /* gb2utf(midText, uIn, 0); */
+        /*AUTO_MEM_P(uCombo, char) = malloc();
+        AUTO_MEM_P(uIn, char) = malloc();
+        gb2utf(comboText, uCombo, 0);
+        gb2utf(midText, uIn, 0); */
         bussCode(comboText, midText, isChecked, index);
         GlobalFree(midText);
     }
+}
+
+int is_shortkey(int cas, int target, int press) {
+  int ctrl = (cas>>2) & 1;
+  int alt  = (cas>>1) & 1;
+  int shft = (cas) & 1;
+  if ( (!ctrl || (GetKeyState(VK_CONTROL) & 0x8000)) && (!alt || (GetKeyState(VK_MENU) & 0x8000)) && (!shft || (GetKeyState(VK_SHIFT) & 0x8000)) && (target==press)) { return 1;}
+  else {return 0;}
 }
 
 int msg_loop() {
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0)) {
         if (msg.message == WM_KEYDOWN){ // choose your favor
-            if ((GetKeyState(VK_CONTROL) & 0x8000) && (msg.wParam == 'R')) { /* VK_MENU VK_SHIFT */
+            if (is_shortkey(0b100, 'R', msg.wParam)) {
                 BrgGui2Buss();
                 continue;
             }

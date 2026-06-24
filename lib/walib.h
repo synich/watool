@@ -22,8 +22,8 @@ int wa_base16dec(char* src, char* dst);
 #ifdef _WIN32
 int gb2utfA(const char* gb, char* utf, int len);
 int utf2gbA(const char* utf, char* gb, int len);
-int gb2utfW(const char* gb, char* utf, int len);
-int utf2gbW(const char* utf, char* gb, int len);
+int gb2utfW(const wchar_t* gb, char* utf, int len);
+int utf2gbW(const char* utf, wchar_t* gb, int len);
 #ifdef UNICODE
  #define gb2utf gb2utfW
  #define utf2gb utf2gbW
