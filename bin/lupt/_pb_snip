@@ -381,6 +381,15 @@ sed "addr1[,addr2!]{cmd1;!cmd2}"
 @@
 
 # snip_mermaid
+graph  sequenceDiagram
+
+%% beauty only full line comment
+style A color:#fff,stroke:none
+class B proc
+classDef proc x:y,z:x
+@@
+
+## snip_mermaid graph
 graph LR   TD
 A[py] -->|call| B(node)
 B -.-> C[/cpp/]
@@ -391,11 +400,33 @@ subgraph Tile_xx
 %% global ns, so B is the same [node] but F is new node
 B --> F
 end
+@@
 
-%% beauty only full line comment
-style A color:#fff,stroke:none
-class B proc
-classDef proc x:y,z:x
+## snip_mermaid sequenceDiagram
+sequenceDiagram
+
+box front
+ participant A
+end
+box back
+ participant B
+end
+
+A ->> B: mes1
+rect rgba(150, 120, 180, 0.1)
+ B --x A: close
+end
+loop COMMENT
+ B -->> A: xu
+end
+alt OK
+ C ->> D: if
+else FAIL
+end
+opt OPTION
+end
+note over A,B: top rect
+note right of B: right rect
 @@
 
 # snip_git
