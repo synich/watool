@@ -1,9 +1,9 @@
 CC=gcc
 CFLAGS = -c --std=c99 -Wall -pedantic
-OBJS = obj/md5.o obj/tcpclient.o obj/time.o obj/regex.o obj/mem.o obj/file.o obj/brscr.o
-THIRDPATH = E:/oldturtle/D/code/op3rd/
-DEPINC = -I$(THIRDPATH)include/
-DEPLIB = -L$(THIRDPATH)lib64/
+OBJS = obj/md5.o obj/tcpclient.o obj/time.o obj/regex.o obj/mem.o obj/file.o obj/brl.o obj/extlua.o obj/brscr.o
+THIRDPATH = ../bin
+DEPINC = -I$(THIRDPATH)/inc/lua55
+DEPLIB = -L$(THIRDPATH)/lib/
 HOST = $(shell uname)
 ifeq ($(HOST), Linux)
 	UTLIB = -lwa
@@ -16,6 +16,12 @@ lib: $(OBJS)
 
 obj/brscr.o : brscr.c
 	$(CC) $(CFLAGS) $(DEPINC) -DMUJS -o $@ $<
+
+obj/brl.o: brl.c
+	$(CC) $(CFLAGS) $(DEPINC) -DSUPPORT_LUA -o $@ $<
+
+obj/extlua.o: extlua.c
+	$(CC) $(CFLAGS) $(DEPINC) -DSUPPORT_LUA -o $@ $<
 
 obj/%.o : %.c
 	$(CC) $(CFLAGS) -o $@ $<

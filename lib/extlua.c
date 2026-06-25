@@ -3,6 +3,8 @@
 ** Standard library for UTF-8 manipulation
 ** See Copyright Notice in lua.h
 */
+#ifdef SUPPORT_LUA
+
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
@@ -557,3 +559,5 @@ LUALIB_API int luaopen_px (lua_State *L) {
   luaL_register(L, "px", px_funcs);
   return 1;
 }
+
+#endif /* SUPPORT_LUA */

@@ -6,20 +6,17 @@
 #include "walib.h"
 #define MAXLINE 256
 
-#ifdef _WIN32
-  #include <windows.h>
-  #define DIR_SEP "\\"
-#else
-  #define DIR_SEP "/"
-#endif
-
 #define SUPPORT_LUA
 #ifdef SUPPORT_LUA
   #include "lua.h"
   #include "lauxlib.h"
   #include "lualib.h"
-  int luaopen_utf8(lua_State *L);
-  int luaopen_px(lua_State *L);
+
+#include "lupt/fennel_lua.c"
+#ifndef _PB_LUAFN_FENNEL
+static void luafn_fennel(lua_State* L){puts("FNL N/A");}
+#endif
+
 #ifdef USE_VENDOR
   int luaopen_lsqlite3(lua_State *L);
   //int luaopen_lpeg (lua_State *L);
@@ -60,19 +57,6 @@ static void _cal_ext_fb2bb(char* cmd){
     ret = system(bbcmd);
   } else {ret = system(cmd);}
   if (0!=ret){puts("no busybox or native util found, cmd fail");}
-}
-
-void get_exe_path(char* wd){
-#ifdef _WIN32
-  char *pos;
-  GetModuleFileName(NULL, wd, MAXLINE);
-  pos = strstr(wd, ".exe");
-  *pos=0;
-#else
-  int ret = readlink("/proc/self/exe", wd, MAXLINE);
-  wd[ret] = 0;
-#endif
-  strcat(wd, "_d"DIR_SEP);
 }
 
 int frontcmp(const char* s, const char* target, int most){
@@ -268,40 +252,8 @@ void xlispindent(int argc, char** argv){
 #define lua_rawlen  lua_objlen
 #endif
 #ifdef SUPPORT_LUA
-static void _print_one_lua_val(lua_State *L, int i, int stk_size){
-    int val_t = lua_type(L, i);
-    char *idx_mean = " | :";
-    if (i==stk_size){idx_mean = "top:";}
-    else if (1==i){idx_mean = "bot:";}
-    wa_prtcs("%s%d or %d <%s>: ", idx_mean, i, i-1-stk_size, lua_typename(L, val_t));
-
-    if (val_t==LUA_TSTRING) {wa_prtcs(" %s", lua_tostring(L, i));}
-    else if (val_t==LUA_TNUMBER) {wa_prtcs(" %.2f", lua_tonumber(L, i));}
-    else if (val_t==LUA_TTABLE) {int j=1;wa_prtcs(" arrlen %d, key_5:", (int)lua_rawlen(L, i));
-      lua_pushnil(L);
-      for(;j<=5;j++){if (0==lua_next(L,i)){break;} else {
-        val_t = lua_type(L, -2);
-        if (val_t==LUA_TSTRING) {wa_prtcs(" %s",lua_tostring(L,-2));}
-        else if (val_t==LUA_TNUMBER) {wa_prtcs(" %.0f",lua_tonumber(L,-2));}
-        else {wa_prtcs(" %s", lua_typename(L, lua_type(L, -2)));}
-        lua_pop(L, 1);/* removes 'value'; keeps 'key' for next iteration */
-        } }
-    }
-    else if (val_t==LUA_TBOOLEAN) {wa_prtcs(" %s", 1==lua_toboolean(L, i)?"true":"false");}
-    wa_prtcs("\n");
-}
-
-static void _debug_lua(lua_State *L, char* hint_mess){
-  int stk_size = lua_gettop(L), i;
-  wa_prtto(-1);  /* to stderr */
-  wa_prtcs("[DEBUG %s]: elem num is %d\n", hint_mess, stk_size);
-  for(i=stk_size;i>=1;i--){
-    _print_one_lua_val(L, i, stk_size);
-  }
-  wa_prtto(0);
-}
 static void debug_lua(lua_State *L, char* hint_mess){
-  if (getenv("PB_DEBUG") != NULL) { _debug_lua(L, hint_mess); }
+  if (getenv("PB_DEBUG") != NULL) { wa_debug_lua(L, hint_mess); }
 }
 
 static int _traceback (lua_State *L) {
@@ -323,33 +275,10 @@ static int _traceback (lua_State *L) {
   return 1;
 }
 
-#include "lupt/pb_lua.c"
-#include "lupt/fennel_lua.c"
-#ifndef _PB_LUAFN_PB
-static void luafn_pb(lua_State* L){puts("PB N/A");}
-#endif
-#ifndef _PB_LUAFN_FENNEL
-static void luafn_fennel(lua_State* L){puts("FNL N/A");}
-#endif
-#endif
-
-static void* linit(){
-  void *L = NULL;
-#ifdef SUPPORT_LUA
-  L = (lua_State *)luaL_newstate();  /* create state */
-  if (L == NULL) {
-    puts("cannot create lua_State: not enough memory");
-  } else {
-    char s_lua_precode[MAXLINE]={0};
-    char pb_d_path[MAXLINE];
-    get_exe_path(pb_d_path);
-    lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
-    luaL_openlibs(L);  /* open libraries */
-#if LUA_VERSION_NUM < 503
-    luaopen_utf8(L);
-#endif
-    luaopen_px (L);
+void* linit(){
+  void* p = (lua_State*)wa_linit();
 #ifdef USE_VENDOR
+    lua_State* L = (lua_State*)p;
     luaopen_lsqlite3(L);
   #if LUA_VERSION_NUM > 501
     lua_setglobal(L, "sqlite3");
@@ -359,16 +288,9 @@ static void* linit(){
     //lua_setglobal(L, "lpeg");
   #endif
 #endif
-    lua_gc(L, LUA_GCRESTART, 0);
-    luafn_pb(L);
-    lua_setglobal(L, "pb");
-    sprintf(s_lua_precode, "package.path=[[%s?.lua;]]..package.path", pb_d_path);
-    luaL_dostring(L, s_lua_precode);
-    lua_pop(L, lua_gettop(L)); // clean
-  }
-#endif
-  return L;
+  return p;
 }
+#endif
 
 static void _conv2lua(char *fname){
   char trans_name[96];
@@ -400,12 +322,6 @@ static int ldofile(void* L, char *fname, int narg){
   return status; /*0-ok 1-fail*/
 }
 
-static void lclose(void* L){
-#ifdef SUPPORT_LUA
-  lua_close((lua_State *)L);
-#endif
-}
-
 static void _lua_expr(lua_State *L, int argc, char** argv){
   char exprbuff[MAXLINE] = {0};
   int val_t, ret;
@@ -413,7 +329,7 @@ static void _lua_expr(lua_State *L, int argc, char** argv){
   sprintf(exprbuff, "return %s", argv[2]);
   ret = luaL_dostring(L, exprbuff);
   wa_prtcs("run %s\n", ret==0?"ok":"fail");
-  _debug_lua(L, "Expr");
+  wa_debug_lua(L, "Expr");
 }
 
 static void _lua_help(lua_State *L){
@@ -448,7 +364,7 @@ void run_lua(int argc, char** argv){
   void *L = linit();
   if (1==argc) {
     char fname[MAXLINE];
-    get_exe_path(fname);
+    wa_get_exe_path(fname);
     strcat(fname, "init.lua");
     ldofile(L, fname, 0);
   } else {
@@ -465,7 +381,7 @@ void run_lua(int argc, char** argv){
     }
   }
   debug_lua(L, "exit lua");
-  lclose(L);
+  wa_lclose(L);
 #endif
 }
 
@@ -487,11 +403,11 @@ static int _luac(char *fname){
   ret = lua_dump(L, lwriter, fp, 1);
 #endif
   if (0 != ret) {
-    wa_prtcs("lua dump %s fail, code: %d\n", fname, ret);
-    _debug_lua(L, "dump fail");
+    wa_prtcs("lua dump %s fail, code: %d. see more with PB_DEBUG\n", fname, ret);
+    debug_lua(L, "dump fail");
   }
   fclose(fp);
-  lclose(L);
+  wa_lclose(L);
 #endif
   return ret;
 }
@@ -554,7 +470,7 @@ void enc_lua(int argc, char *argv[])
   snprintf(fndecl, MAXLINE, "\n  };\n\n  if (luaL_loadbuffer"
     "(L,(const char*)B1,sizeof(B1),\"buf_%s\")==0)\n"
     "    lua_call(L, 0, LUA_MULTRET);\n"
-    "  else _debug_lua(L, \"err: buf_%s\");\n"
+    "  else wa_debug_lua(L, \"err: buf_%s\");\n"
     "  //lua_setglobal(L, \"%s\");\n"
     "}\n", flname, flname, flname);
   fwrite(fndecl, strlen(fndecl), 1, fw);
@@ -575,7 +491,7 @@ void lsnip(int argc, char** argv){
   char* snip_flag = "snip";
   void *L = linit();
   int i=1;
-  get_exe_path(fname);
+  wa_get_exe_path(fname);
   sprintf(scname, "_pb_%s", snip_flag);
   strcat(fname, scname);
   for (; i<argc; i++){
@@ -586,7 +502,7 @@ void lsnip(int argc, char** argv){
   lua_pushstring(L, fname);
   lua_pushstring(L, kwd);
   if (0 != lua_pcall(L, 3, LUA_MULTRET, 0)){
-    _debug_lua(L, "snip fail");
+    puts("snip fail, see more with PB_DEBUG"); debug_lua(L, "snip");
   }
 }
 

@@ -118,6 +118,11 @@ int wa_memdbgflg(int i);
 void wa_memreport(void);
 
 /* Bridge to script */
+void wa_get_exe_path(char* wd);
+void* wa_linit();
+void wa_lclose(void* L);
+void wa_debug_lua(void *p, char* hint_mess);
+
 void *wa_bsnew(void);
 int wa_bsload(void* J, char* fn); /*return 0-OK 1-fail*/
 /*fn: func name  fmt: last is output, others are input. s-str b-bool i-int f-double

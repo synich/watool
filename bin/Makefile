@@ -5,7 +5,7 @@
 # * lupt/fennel - fennel
 # * lex.l - [opt] parse python like to lua
 
-CFLAGS = -I./inc/lua51 -I../lib/ -c -DUSE_WALIB
+CFLAGS = -I./inc/lua55 -I../lib/ -c -DUSE_WALIB
 
 ifneq ($(VENDOR), )
   EXTCFL = -DUSE_VENDOR=$(VENDOR)
@@ -21,15 +21,13 @@ else
 endif
 
 
-pb: pb.c extlua.o
+pb: pb.c
 	@echo build pb with VENDOR=$(VENDOR) and FLAGS=$(EXTCFL)
 	@echo export/set VENDOR=1/0  then make again
 	@gcc $(CFLAGS) $(EXTCFL) pb.c
-	gcc -o pb extlua.o pb.o $(RES) $(EXTLIB) -L./lib/ -L../lib/ -lwa -llua -lm
-	@strip pb
-
-extlua.o: extlua.c
-	@gcc $(CFLAGS) extlua.c
+	gcc -o pb pb.o $(RES) $(EXTLIB) -L./lib/ -L../lib/ -lwa -llua -lws2_32 -lm
+	@strip pb.exe
+	@mv pb.exe D:\soft\wabin\bin
 
 ico.res: ico.rc
 	@windres -i ico.rc -o ico.res -O coff
