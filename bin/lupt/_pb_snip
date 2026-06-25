@@ -490,6 +490,7 @@ END
 # snip_win_c
 // default is A(char, ""); define UNICODE and _UNICODE to W(wchar_t, L"")
 #include <windows.h>
+#include <tchar.h>
 #include <stdio.h>
 
 // 控件ID与命令ID定义
@@ -508,11 +509,10 @@ HWND g_hEditOutput;
 HWND g_hCheck;
 HWND g_hList;
 
-void bussCode(TCHAR* uCombo, TCHAR* uIn, int isChecked, int index){
-    TCHAR result[4096] = { 0 };
-    _snprintf(result, countof(result), TEXT("%s,%d,%d:%s"), uCombo, isChecked, index, uIn);
-    /* utf2gb(, result, 0); */
-    SetWindowText(g_hEditOutput, result);
+void bussCode(TCHAR* uCombo, TCHAR* uIn, int isChecked, int index, TCHAR** result){
+    char out[16] = {0};
+    _snprintf(out, countof(out), TEXT("%s,%d,%d:%s"), uCombo, isChecked, index, uIn);
+    /* utf2gb(out, *result, 0); */
 }
 
 // GUI参数转业务逻辑
@@ -527,13 +527,16 @@ static void BrgGui2Buss(void)
     int midLen = GetWindowTextLength(g_hEditInput);
     TCHAR* midText = (TCHAR*)GlobalAlloc(GPTR, (midLen + 1) * sizeof(TCHAR));
     if (midText) {
+        TCHAR result[4096] = { 0 };
         GetWindowText(g_hEditInput, midText, midLen + 1);
-        /*AUTO_MEM_P(uCombo, char) = malloc();
-        AUTO_MEM_P(uIn, char) = malloc();
+        /*AUTO_MEM_P(uCombo, char) = malloc(_tcslen(comboText)*2);
+        AUTO_MEM_P(uIn, char) = malloc(_tcslen(midText)*2);
+        uCombo[0]=0; uIn[0]=0;
         gb2utf(comboText, uCombo, 0);
         gb2utf(midText, uIn, 0); */
-        bussCode(comboText, midText, isChecked, index);
+        bussCode(comboText, midText, isChecked, index, &result);
         GlobalFree(midText);
+        SetWindowText(g_hEditOutput, result);
     }
 }
 
