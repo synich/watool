@@ -14,10 +14,13 @@ else
   EXTCFL =
   EXTLIB =
 endif
-ifeq ($(findstring MSYS,$(shell uname -s)), MSYS)
-  RES = ico.res
-else
+HOST = $(shell uname)
+ifeq ($(HOST), Linux)
   RES =
+  WLIB =
+else
+  RES = ico.res
+  WLIB = -lws2_32
 endif
 
 
@@ -25,9 +28,9 @@ pb: pb.c
 	@echo build pb with VENDOR=$(VENDOR) and FLAGS=$(EXTCFL)
 	@echo export/set VENDOR=1/0  then make again
 	@gcc $(CFLAGS) $(EXTCFL) pb.c
-	gcc -o pb pb.o $(RES) $(EXTLIB) -L./lib/ -L../lib/ -lwa -llua -lws2_32 -lm
-	@strip pb.exe
-	@mv pb.exe D:\soft\wabin\bin
+	gcc -o pb pb.o $(RES) $(EXTLIB) -L./lib/ -L../lib/ -lwa -llua $(WLIB) -lm
+	@strip pb
+	#@mv pb.exe D:\soft\wabin\bin
 
 ico.res: ico.rc
 	@windres -i ico.rc -o ico.res -O coff

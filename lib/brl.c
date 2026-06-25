@@ -9,6 +9,7 @@
   #include <windows.h>
   #define DIR_SEP "\\"
 #else
+  #include <unistd.h>
   #define DIR_SEP "/"
 #endif
 #define MAXLINE 256
@@ -26,6 +27,9 @@ void wa_get_exe_path(char* wd){
   strcat(wd, "_d"DIR_SEP);
 }
 
+#if LUA_VERSION_NUM == 501
+#define lua_rawlen  lua_objlen
+#endif
 static void _print_one_lua_val(lua_State *L, int i, int stk_size){
     int val_t = lua_type(L, i);
     char *idx_mean = " | :";
@@ -67,7 +71,7 @@ int luaopen_px(lua_State *L);
 static void luafn_pb(lua_State* L){puts("PB N/A");}
 #endif
 
-void* wa_linit(){
+void* wa_linit(void){
   void *L = NULL;
 #ifdef SUPPORT_LUA
   L = (lua_State *)luaL_newstate();  /* create state */

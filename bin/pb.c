@@ -24,7 +24,7 @@ static void luafn_fennel(lua_State* L){puts("FNL N/A");}
 #endif
 
 void usage(){
-  wa_prtcs("personal busybox %dbit ver260612\nascii\n"
+  wa_prtcs("personal busybox %dbit ver260625\nascii\n"
   "dyn2str file -- convert script into C string file\n"
   "hsc helper show cvs\n  mf(list modified file)|ml(number modified line)|rv(repo version)\n"
   "snip [keyword] -- {pb}/pb_d/_pb_snip[0-9]\n"
@@ -248,9 +248,6 @@ void xlispindent(int argc, char** argv){
 
 
 /******** lua ********/
-#if LUA_VERSION_NUM == 501
-#define lua_rawlen  lua_objlen
-#endif
 #ifdef SUPPORT_LUA
 static void debug_lua(lua_State *L, char* hint_mess){
   if (getenv("PB_DEBUG") != NULL) { wa_debug_lua(L, hint_mess); }

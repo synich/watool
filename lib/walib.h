@@ -119,7 +119,7 @@ void wa_memreport(void);
 
 /* Bridge to script */
 void wa_get_exe_path(char* wd);
-void* wa_linit();
+void* wa_linit(void);
 void wa_lclose(void* L);
 void wa_debug_lua(void *p, char* hint_mess);
 
