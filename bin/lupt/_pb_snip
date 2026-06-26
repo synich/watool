@@ -512,10 +512,10 @@ HWND g_hEditOutput;
 HWND g_hCheck;
 HWND g_hList;
 
-void bussCode(TCHAR* uCombo, TCHAR* uIn, int isChecked, int index, TCHAR** result){
+void bussCode(TCHAR* uCombo, TCHAR* uIn, int isChecked, int index, TCHAR* result){
     char out[16] = {0};
     _snprintf(out, countof(out), TEXT("%s,%d,%d:%s"), uCombo, isChecked, index, uIn);
-    /* utf2gb(out, *result, 0); */
+    /* utf2gb(out, result, 0); */
 }
 
 // GUI参数转业务逻辑
@@ -532,12 +532,13 @@ static void BrgGui2Buss(void)
     if (midText) {
         TCHAR result[4096] = { 0 };
         GetWindowText(g_hEditInput, midText, midLen + 1);
-        /*AUTO_MEM_P(uCombo, char) = malloc(_tcslen(comboText)*2);
-        AUTO_MEM_P(uIn, char) = malloc(_tcslen(midText)*2);
+        /*AUTO_MEM_P(char, uCombo) = malloc(_tcslen(comboText)*2);
+        AUTO_MEM_P(char, uIn) = malloc(_tcslen(midText)*2);
         uCombo[0]=0; uIn[0]=0;
         gb2utf(comboText, uCombo, 0);
-        gb2utf(midText, uIn, 0); */
-        bussCode(comboText, midText, isChecked, index, &result);
+        gb2utf(midText, uIn, 0);
+        bussCode(uCombo, uIn, isChecked, index, result);  */
+        bussCode(comboText, midText, isChecked, index, result);
         GlobalFree(midText);
         SetWindowText(g_hEditOutput, result);
     }
