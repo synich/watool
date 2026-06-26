@@ -291,8 +291,11 @@ while & when & for
 @@
 
 # snip_k
-elem: {x@y-1}  / index from 0
-elem["abcd";2] / call use ; sep params
+elem: {x@y-1} / index from 0
+elem["abc";2] / call use ; sep params
+a * b    / hadamard product
++/ a * b / inner product
+b */ a   / outer product, right-a first
 @@
 
 # snip_vim
