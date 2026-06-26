@@ -12,11 +12,6 @@
   #include "lauxlib.h"
   #include "lualib.h"
 
-#include "lupt/fennel_lua.c"
-#ifndef _PB_LUAFN_FENNEL
-static void luafn_fennel(lua_State* L){puts("FNL N/A");}
-#endif
-
 #ifdef USE_VENDOR
   int luaopen_lsqlite3(lua_State *L);
   //int luaopen_lpeg (lua_State *L);
@@ -253,25 +248,6 @@ static void debug_lua(lua_State *L, char* hint_mess){
   if (getenv("PB_DEBUG") != NULL) { wa_debug_lua(L, hint_mess); }
 }
 
-static int _traceback (lua_State *L) {
-  if (!lua_isstring(L, 1))  /* 'message' not a string? */
-    return 1;  /* keep it intact */
-  lua_getglobal(L, "debug");
-  if (!lua_istable(L, -1)) {
-    lua_pop(L, 1);
-    return 1;
-  }
-  lua_getfield(L, -1, "traceback");
-  if (!lua_isfunction(L, -1)) {
-    lua_pop(L, 2);
-    return 1;
-  }
-  lua_pushvalue(L, 1);  /* pass error message */
-  lua_pushinteger(L, 2);  /* skip this function and traceback */
-  lua_call(L, 2, 1);  /* call debug.traceback */
-  return 1;
-}
-
 void* linit(){
   void* p = (lua_State*)wa_linit();
 #ifdef USE_VENDOR
@@ -297,28 +273,6 @@ static void _conv2lua(char *fname){
   _cal_ext_fb2bb(cmd);
 }
 
-static int ldofile(void* L, char *fname, int narg){
-  int status = 0, base;
-#ifdef SUPPORT_LUA
-  status = luaL_loadfile(L, fname);
-  if (0!=status) {
-    wa_prtcs("pb load %s fail[%d]: %s\n", fname, status, lua_tostring(L, -1));
-    lua_pop(L, lua_gettop(L));
-    return status;
-  }
-  if (0<narg) {lua_insert(L, 1);}
-  base = lua_gettop(L) - narg;  /* chunk function index */
-  lua_pushcfunction(L, _traceback);  /* push traceback function */
-  lua_insert(L, base);  /* put it under chunk and args */
-  status = lua_pcall(L, narg, LUA_MULTRET, base); /*LUA_MULTRET*/
-  if (0!=status) {
-    wa_prtcs("pb run %s fail[%d]: %s\n",fname, status, lua_tostring(L, -1));
-  }
-  lua_pop(L, lua_gettop(L));
-#endif
-  return status; /*0-ok 1-fail*/
-}
-
 static void _lua_expr(lua_State *L, int argc, char** argv){
   char exprbuff[MAXLINE] = {0};
   int val_t, ret;
@@ -334,6 +288,11 @@ static void _lua_help(lua_State *L){
   lua_getfield(L, -1, "__doc__");
   puts(lua_tostring(L, -1));
 }
+
+#include "lupt/fennel_lua.c"
+#ifndef _PB_LUAFN_FENNEL
+static void luafn_fennel(lua_State* L){puts("FNL N/A");}
+#endif
 
 static void _lua_dofile(lua_State* L, int argc, char** argv){
   int i=1, j=0;
@@ -352,7 +311,7 @@ static void _lua_dofile(lua_State* L, int argc, char** argv){
   if ('i'==argv[0][1]){ /*lisp*/
     luafn_fennel(L);
   } else {
-    ldofile(L, argv[1], count);
+    wa_ldofile(L, argv[1], count);
   }
 }
 
@@ -363,7 +322,7 @@ void run_lua(int argc, char** argv){
     char fname[MAXLINE];
     wa_get_exe_path(fname);
     strcat(fname, "init.lua");
-    ldofile(L, fname, 0);
+    wa_ldofile(L, fname, 0);
   } else {
     if ('i'==argv[0][1]){ /*lisp*/
       _lua_dofile(L, argc, argv);

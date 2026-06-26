@@ -1,9 +1,4 @@
 #include "walib.h"
-#ifdef SUPPORT_LUA
-  #include "lua.h"
-  #include "lauxlib.h"
-  #include "lualib.h"
-#endif
 
 #ifdef _WIN32
   #include <windows.h>
@@ -26,6 +21,12 @@ void wa_get_exe_path(char* wd){
 #endif
   strcat(wd, "_d"DIR_SEP);
 }
+
+#ifdef SUPPORT_LUA
+  #include "lua.h"
+  #include "lauxlib.h"
+  #include "lualib.h"
+#endif
 
 #if LUA_VERSION_NUM == 501
 #define lua_rawlen  lua_objlen
@@ -96,6 +97,47 @@ void* wa_linit(void){
   }
 #endif
   return L;
+}
+
+static int _traceback (lua_State *L) {
+  if (!lua_isstring(L, 1))  /* 'message' not a string? */
+    return 1;  /* keep it intact */
+  lua_getglobal(L, "debug");
+  if (!lua_istable(L, -1)) {
+    lua_pop(L, 1);
+    return 1;
+  }
+  lua_getfield(L, -1, "traceback");
+  if (!lua_isfunction(L, -1)) {
+    lua_pop(L, 2);
+    return 1;
+  }
+  lua_pushvalue(L, 1);  /* pass error message */
+  lua_pushinteger(L, 2);  /* skip this function and traceback */
+  lua_call(L, 2, 1);  /* call debug.traceback */
+  return 1;
+}
+
+int wa_ldofile(void* L, char *fname, int narg){
+  int status = 0, base;
+#ifdef SUPPORT_LUA
+  status = luaL_loadfile(L, fname);
+  if (0!=status) {
+    wa_prtcs("pb load %s fail[%d]: %s\n", fname, status, lua_tostring(L, -1));
+    lua_pop(L, lua_gettop(L));
+    return status;
+  }
+  if (0<narg) {lua_insert(L, 1);}
+  base = lua_gettop(L) - narg;  /* chunk function index */
+  lua_pushcfunction(L, _traceback);  /* push traceback function */
+  lua_insert(L, base);  /* put it under chunk and args */
+  status = lua_pcall(L, narg, LUA_MULTRET, base); /*LUA_MULTRET*/
+  if (0!=status) {
+    wa_prtcs("pb run %s fail[%d]: %s\n",fname, status, lua_tostring(L, -1));
+  }
+  lua_pop(L, lua_gettop(L));
+#endif
+  return status; /*0-ok 1-fail*/
 }
 
 void wa_lclose(void* L){
