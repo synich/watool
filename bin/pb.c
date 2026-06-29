@@ -54,14 +54,6 @@ static void _cal_ext_fb2bb(char* cmd){
   if (0!=ret){puts("no busybox or native util found, cmd fail");}
 }
 
-int frontcmp(const char* s, const char* target, int most){
-  int tlen = strlen(target);
-  for(;most<=tlen;most++){
-    if (0==strncmp(s,target,most)){return 0;}
-  }
-  return strncmp(s,target, tlen);
-}
-
 /******** show ascii char ********/
 void ascii(){
   int i = 32;
