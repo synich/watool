@@ -379,13 +379,20 @@ static int _http_do(const char* mth, lua_State *L) {
     }
     const char *headers = luaL_optstring(L, h_pos, "Content-Type: application/json\r\n");
     int rcvbuf_size = luaL_optinteger(L, h_pos+1, 8192);
-    char* recvbuf = (char*)malloc(rcvbuf_size); recvbuf[0] = 0;
     char request[1024];
     char *pos = strchr(url, ':');
+    if (NULL==pos) {
+      lua_pushnil(L); lua_pushstring(L, "expect ip:port/path, but no `:port' in url");
+      return 2;
+    }
     char *port_s = pos+1;
     *pos = 0;
     char *ip = url;
     pos = strchr(port_s, '/');
+    if (NULL==pos) {
+      lua_pushnil(L); lua_pushstring(L, "expect ip:port/path, but no `/[path]' in url");
+      return 2;
+    }
     *pos = 0;
     int port = atoi(port_s);
     char *path = pos+1;
@@ -393,8 +400,8 @@ static int _http_do(const char* mth, lua_State *L) {
     //printf("DEBUG: %s, %d, %s, %s", ip, port, request, headers);
     wa_autosock();
 
+    AUTO_MEM_P(char, recvbuf) = (char*)malloc(rcvbuf_size); recvbuf[0] = 0;
     int ret = wa_http((char*)ip, port, request, (char*)headers, body, recvbuf, rcvbuf_size);
-
     if (ret >= 0) {
         char *pos = strstr(recvbuf, "\r\n\r\n");
         if (pos) { // split body and header
@@ -420,7 +427,6 @@ static int _http_do(const char* mth, lua_State *L) {
         lua_pushnil(L);
         lua_pushfstring(L, "%d[%s]:%s", ret, ret==-1?"error":"buf too short", recvbuf);
     }
-    free(recvbuf);
     return 2;
 }
 
