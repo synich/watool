@@ -17,7 +17,7 @@ lib: $(OBJS)
 obj/brscr.o : brscr.c
 	$(CC) $(CFLAGS) $(DEPINC) -DMUJS -o $@ $<
 
-obj/brl.o: brl.c
+obj/brl.o: brl.c lupt/pb.lua
 	$(CC) $(CFLAGS) $(DEPINC) -DSUPPORT_LUA -o $@ $<
 
 obj/extlua.o: extlua.c
