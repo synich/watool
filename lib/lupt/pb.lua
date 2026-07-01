@@ -1,6 +1,6 @@
-local _doc=[[ver260612
+local _doc=[[ver260701
 fmt/var_dump/tie
-string.split/indexOf/replace/search/trim/slice/at
+string.split/indexOf/replace/search/rfind/trim/slice/at
 table.join/map/reduce/filter/pop/clone...
 os.popen/ts/setenv
 sqlite3/lpeg
@@ -173,6 +173,16 @@ end
 function string.search(str, pat)
   local s, e = string.find(str, pat, 1, false)
   if s then return s, e else return -1 end
+end
+
+function string.rfind(str, pat, init, plain)
+  local st = init or #str
+  while st >= 1 do
+    local pos, eps = string.find(str, pat, st, plain)
+    if pos then return pos, eps end
+    st = st -1
+  end
+  return nil
 end
 
 function string.slice(str, s, e)
