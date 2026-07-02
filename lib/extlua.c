@@ -1,7 +1,5 @@
 /*
 ** $Id: extlua.c,v 1.3 2025/04/21 16:16:58 u0_a157 Exp $
-** Standard library for UTF-8 manipulation
-** See Copyright Notice in lua.h
 */
 #ifdef SUPPORT_LUA
 
@@ -10,7 +8,7 @@
 #include "lualib.h"
 
 #if LUA_VERSION_NUM > 501
-#define luaL_register(L,name,reg)  luaL_newlib(L,reg);lua_setglobal(L,name)
+#define luaL_register(L,name,reg)  luaL_newlib(L,reg);lua_pushvalue(L,-1);lua_setglobal(L,name)
 #endif
 
 /********utf8********/
