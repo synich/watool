@@ -252,6 +252,7 @@ void* linit(){
   #if LUA_VERSION_NUM > 501
     //lua_setglobal(L, "lpeg");
   #endif
+    lua_pop(L, lua_gettop(L)); // clean
 #endif
   return p;
 }
