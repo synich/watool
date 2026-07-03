@@ -1,10 +1,10 @@
-local _doc=[[ver260701
-fmt/var_dump/tie
+local _doc=[[ver260703
+fmt
 string.split/indexOf/replace/search/rfind/trim/slice/at
 table.join/map/reduce/filter/pop/clone...
 os.popen/ts/setenv
 sqlite3/lpeg
-pb.range[0,n)/lunit/dprint/sqlite3_connect
+pb.range[0,n)/tie/pp/lunit/dprint/sqlite3_connect
   .json:stringify/parse
   .set:new/add/delete/has/clear/values
 px.md5/sha1/btoa/atob/datediff/lsdir/lsfile/band
@@ -31,6 +31,30 @@ function fmt(s, ...)
   end
 end
 
+-------- pb extend --------
+local pb = {__doc__ = _doc}
+
+pb.range = function(start, stop, step)
+  step = step or 1
+  if stop == nil then
+    stop = start
+    start = 0
+  end
+  local res = {}
+  local end_iter = stop-1
+  if step < 0 then end_iter = stop+1 end
+  for i = start, end_iter, step do
+    table.insert(res, i)
+  end
+  return res
+end
+
+pb.tie = function(t)
+  t = t or {}
+  return setmetatable(t, {__index=table,
+  __tostring=function(t)local k=next(t) return "tbl-arr:"..#t..",1st_k:"..(k and k or "nil")end})
+end
+
 local function _var_dump(t, indent)
   indent = indent or 0
   if indent >= 6 then return end -- avoid deep recusive
@@ -51,33 +75,9 @@ local function _var_dump(t, indent)
     print(prefix .. tostring(t))
   end
 end
-function var_dump(...)
+pb.pp = function(...)
   local tt = {...}
   for i,v in ipairs(tt) do _var_dump(v, 0) end
-end
-
-function tie(t)
-  t = t or {}
-  return setmetatable(t, {__index=table,
-  __tostring=function(t)local k=next(t) return "tbl-arr:"..#t..",1st_k:"..(k and k or "nil")end})
-end
-
--------- pb extend --------
-local pb = {__doc__ = _doc}
-
-pb.range = function(start, stop, step)
-  step = step or 1
-  if stop == nil then
-    stop = start
-    start = 0
-  end
-  local res = {}
-  local end_iter = stop-1
-  if step < 0 then end_iter = stop+1 end
-  for i = start, end_iter, step do
-    table.insert(res, i)
-  end
-  return res
 end
 
 pb.lunit = function(...)
