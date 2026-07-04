@@ -101,7 +101,7 @@ pb.lunit = function(...)
 end
 
 pb.stub = function(v, t)
-  v = v or "call_faker"
+  v = v or "call_stub"
   t = t or {}
   local mt = {
     __call = function(...) return v end,
@@ -109,7 +109,7 @@ pb.stub = function(v, t)
       if t[key] then
         return function(...) return t[k] end
       else
-        return function(...) return "mth_faker" end
+        return function(...) return v end
       end
     end
   }
