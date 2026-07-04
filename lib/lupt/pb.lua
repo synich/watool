@@ -100,6 +100,24 @@ pb.lunit = function(...)
   end
 end
 
+pb.stub = function(v, t)
+  v = v or "call_faker"
+  t = t or {}
+  local mt = {
+    __call = function(...) return v end,
+    __index = function(self, key)
+      if t[key] then
+        return function(...) return t[k] end
+      else
+        return function(...) return "mth_faker" end
+      end
+    end
+  }
+  local stub = {}
+  setmetatable(stub, mt)
+  return stub
+end
+
 pb.dprint = function (...)
   if os.getenv("PB_DEBUG") then
     local info = debug.getinfo(2, "Sl")
