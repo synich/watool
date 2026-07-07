@@ -1,14 +1,14 @@
-local _doc=[[ver260703
+local _doc=[[ver260707
 fmt
 string.split/indexOf/replace/search/rfind/trim/slice/at
 table.join/map/reduce/filter/pop/clone...
 os.popen/ts/setenv
 sqlite3/lpeg
-pb.range[0,n)/tie/pp/lunit/dprint/sqlite3_connect
+pb.range[0,n)/tie/pp/lunit/stub/dprint/sqlite3_connect
   .json:stringify/parse
   .set:new/add/delete/has/clear/values
 px.md5/sha1/btoa/atob/datediff/lsdir/lsfile/band
-  .http_get|post|timeout(url, [bd], <hd>, <rcv_sz>)
+  .http_get|post|timeout(ip:pt/pth, [bd], <hd>, <rcv_sz>)
 ]]
 
 -------- global func --------
