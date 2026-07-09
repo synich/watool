@@ -59,7 +59,7 @@ int wa_opentcp(char* ip, unsigned short port){
     serverAddr.sin_addr.s_addr = inet_addr(ip);
     if(connect(clientSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0)
     {
-        perror("connect fail");
+        wa_prtcs("connect %s:%d fail\n", ip, port);
         WA_CLOSE(clientSocket);
         return -1;
     }
@@ -141,7 +141,8 @@ static int httpreq(int fd, char* sendbuf, char* recvbuf, int len){
         break;
       }
     } else {//sr<=0 is error, either timeout or other error
-        return sr-1;
+      wa_prtcs("httpreq select fail=%d, tout=%ds, rv_len=%d\n", sr, tout.tv_sec, len);
+      return sr-1;
     }
   }
   recvbuf[curLen] = 0;
