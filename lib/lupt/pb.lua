@@ -1,4 +1,4 @@
-local _doc=[[ver260707
+local _doc=[[ver260709
 fmt
 string.split/indexOf/replace/search/rfind/trim/slice/at
 table.join/map/reduce/filter/pop/clone...
@@ -9,6 +9,7 @@ pb.range[0,n)/tie/pp/lunit/stub/dprint/sqlite3_connect
   .set:new/add/delete/has/clear/values
 px.md5/sha1/btoa/atob/datediff/lsdir/lsfile/band
   .http_get|post|timeout(ip:pt/pth, [bd], <hd>, <rcv_sz>)
+      post default header is: Content-Type: application/json
 ]]
 
 -------- global func --------
