@@ -29,8 +29,8 @@ pb: pb.c
 	@echo export/set VENDOR=1/0  then make again
 	@gcc $(CFLAGS) $(EXTCFL) pb.c
 	gcc -o pb pb.o $(RES) $(EXTLIB) -L./lib/ -L../lib/ -lwa -llua $(WLIB) -lm
-	@strip pb
-	#@mv pb.exe D:\soft\wabin\bin
+	@strip pb.exe
+	@mv pb.exe D:\soft\wabin\bin
 
 ico.res: ico.rc
 	@windres -i ico.rc -o ico.res -O coff
@@ -56,5 +56,6 @@ genc:
 	@pb el pb.lua
 	@pb el fennel.lua
 
-iconv:
-	@gcc -shared -L./lib  -o iconv.dll luaiconv.o libiconv2.dll -llua51
+wpb: wpb.c
+	@gcc $(CFLAGS) $(EXTCFL) wpb.c
+	gcc -o wpb ktye.o wpb.o $(RES)  -L./lib/ -L../lib/ -lwa -llua $(WLIB) -lm

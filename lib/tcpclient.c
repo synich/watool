@@ -108,40 +108,37 @@ static int httpreq(int fd, char* sendbuf, char* recvbuf, int len){
     FD_ZERO(&set);
     FD_SET(fd, &set);
     int sr = select(fd+1, &set, NULL, NULL, &tout);
-    if ( 0<sr ) {
-      if ( FD_ISSET(fd, &set) ) {
-        iDataNum = recv(fd, tmpBuf, sizeof(tmpBuf)-1, 0);
-        if ( iDataNum <= 0) {
-          break;
+    if ( (0<sr) && FD_ISSET(fd, &set) ) {
+      iDataNum = recv(fd, tmpBuf, sizeof(tmpBuf)-1, 0);
+      if ( iDataNum <= 0) {
+        break;
+      }
+      if (curLen+iDataNum < len) {
+        memcpy(recvbuf+curLen, tmpBuf, iDataNum);
+        curLen += iDataNum;
+        recvbuf[curLen] = 0;
+        if (headerEnd < 0){
+          char *hend = strstr(recvbuf, "\r\n\r\n");
+          if (hend) {
+            headerEnd = (int)(hend - recvbuf)+4;
+            contentLen = find_content_length(recvbuf);
+          }
         }
-        if (curLen+iDataNum < len) {
-          memcpy(recvbuf+curLen, tmpBuf, iDataNum);
-          curLen += iDataNum;
-          recvbuf[curLen] = 0;
-          if (headerEnd < 0){
-            char *hend = strstr(recvbuf, "\r\n\r\n");
-            if (hend) {
-              headerEnd = (int)(hend - recvbuf)+4;
-              contentLen = find_content_length(recvbuf);
-            }
-          }
-          if (contentLen >=0 && headerEnd > 0){
-            if ((curLen - headerEnd) >= contentLen) break; // body complete
-          }
-        } else {
-          int copylen = len - curLen -1;
-          if (copylen > 0) {
-            memcpy(recvbuf+curLen, tmpBuf, copylen);
-            curLen += copylen;
-          }
-          truncated = 1;
-          break;
+        if (contentLen >=0 && headerEnd > 0){
+          if ((curLen - headerEnd) >= contentLen) break; // body complete
         }
       } else {
+        int copylen = len - curLen -1;
+        if (copylen > 0) {
+          memcpy(recvbuf+curLen, tmpBuf, copylen);
+          curLen += copylen;
+        }
+        truncated = 1;
+        wa_prtcs("httpreq: rv_len=%d too small\n", len);
         break;
       }
     } else {//sr<=0 is error, either timeout or other error
-      wa_prtcs("httpreq select fail=%d, tout=%ds, rv_len=%d\n", sr, tout.tv_sec, len);
+      wa_prtcs("httpreq: select fd=%d fail=%d, tout=%ds, rv_len=%d\n", fd, sr, tout.tv_sec, len);
       return sr-1;
     }
   }
