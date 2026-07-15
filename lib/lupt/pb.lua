@@ -1,4 +1,4 @@
-local _doc=[[ver260709
+local _doc=[[ver260716
 fmt
 string.split/indexOf/replace/search/rfind/trim/slice/at
 table.join/map/reduce/filter/pop/clone...
@@ -204,10 +204,46 @@ function string.rfind(str, pat, init, plain)
   return nil
 end
 
+local function u8char_len(byte)
+  if byte < 0x80 then
+    return 1
+  elseif byte < 0xE0 then
+    return 2
+  elseif byte < 0xF0 then
+    return 3
+  else
+    return 4
+  end
+end
+
 function string.slice(str, s, e)
   if not utf8 then
-    e = not e and e or #str
-    return string.sub(str, s, e)
+    e = e and e or #str
+    -- s个字符的byte位置
+    local s_byte = 1
+    local char_idx = 1
+    while char_idx < s do
+      local byte = string.byte(str, s_byte)
+      if not byte then break end
+      s_byte = s_byte + u8char_len(byte)
+      char_idx = char_idx + 1
+    end
+
+    -- e个字符的byte位置
+    local e_byte = s_byte
+    while char_idx < e do
+      local byte = string.byte(str, e_byte)
+      if not byte then break end
+      e_byte = e_byte + u8char_len(byte)
+      char_idx = char_idx + 1
+    end
+    local byte = string.byte(str, e_byte)
+    if byte then
+      e_byte = e_byte + u8char_len(byte) - 1
+    else
+      e_byte = #str
+    end
+    return string.sub(str, s_byte, e_byte)
   end
 
   local ulen = utf8.len(str)
