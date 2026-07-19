@@ -22,6 +22,71 @@ void wa_get_exe_path(char* wd){
   strcat(wd, "_d"DIR_SEP);
 }
 
+/** split with spaces 0:ok -1:fail
+ * @param input   string, will be modified
+ * - spaces as one space, ignore leading and trailing space
+ * - argv[0] is also arg, not like main argv[0]  */
+int wa_split_args(char *input, int *argc, char ***argv) {
+    if (!input || !argc || !argv) { return -1; }
+
+    *argc = 0;
+    *argv = NULL;
+    if (input[0] == '\0') { return 0; }
+
+    // first time, count
+    int count = 0;
+    char *p = input;
+    int in_token = 0;
+    while (*p) {
+        if (!isspace((unsigned char)*p)) {
+            if (!in_token) {
+                count++;
+                in_token = 1;
+            }
+        } else {
+            in_token = 0;
+        }
+        p++;
+    }
+    if (count == 0) { return 0; }
+
+    // one more argv end with NULL
+    char **result = malloc((count + 1) * sizeof(char *));
+    if (!result) { return -1; }
+    result[count] = NULL;
+
+    // second time fill pointer
+    int idx = 0;
+    p = input;
+    in_token = 0;
+    char *token_start = NULL;
+
+    while (*p) {
+        if (!isspace((unsigned char)*p)) {
+            if (!in_token) {
+                token_start = p;
+                in_token = 1;
+            }
+        } else {
+            if (in_token) {
+                *p = '\0';
+                result[idx++] = token_start;
+                in_token = 0;
+            }
+        }
+        p++;
+    }
+
+    // last token(not end with space)
+    if (in_token) {
+        result[idx++] = token_start;
+    }
+    *argc = count;
+    *argv = result;
+    return 0;
+}
+
+
 #ifdef SUPPORT_LUA
   #include "lua.h"
   #include "lauxlib.h"

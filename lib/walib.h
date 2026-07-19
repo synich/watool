@@ -119,6 +119,7 @@ void wa_memreport(void);
 
 /* Bridge to script */
 void wa_get_exe_path(char* wd);
+int wa_split_args(char *input, int *argc, char ***argv);
 void* wa_linit(void);
 int wa_ldofile(void* L, char *fname, int narg);
 void wa_lclose(void* L);

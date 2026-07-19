@@ -456,70 +456,6 @@ void lsnip(int argc, char** argv){
 }
 
 /************** main entry *********************/
-/** split with spaces 0:ok -1:fail
- * @param input   string, will be modified
- * - spaces as one space, ignore leading and trailing space
- * - argv[0] is also arg, not like main argv[0]  */
-int split_args(char *input, int *argc, char ***argv) {
-    if (!input || !argc || !argv) { return -1; }
-
-    *argc = 0;
-    *argv = NULL;
-    if (input[0] == '\0') { return 0; }
-
-    // first time, count
-    int count = 0;
-    char *p = input;
-    int in_token = 0;
-    while (*p) {
-        if (!isspace((unsigned char)*p)) {
-            if (!in_token) {
-                count++;
-                in_token = 1;
-            }
-        } else {
-            in_token = 0;
-        }
-        p++;
-    }
-    if (count == 0) { return 0; }
-
-    // one more argv end with NULL
-    char **result = malloc((count + 1) * sizeof(char *));
-    if (!result) { return -1; }
-    result[count] = NULL;
-
-    // second time fill pointer
-    int idx = 0;
-    p = input;
-    in_token = 0;
-    char *token_start = NULL;
-
-    while (*p) {
-        if (!isspace((unsigned char)*p)) {
-            if (!in_token) {
-                token_start = p;
-                in_token = 1;
-            }
-        } else {
-            if (in_token) {
-                *p = '\0';
-                result[idx++] = token_start;
-                in_token = 0;
-            }
-        }
-        p++;
-    }
-
-    // last token(not end with space)
-    if (in_token) {
-        result[idx++] = token_start;
-    }
-    *argc = count;
-    *argv = result;
-    return 0;
-}
-
 void cli_entry(int argc, char** argv){
   int cmd = (argc==0 ?0 :argv[0][0]);
   switch(cmd){
@@ -553,7 +489,7 @@ void cli_entry(int argc, char** argv){
 void pipe_entry(char* pp_txt){
   int prgc;
   char** prgv;
-  if (0==split_args(pp_txt, &prgc, &prgv)){
+  if (0==wa_split_args(pp_txt, &prgc, &prgv)){
     cli_entry(prgc, prgv);
     free(prgv);
   } else {puts("can not parse args");}
