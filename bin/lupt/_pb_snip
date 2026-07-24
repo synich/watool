@@ -432,6 +432,38 @@ note over A,B: top rect
 note right of B: right rect
 @@
 
+# snip_latex
+greece
+@@
+
+## snip_latex greece
+%% * var, `o' just o
+alpha
+beta
+gamma
+delta
+epsilon *
+zeta
+eta
+theta *
+iota
+kappa
+lambda
+mu
+nu
+xi
+o
+pi *
+rho *
+sigma *
+tau
+upsilon
+phi *
+chi
+psi
+omega
+@@
+
 # snip_git
 -- remove large file from repo
 git rev-list --objects --all | grep "$(git verify-pack -v .git/objects/pack/*.idx | sort -k 3 -n | tail -5 | awk '{print$1}')"
