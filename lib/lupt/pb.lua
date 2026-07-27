@@ -128,10 +128,10 @@ pb.dprint = function (...)
   end
 end
 
-if sqlite3 then
 pb.sqlite3_connect = function(nam)
+  if sqlite3 then
   local fd = io.open(nam, "r")
-  if fd then fd:close() else return nil end
+  if fd then fd:close() else return nil, fmt("no_{}", nam) end
 
   local t = {db=nil}
   t.db = sqlite3.open(nam) -- return db even nam not exists
@@ -148,6 +148,7 @@ pb.sqlite3_connect = function(nam)
     return self.db:exec(sql)
   end
   return t
+  else return nil, "no_sqlite3"
   end
 end
 

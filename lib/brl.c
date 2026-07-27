@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include "walib.h"
 
 #ifdef _WIN32
