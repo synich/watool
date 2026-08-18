@@ -1,15 +1,17 @@
-local _doc=[[ver260716
-fmt
-string.split/indexOf/replace/search/rfind/trim/slice/at
-table.join/map/reduce/filter/pop/clone...
+local _doc=[[extend function list
+fmt -- fill string on {} position, fmt("a{}b", 12)=>a12b
 os.popen/ts/setenv
+---- same as JavaScript except the index start from 1 ----
+string.split/indexOf/replace/search/rfind/trim/slice/at
+table.join/map/reduce/filter/pop/clone
+pb.json:stringify/parse
+---- end of JavaScript like----
 sqlite3/lpeg
 pb.range[0,n)/tie/pp/lunit/stub/dprint/sqlite3_connect
-  .json:stringify/parse
-  .set:new/add/delete/has/clear/values
+pb.set:new/add/delete/has/clear/values
 px.md5/sha1/btoa/atob/datediff/lsdir/lsfile/band
-  .http_get|post|timeout(ip:pt/pth, [bd], <hd>, <rcv_sz>)
-      post default header is: Content-Type: application/json
+px.http_get|post|timeout(ip:pt/pth, [bd], <hd>, <rcv_sz>)
+    post default header is: Content-Type: application/json
 ]]
 
 -------- global func --------
