@@ -6,7 +6,7 @@ main(){
     usage
     return
   fi
-  if [ "$1" = "x" ]; then
+  if ! [ "$1" = "x" ]; then
   fi
 }
 
@@ -15,10 +15,10 @@ main $@
 
 
 ## snip_sh if
-if [ -a -o ]; then
-if [[ && || ]]; then         # bash feature
-if [[ "$i" =~ a.* ]]; then   # bash regex, no quote right
-if [[ "$i" == a* ]]; then    # bash glob, no quote right
+if [ ! -a -o ]; then   # ! work in/out
+if [[ && || ]]; then   # bash feature
+if [[ "$i" =~ a.* ]]; then # bash regex, no quote right
+if [[ "$i" == a* ]]; then  # bash glob, no quote right
 if [[ "$i" == *" "* ]]; then # compare to space
 elif
 fi
