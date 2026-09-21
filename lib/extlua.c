@@ -378,14 +378,17 @@ static int _http_do(const char* mth, lua_State *L) {
     const char *headers = luaL_optstring(L, h_pos, "Content-Type: application/json\r\n");
     int rcvbuf_size = luaL_optinteger(L, h_pos+1, 8192);
     char request[1024];
-    char *pos = strchr(url, ':');
+    int addr_begin = 0;
+    char *h_schema = strstr(url, "://");
+    if (h_schema) {addr_begin=h_schema-url+3;}
+    char *pos = strchr(url+addr_begin, ':');
     if (NULL==pos) {
       lua_pushnil(L); lua_pushstring(L, "expect ip:port/path, but no `:port' in url");
       return 2;
     }
     char *port_s = pos+1;
     *pos = 0;
-    char *ip = url;
+    char *ip = url+addr_begin;
     pos = strchr(port_s, '/');
     if (NULL==pos) {
       lua_pushnil(L); lua_pushstring(L, "expect ip:port/path, but no `/[path]' in url");

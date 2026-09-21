@@ -59,7 +59,7 @@ int wa_opentcp(char* ip, unsigned short port){
     serverAddr.sin_addr.s_addr = inet_addr(ip);
     if(connect(clientSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0)
     {
-        wa_prtcs("connect %s:%d fail\n", ip, port);
+        wa_prtcs("connect addr [%s:%d] fail\n", ip, port);
         WA_CLOSE(clientSocket);
         return -1;
     }
