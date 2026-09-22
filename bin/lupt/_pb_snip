@@ -40,7 +40,8 @@ done
 
 
 ## snip_sh var
-res=${var:-abc}  # if $var not assign, $res is 'abc'. beside ${var-abc} means $var not declare
+res=${var:-abc}  # if $var not assign, $res is 'abc'. if NOT exists then FALLBACK
+res=${var:+abc}  # if $var not assign, $res is $var(''). if exists use abc REPLACE
 sub=${str:start:len}   # substr from left,start from 0
 sub=${str:0-start:len} # substr from right, start from 1
 res=${var#*\"}   # glob left drop, no-greedy: 'abc"def"gh' -> 'def"gh'
