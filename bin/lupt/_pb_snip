@@ -55,7 +55,7 @@ res=$((1+2))     # calc
 
 
 # snip_bat
--- syn --
+-- syn for --
 setlocal EnableDelayedExpansion
 
 if "%~1" == "" (
@@ -92,6 +92,10 @@ if /i "%~1" == "ABC" (  rem ignore case and %~1 no quote over %1
 ) else if %errorlevel% equ/leq/geq/neq %random% (
   cmd2
 )
+@@
+
+## snip_bat for
+rem for variable must %%
 
 rem single quote in for is `` in shell, and use double quote after set is good
 for /f "delims=" %%I in ('fzf') do (
@@ -103,6 +107,11 @@ if not defined sel_file (
 )
 rem !var! is special with for
   npp !sel_file!
+
+rem close interval [0,10] step 2
+for /l %%i in (0,2,10) do (
+  echo %%i
+)
 @@
 
 # snip_vbs
