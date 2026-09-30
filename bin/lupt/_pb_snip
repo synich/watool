@@ -1,4 +1,3 @@
-
 # snip_sh
 -- if for var --
 main(){
@@ -81,6 +80,8 @@ endlocal
 @@
 
 ## snip_bat syn
+rem %env_var%  %1 exceed 9 need shift
+
 %var:~0,3%      rem get first 3 char
 %var:~0,-3%     rem drop last 3 char. positive mean len, neg mean position
 %var:a=b%       rem replace a -> b
@@ -95,18 +96,18 @@ if /i "%~1" == "ABC" (  rem ignore case and %~1 no quote over %1
 @@
 
 ## snip_bat for
-rem for variable must %%
+rem for var must %% and 1 char
+rem special DelayExpansion  !var!
 
 rem single quote in for is `` in shell, and use double quote after set is good
 for /f "delims=" %%I in ('fzf') do (
   set "sel_file=%%I"
+  npp !sel_file!
 )
 if not defined sel_file (
   echo no file
   goto :end
 )
-rem !var! is special with for
-  npp !sel_file!
 
 rem close interval [0,10] step 2
 for /l %%i in (0,2,10) do (
